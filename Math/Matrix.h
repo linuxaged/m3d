@@ -1,3 +1,5 @@
+#include <vector>
+#include <cstddef> // size_t
 namespace M3D {
 namespace Math {
 template<typename T, size_t N>
@@ -16,7 +18,7 @@ public:
     Matrix(Matrix const&) = default; // copy
     Matrix& operator=(Matrix const&) = default;
 
-    ˜Matrix() = default;
+    ~Matrix() = default;
 
     template<typename U>
     Matrix(const Matrix_ref<U, N>&); // construct from Matrix_ref
@@ -32,7 +34,7 @@ public:
     Matrix& operator=(Matrix_initializer<T, N>); // assign from list
 
     template<typename U>
-    Matrix(initializer_list<U>) = delete; // don’t use {} except for elements
+    Matrix(initializer_list<U>) = delete; // dont use {} except for elements
 
     template<typename U>
     Matrix& operator=(initializer_list<U>) = delete;
@@ -45,9 +47,9 @@ public:
 
     const Matrix_slice<N>& descriptor() const { return desc; } // the slice defining subscripting
 
-    T∗ data() { return elems.data(); } // ‘‘flat’’ element access
+    T* data() { return elems.data(); } // "flat" element access
 
-    const T∗ data() const { return elems.data(); }
+    const T* data() const { return elems.data(); }
 
     /*
      * Subscripting and slicing
@@ -68,12 +70,12 @@ public:
     Enable_if<Matrix_impl::Requesting_slice<Args...>(), Matrix_ref<const T, N>>
             operator()(const Args&... args) const;
 
-    Matrix_ref < T, N−1 > operator[](size_t i) { return row(i); } // m[i] row access
-    Matrix_ref < const T, N−1 > operator[](size_t i) const { return row(i); }
-    Matrix_ref < T, N−1 > row(size_t n); // row access
-    Matrix_ref < const T, N−1 > row(siz e_t n) const;
-    Matrix_ref < T, N−1 > col(size_t n); // column access
-    Matrix_ref < const T, N−1 > col(size_t n) const;
+    Matrix_ref < T, N1 > operator[](size_t i) { return row(i); } // m[i] row access
+    Matrix_ref < const T, N1 > operator[](size_t i) const { return row(i); }
+    Matrix_ref < T, N1 > row(size_t n); // row access
+    Matrix_ref < const T, N1 > row(siz e_t n) const;
+    Matrix_ref < T, N1 > col(size_t n); // column access
+    Matrix_ref < const T, N1 > col(size_t n) const;
 
     /* Arithmetic Operation */
     template<typename F>
@@ -82,18 +84,18 @@ public:
     Matrix& apply(const M& m, F f); // f(x,mx) for corresponding elements
     Matrix& operator=(const T& value); // assignment with scalar
     Matrix& operator+=(const T& value); // scalar addition
-    Matrix& operator−=(const T& value); // scalar subtraction
-    Matrix& operator∗=(const T& value); // scalar multiplication
+    Matrix& operator=(const T& value); // scalar subtraction
+    Matrix& operator=(const T& value); // scalar multiplication
     Matrix& operator/=(const T& value); // scalar division
     Matrix& operator%=(const T& value); // scalar modulo
     template<typename M> // matrix addition
     Matrix& operator+=(const M& x);
     template<typename M> // matrix subtraction
-    Matrix& operator−=(const M& x);
+    Matrix& operator=(const M& x);
 
 private:
     Matrix_slice<N> desc; // slice defining extents in the N dimensions
-    vector<T> elems; // the elements
+    std::vector<T> elems; // the elements
 };
 
 } // namespace Math
