@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{573C270D-7E35-4C89-AEE0-159DF00AA705}</ProjectGuid>
+    <ProjectGuid>{0A5B6D38-AA51-4C25-B94C-DCA6406FDB64}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>UnitTestMath</RootNamespace>
+    <RootNamespace>TestMath</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -165,6 +165,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="unittest1.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MathLib\MathLib.vcxproj">
+      <Project>{fd63f9e1-d3ef-4d56-92c9-ce51628d500b}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
