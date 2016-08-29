@@ -116,11 +116,11 @@ namespace M3D {
 			inline Matrix4x4 operator+(Matrix4x4& Other);
 			inline Matrix4x4 operator-(Matrix4x4& Other);
 			inline Matrix4x4 operator*(Matrix4x4& Other);
-			inline Matrix4x4& operator=(Matrix4x4& Other);
-			inline Matrix4x4 operator+=(Matrix4x4& Other);
-			inline Matrix4x4 operator*=(Matrix4x4& Other);
+			inline void operator+=(Matrix4x4& Other);
+			inline void operator*=(Matrix4x4& Other);
 
 			void print();
+			void ToString(char* const str, size_t size);
 		};
 
 		inline void Matrix4x4::SetIdentity()
@@ -186,39 +186,14 @@ namespace M3D {
 			return result;
 		}
 
-		inline Matrix4x4& Matrix4x4::operator=(Matrix4x4& Other)
+		inline void Matrix4x4::operator+=(Matrix4x4& Other)
 		{
-			std::memcpy(m, &Other.m[0][0], 16 * sizeof(float));
+			*this = *this + Other;
 		}
 
-		inline Matrix4x4 Matrix4x4::operator+=(Matrix4x4& Other)
+		inline void Matrix4x4::operator*=(Matrix4x4& Other)
 		{
-			for (int i = 0; i < 4; i++)
-			{
-				for (int j = 0; j < 4; j++)
-				{
-					m[i][j] += Other.m[i][j];
-				}
-			}
-		}
-
-		inline Matrix4x4 Matrix4x4::operator*=(Matrix4x4& Other)
-		{
-			Matrix4x4 result;
-			for (int i = 0; i < 4; i++)
-			{
-				float accumulator;
-				for (int j = 0; j < 4; j++)
-				{
-					for (int k = 0; k < 4; k++)
-					{
-						accumulator += m[i][k] * Other.m[k][j];
-					}
-
-					result.m[i][j] = accumulator;
-				}
-			}
-			*this = result;
+			*this = *this * Other;
 		}
 	} // namespace Math
 } // namespace M3D

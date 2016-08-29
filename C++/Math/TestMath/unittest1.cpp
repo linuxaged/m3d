@@ -17,24 +17,28 @@ namespace TestMath
 			// TODO: 在此输入测试代码
 			std::default_random_engine dre;
 			std::uniform_real_distribution<float> dr(-100.0f, 100.0f);
-			for (int i = 0; i < 8; i++)
+
+			const size_t length = 100;
+			std::vector<Matrix4x4> array_mat(length);
+			for (auto& m : array_mat)
 			{
-				printf("%f\n", dr(dre));
+				for (int i = 0; i < 4; i++)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+						m.m[i][j] = dr(dre);
+					}
+				}
 			}
-			Vector3 v0(1.0f, 2.0f, 3.0f);
-			Vector3 v1(4.0f, 5.0f, 6.0f);
+			
+			Matrix4x4 mul_result;
+			for (auto& m : array_mat)
+			{
+				mul_result += m;
+			}
 
-			Vector3 v2 = v0 + v1;
-			v2 = v0 ^ v1;
-
-			v2.print();
-
-			Matrix4x4 m0;
-			m0.SetIdentity();
-			m0.print();
-
-			char buffer[128];
-			v2.ToString(buffer, 128);
+			char buffer[256];
+			mul_result.ToString(buffer, 256);
 			Logger::WriteMessage(buffer);
 		}
 
