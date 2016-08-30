@@ -26,5 +26,8 @@
     <ClInclude Include="..\Matrix.h">
       <Filter>源文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\NEONvsSSE.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

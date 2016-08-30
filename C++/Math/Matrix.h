@@ -5,6 +5,13 @@
 #include <cstring>
 #include <cstdio>
 
+// SIMD
+#if defined __arm__
+#include <arm_neon.h>
+#else
+#include "NEONvsSSE.h"
+#endif
+
 namespace M3D {
 	namespace Math {
 		//-------------------------------------------------------------
