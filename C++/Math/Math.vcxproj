@@ -112,7 +112,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='WinDebug|x86'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>Clang_3_6</PlatformToolset>
+    <PlatformToolset>Clang 3.8</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -169,6 +169,8 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>c++11</CppLanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
@@ -217,12 +219,16 @@
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Quaternion.cpp" />
+    <ClCompile Include="SIMD_NEON.cpp" />
+    <ClCompile Include="SIMD_SSE.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Quaternion.h" />
+    <ClInclude Include="SIMD_NEON.h" />
+    <ClInclude Include="SIMD_SSE.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

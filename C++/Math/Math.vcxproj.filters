@@ -4,11 +4,15 @@
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Quaternion.cpp" />
+    <ClCompile Include="SIMD_NEON.cpp" />
+    <ClCompile Include="SIMD_SSE.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="Quaternion.h" />
+    <ClInclude Include="SIMD_NEON.h" />
+    <ClInclude Include="SIMD_SSE.h" />
   </ItemGroup>
 </Project>

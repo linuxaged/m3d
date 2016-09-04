@@ -7,13 +7,16 @@
 
 // SIMD
 #if defined __arm__
-#include <arm_neon.h>
+#include "SIMD_NEON.h"
 #else
-#include "NEONvsSSE.h"
+#include "SIMD_SSE.h"
 #endif
+
+#define USE_SIMD 1
 
 namespace M3D {
 	namespace Math {
+
 		//-------------------------------------------------------------
 		// Vector3
 		//-------------------------------------------------------------
@@ -177,6 +180,10 @@ namespace M3D {
 		inline Matrix4x4 Matrix4x4::operator*(Matrix4x4& Other)
 		{
 			Matrix4x4 result;
+#if USE_SIMD
+			MatrixMultiply(&result, this, &Other);
+#else
+			
 			for (int i = 0; i < 4; i++)
 			{
 				float accumulator;
@@ -190,6 +197,7 @@ namespace M3D {
 					result.m[i][j] = accumulator;
 				}
 			}
+#endif
 			return result;
 		}
 
@@ -200,7 +208,9 @@ namespace M3D {
 
 		inline void Matrix4x4::operator*=(Matrix4x4& Other)
 		{
-			*this = *this * Other;
+#if USE_SIMD
+			MatrixMultiply(this, this, &Other);
+#else			*this = *this * Other;#endif
 		}
 	} // namespace Math
 } // namespace M3D
