@@ -1,10 +1,10 @@
 #ifndef M3D_MATH_MATRIX_H
 #define M3D_MATH_MATRIX_H
 
-#include <cmath>
 #include <cstring>
 #include <cstdio>
 
+#include "Math.h"
 // SIMD
 #if defined __arm__
 #include "SIMD_NEON.h"
@@ -116,7 +116,7 @@ namespace M3D {
 		struct Matrix4x4
 		{
 		public:
-			float m[4][4];
+			alignas(16) float m[4][4];
 
 			inline Matrix4x4();
 			inline Matrix4x4(const float* array);
@@ -210,7 +210,9 @@ namespace M3D {
 		{
 #if USE_SIMD
 			MatrixMultiply(this, this, &Other);
-#else			*this = *this * Other;#endif
+#else
+			*this = *this * Other;
+#endif
 		}
 	} // namespace Math
 } // namespace M3D

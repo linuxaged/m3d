@@ -24,6 +24,19 @@ namespace M3D
 			return vectorSIMD._vectorSIMD;
 		}
 		
+		inline VectorSIMD VectorLoad4f(const void* ptr)
+		{
+			return vld1q_f32((float32_t*)ptr);
+		}
+		
+		inline void VectorStore4f(VectorSIMD v, void* ptr)
+		{
+			vst1q_f32((float32_t *)ptr, v);
+		}
+		
+#define VectorReplicate( v, index ) vdupq_n_f32(vgetq_lane_f32(v, index))
+#define VectorSwizzle( v, x, y, z, w ) __builtin_shufflevector(v, v, x, y, z, w)
+		
 		/// Add two VectorSIMD
 		inline VectorSIMD VectorAdd(VectorSIMD v0, VectorSIMD v1)
 		{
@@ -40,6 +53,11 @@ namespace M3D
 		inline VectorSIMD VectorMultiply(VectorSIMD v0, VectorSIMD v1)
 		{
 			return vmulq_f32(v0, v1);
+		}
+		
+		inline VectorSIMD VectorMultiplyAdd(VectorSIMD v0, VectorSIMD v1, VectorSIMD v2)
+		{
+			return vmlaq_f32(v0, v1, v2);
 		}
 		
 		inline void MatrixMultiply(void* result, const void* m0, const void* m1)
@@ -73,6 +91,29 @@ namespace M3D
 			_result[1] = row1;
 			_result[2] = row2;
 			_result[3] = row3;	
+		}
+		
+		static const VectorSIMD QMULTI_SIGN_MASK0 = MakeVectorSIMD(1.0f, -1.0f, 1.0f, -1.0f);
+		static const VectorSIMD QMULTI_SIGN_MASK1 = MakeVectorSIMD(1.0f, 1.0f, -1.0f, -1.0f);
+		static const VectorSIMD QMULTI_SIGN_MASK2 = MakeVectorSIMD(-1.0f, 1.0f, 1.0f, -1.0f);
+		
+		inline VectorSIMD QuaternionMultiply2(const VectorSIMD& quat0, const VectorSIMD& quat1)
+		{
+			VectorSIMD result = VectorMultiply(VectorReplicate(quat0, 3), quat1);
+			result = VectorMultiplyAdd(VectorMultiply(VectorReplicate(quat0, 0), VectorSwizzle(quat1, 3, 2, 1, 0)), QMULTI_SIGN_MASK0, result);
+			result = VectorMultiplyAdd(VectorMultiply(VectorReplicate(quat0, 1), VectorSwizzle(quat1, 2, 3, 0, 1)), QMULTI_SIGN_MASK1, result);
+			result = VectorMultiplyAdd(VectorMultiply(VectorReplicate(quat0, 2), VectorSwizzle(quat1, 1, 0, 3, 2)), QMULTI_SIGN_MASK2, result);
+
+			return result;
+		}
+		
+		inline void QuaternionMultiply(
+			void* __restrict__ result,
+			const void* __restrict__ quat0,
+			const void* __restrict__ quat1
+		)
+		{
+			*((VectorSIMD *)result) = QuaternionMultiply2(*((const VectorSIMD *)quat0), *((const VectorSIMD *)quat1));
 		}
 	}
 }

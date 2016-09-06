@@ -13,6 +13,8 @@ namespace M3D
 			return _mm_setr_ps(fX, fY, fZ, fW);
 		}
 		
+#define VectorLoad4f( ptr ) _mm_load_ps( (float*)(ptr) );
+
 #define SHUFFLEMASK(A0,A1,B2,B3) ( (A0) | ((A1)<<2) | ((B2)<<4) | ((B3)<<6) )
 		
 #define VectorMultiply( v0, v1 )	_mm_mul_ps( v0, v1 )
