@@ -34,14 +34,14 @@
 
 #include <android/sensor.h>
 #include <android/log.h>
-#include "../../android_native_app_gluelib/android_native_app_glue.h"
+#include <android_native_app_glue.h>
 #include <android/native_window_jni.h>
-#include "../../android_native_app_gluelib/android_native_app_glue.h"
+#include <cpu-features.h>
 
 #define CLASS_NAME "android/app/NativeActivity"
 #define APPLICATION_CLASS_NAME "com/sample/moreteapotss/MoreTeapotsApplication"
 
-#include "../../ndkhelperlib/NDKHelper.h"
+#include "NDKHelper.h"
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 

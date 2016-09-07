@@ -21,7 +21,7 @@
 #include <string>
 
 #include <android/log.h>
-#include "../android_native_app_gluelib/android_native_app_glue.h"
+#include <android_native_app_glue.h>
 
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, ndk_helper::JNIHelper::GetInstance()->GetAppName(), __VA_ARGS__))
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, ndk_helper::JNIHelper::GetInstance()->GetAppName(), __VA_ARGS__))
