@@ -24,6 +24,8 @@
 
 using namespace M3D::Math;
 
+#define USE_M3D_MATH 0
+
 namespace ndk_helper
 {
 
@@ -285,6 +287,24 @@ namespace ndk_helper
 	//----------------------------------------------------------
 	//Trackball controll
 	//----------------------------------------------------------
+#if USE_M3D_MATH
+	void TapCamera::BallUpdate()
+	{
+		if (dragging_)
+		{
+			Vector3 vec_from = PointOnSphere(vec_ball_down_);
+			Vector3 vec_to = PointOnSphere(vec_ball_now_);
+
+			Vector3 vec = vec_from ^ vec_to;
+			float w = vec_from | vec_to;
+
+			Quaternion qDrag = Quaternion(vec, w);
+			qDrag = qDrag * m_QuatBallDown;
+			m_QuatBallNow = m_QuatBallRot * qDrag;
+		}
+		m_QuatBallNow.ToMatrix(m_Mat4Rotation);
+	}
+#else
 	void TapCamera::BallUpdate()
 	{
 		if (dragging_)
@@ -301,6 +321,7 @@ namespace ndk_helper
 		}
 		quat_ball_now_.ToMatrix(mat_rotation_);
 	}
+#endif
 
 	Vector3 TapCamera::PointOnSphere(Vector2& point)
 	{

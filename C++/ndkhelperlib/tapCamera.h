@@ -24,6 +24,7 @@
 #include "interpolator.h"
 
 #include "Matrix.h"
+#include "Quaternion.h"
 
 namespace ndk_helper
 {
@@ -43,11 +44,14 @@ private:
     float ball_radius_;
     Quaternion quat_ball_now_;
     Quaternion quat_ball_down_;
+	M3D::Math::Quaternion m_QuatBallNow;
+	M3D::Math::Quaternion m_QuatBallDown;
     Vec2 vec_ball_now_;
     Vec2 vec_ball_down_;
-	M3D::Math::Vector2 m_BallNow;
-	M3D::Math::Vector2 m_BallDown;
+	M3D::Math::Vector2 m_Vec2BallNow;
+	M3D::Math::Vector2 m_Vec2BallDown;
     Quaternion quat_ball_rot_;
+	M3D::Math::Quaternion m_QuatBallRot;
 
     bool dragging_;
     bool pinching_;
@@ -55,15 +59,15 @@ private:
     //Pinch related info
     Vec2 vec_pinch_start_;
     Vec2 vec_pinch_start_center_;
-	M3D::Math::Vector2 m_PinchStart;
-	M3D::Math::Vector2 m_PinchStartCenter;
+	M3D::Math::Vector2 m_Vec2PinchStart;
+	M3D::Math::Vector2 m_Vec2PinchStartCenter;
     float pinch_start_distance_SQ_;
 
     //Camera shift
     Vec3 vec_offset_;
     Vec3 vec_offset_now_;
-	M3D::Math::Vector3 m_Offset;
-	M3D::Math::Vector3 m_OffsetNow;
+	M3D::Math::Vector3 m_Vec2Offset;
+	M3D::Math::Vector3 m_Vec2OffsetNow;
 
     //Camera Rotation
     float camera_rotation_;
@@ -76,15 +80,15 @@ private:
     Vec2 vec_last_input_;
     Vec3 vec_offset_last_;
     Vec3 vec_offset_delta_;
-	M3D::Math::Vector2 m_DragDelta;
-	M3D::Math::Vector2 m_LastInput;
-	M3D::Math::Vector3 m_OffsetLast;
-	M3D::Math::Vector3 m_OffsetDelta;
+	M3D::Math::Vector2 m_Vec2DragDelta;
+	M3D::Math::Vector2 m_Vec2LastInput;
+	M3D::Math::Vector3 m_Vec3OffsetLast;
+	M3D::Math::Vector3 m_Vec3OffsetDelta;
 	
     float momemtum_steps_;
 
     Vec2 vec_flip_;
-	M3D::Math::Vector2 m_Flip;
+	M3D::Math::Vector2 m_Ve2Flip;
     float flip_z_;
 
     Mat4 mat_rotation_;
@@ -93,7 +97,7 @@ private:
 	M3D::Math::Matrix4x4 m_Mat4Transform;
 
     Vec3 vec_pinch_transform_factor_;
-	M3D::Math::Vector3 m_PinchTransformFactor;
+	M3D::Math::Vector3 m_Vec3PinchTransformFactor;
 
     Vec3 PointOnSphere( Vec2& point );
 	M3D::Math::Vector3 PointOnSphere(M3D::Math::Vector2& point);
