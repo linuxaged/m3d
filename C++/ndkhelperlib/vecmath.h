@@ -17,7 +17,7 @@
 #ifndef VECMATH_H_
 #define VECMATH_H_
 
-#include <math.h>
+#include <cmath>
 #include "JNIHelper.h"
 
 namespace ndk_helper

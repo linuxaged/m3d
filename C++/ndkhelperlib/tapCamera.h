@@ -23,6 +23,8 @@
 #include "vecmath.h"
 #include "interpolator.h"
 
+#include "Matrix.h"
+
 namespace ndk_helper
 {
 
@@ -36,11 +38,15 @@ class TapCamera
 private:
     //Trackball
     Vec2 vec_ball_center_;
+	M3D::Math::Vector2 m_BallCenter;
+	
     float ball_radius_;
     Quaternion quat_ball_now_;
     Quaternion quat_ball_down_;
     Vec2 vec_ball_now_;
     Vec2 vec_ball_down_;
+	M3D::Math::Vector2 m_BallNow;
+	M3D::Math::Vector2 m_BallDown;
     Quaternion quat_ball_rot_;
 
     bool dragging_;
@@ -49,11 +55,15 @@ private:
     //Pinch related info
     Vec2 vec_pinch_start_;
     Vec2 vec_pinch_start_center_;
+	M3D::Math::Vector2 m_PinchStart;
+	M3D::Math::Vector2 m_PinchStartCenter;
     float pinch_start_distance_SQ_;
 
     //Camera shift
     Vec3 vec_offset_;
     Vec3 vec_offset_now_;
+	M3D::Math::Vector3 m_Offset;
+	M3D::Math::Vector3 m_OffsetNow;
 
     //Camera Rotation
     float camera_rotation_;
@@ -66,17 +76,28 @@ private:
     Vec2 vec_last_input_;
     Vec3 vec_offset_last_;
     Vec3 vec_offset_delta_;
+	M3D::Math::Vector2 m_DragDelta;
+	M3D::Math::Vector2 m_LastInput;
+	M3D::Math::Vector3 m_OffsetLast;
+	M3D::Math::Vector3 m_OffsetDelta;
+	
     float momemtum_steps_;
 
     Vec2 vec_flip_;
+	M3D::Math::Vector2 m_Flip;
     float flip_z_;
 
     Mat4 mat_rotation_;
     Mat4 mat_transform_;
+	M3D::Math::Matrix4x4 m_Mat4Rotation;
+	M3D::Math::Matrix4x4 m_Mat4Transform;
 
     Vec3 vec_pinch_transform_factor_;
+	M3D::Math::Vector3 m_PinchTransformFactor;
 
     Vec3 PointOnSphere( Vec2& point );
+	M3D::Math::Vector3 PointOnSphere(M3D::Math::Vector2& point);
+	
     void BallUpdate();
     void InitParameters();
 public:
@@ -89,6 +110,8 @@ public:
 
     Mat4& GetRotationMatrix();
     Mat4& GetTransformMatrix();
+	M3D::Math::Matrix4x4 GetRotation();
+	M3D::Math::Matrix4x4 GetTransform();
 
     void BeginPinch( const Vec2& v1, const Vec2& v2 );
     void EndPinch();

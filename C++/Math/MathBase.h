@@ -9,7 +9,7 @@ namespace M3D
 		static inline float InvSqrt(float f)
 		{
 			// TODO: quake 3, neon
-			return sqrt(1.0f / f);
+			return std::sqrt(1.0f / f);
 		}
 	}
 }

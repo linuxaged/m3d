@@ -55,6 +55,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <TargetName>libndkhelper</TargetName>
+    <IncludePath>D:\workspace\m3d\C++\Math;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <TargetName>libndkhelper</TargetName>
@@ -74,6 +75,8 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(NDKRoot)\platforms\$(AndroidAPILevel)\arch-arm\usr\include;$(NDKRoot)\sources\android\native_app_glue;$(NDKRoot)\sources\android\cpufeatures;$(StlIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CLanguageStandard>c11</CLanguageStandard>
+      <CppLanguageStandard>c++11</CppLanguageStandard>
     </ClCompile>
     <Lib>
       <AdditionalDependencies>
@@ -124,6 +127,9 @@
     </ProjectReference>
     <ProjectReference Include="..\cpufeatureslib\cpufeatureslib.vcxproj">
       <Project>{a86b175b-3125-469d-8e3e-949814475ae1}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Math\Math.vcxproj">
+      <Project>{4b95fb75-0c85-4174-a182-ca0ce6f2974c}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

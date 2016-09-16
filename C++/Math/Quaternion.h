@@ -1,7 +1,5 @@
 #pragma once
 
-//#include "Math.h"
-
 // SIMD
 #if defined __arm__
 #include "SIMD_NEON.h"

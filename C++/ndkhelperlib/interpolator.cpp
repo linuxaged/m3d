@@ -15,7 +15,7 @@
  */
 
 #include "interpolator.h"
-#include <math.h>
+#include <cmath>
 #include "interpolator.h"
 
 namespace ndk_helper

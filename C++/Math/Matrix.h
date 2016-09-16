@@ -4,7 +4,7 @@
 #include <cstring>
 #include <cstdio>
 
-#include "Math.h"
+#include "MathBase.h"
 // SIMD
 #if defined __arm__
 #include "SIMD_NEON.h"
@@ -16,10 +16,70 @@
 
 namespace M3D {
 	namespace Math {
-
-		//-------------------------------------------------------------
-		// Vector3
-		//-------------------------------------------------------------
+		
+		/*
+		Vector2
+		*/
+		struct Vector2
+		{
+		public:
+			float x;
+			float y;
+			
+			inline Vector2() {}
+			;
+			
+			inline Vector2(float fX, float fY)
+				: x(fX)
+				, y(fY)
+			{
+			}
+			
+			/// TODO: implement +=, *= operators ?
+			inline Vector2 operator+(const Vector2& other) const
+			{
+				return Vector2 { x + other.x, y + other.y };
+			}
+			
+			inline Vector2 operator-(const Vector2& other) const
+			{
+				return Vector2 { x - other.x, y - other.y };
+			}
+			
+			inline Vector2 operator+(const float Bias) const
+			{
+				return Vector2 { x + Bias, y + Bias };
+			}
+			
+			inline Vector2 operator-(const float Bias) const
+			{
+				return Vector2 { x - Bias, y - Bias };
+			}
+			
+			inline Vector2 operator*(const float scale) const
+			{
+				return Vector2 { x * scale, y * scale };
+			}
+			
+			inline Vector2 operator/(const float scale) const
+			{
+				return Vector2 { x / scale, y / scale };
+			}
+			
+			/// dot multiply with other
+			inline float operator|(const Vector2& other) const
+			{
+				return x * other.x + y * other.y;
+			}
+			
+			inline static float DotProduct(const Vector2& left, const Vector2& right)
+			{
+				return left | right;
+			}
+		};
+//-------------------------------------------------------------
+// Vector3
+//-------------------------------------------------------------
 		struct Vector3
 		{
 		public:
@@ -27,14 +87,18 @@ namespace M3D {
 			float y;
 			float z;
 
+			inline Vector3() {}
+			;
 			inline Vector3(float InX, float InY, float InZ);
+			inline Vector3(Vector2& v, float fZ);
+			
 			inline Vector3 operator+(const Vector3& Other) const;
 			inline Vector3 operator-(const Vector3& Other) const;
 
 			inline Vector3 operator+(float Bias) const;
 			inline Vector3 operator-(float Bias) const;
 			inline Vector3 operator*(float Scale) const;
-
+			inline Vector3 operator/(float Scale) const;
 			inline float operator|(const Vector3& Other) const;
 			inline Vector3 operator^(const Vector3& Other) const;
 
@@ -55,6 +119,14 @@ namespace M3D {
 
 		}
 
+		inline Vector3::Vector3(Vector2& v, float fZ)
+			: x(v.x)
+			, y(v.y)
+			, z(fZ)
+		{
+			
+		}
+		
 		inline Vector3 Vector3::operator+(const Vector3& Other) const
 		{
 			return Vector3(x + Other.x, y + Other.y, z + Other.z);
@@ -80,6 +152,11 @@ namespace M3D {
 			return Vector3(x * Scale, y * Scale, z * Scale);
 		}
 
+		inline Vector3 Vector3::operator/(float Scale) const
+		{
+			return Vector3(x / Scale, y / Scale, z / Scale);
+		}
+		
 		inline float Vector3::operator|(const Vector3& Other) const
 		{
 			return x * Other.x + y * Other.y + z * Other.z;

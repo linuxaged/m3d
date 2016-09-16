@@ -1,5 +1,5 @@
 #include "Quaternion.h"
-#include "Math.h"
+#include "MathBase.h"
 #include "Matrix.h"
 
 namespace M3D
