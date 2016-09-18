@@ -39,7 +39,7 @@ class TapCamera
 private:
     //Trackball
     Vec2 vec_ball_center_;
-	M3D::Math::Vector2 m_BallCenter;
+	M3D::Math::Vector2 m_Vec2BallCenter;
 	
     float ball_radius_;
     Quaternion quat_ball_now_;
@@ -66,8 +66,8 @@ private:
     //Camera shift
     Vec3 vec_offset_;
     Vec3 vec_offset_now_;
-	M3D::Math::Vector3 m_Vec2Offset;
-	M3D::Math::Vector3 m_Vec2OffsetNow;
+	M3D::Math::Vector3 m_Vec3Offset;
+	M3D::Math::Vector3 m_Vec3OffsetNow;
 
     //Camera Rotation
     float camera_rotation_;
@@ -88,7 +88,7 @@ private:
     float momemtum_steps_;
 
     Vec2 vec_flip_;
-	M3D::Math::Vector2 m_Ve2Flip;
+	M3D::Math::Vector2 m_Vec2Flip;
     float flip_z_;
 
     Mat4 mat_rotation_;
@@ -114,13 +114,14 @@ public:
 
     Mat4& GetRotationMatrix();
     Mat4& GetTransformMatrix();
-	M3D::Math::Matrix4x4 GetRotation();
-	M3D::Math::Matrix4x4 GetTransform();
+	M3D::Math::Matrix4x4& GetRotation();
+	M3D::Math::Matrix4x4& GetTransform();
 
     void BeginPinch( const Vec2& v1, const Vec2& v2 );
     void EndPinch();
     void Pinch( const Vec2& v1, const Vec2& v2 );
-
+	void Pinch(const M3D::Math::Vector2& v1, const M3D::Math::Vector2& v2);
+	
     void SetFlip( const float x, const float y, const float z )
     {
         vec_flip_ = Vec2( x, y );

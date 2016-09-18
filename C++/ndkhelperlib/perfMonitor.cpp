@@ -19,11 +19,12 @@
 namespace ndk_helper
 {
 
-PerfMonitor::PerfMonitor() :
-                last_tick_( 0.f ),
-                tv_last_sec_( 0 ),
-                tickindex_( 0 ),
-                ticksum_( 0 )
+	PerfMonitor::PerfMonitor()
+		:
+		tv_last_sec_(0)
+		, last_tick_(0.f)
+		, tickindex_(0)
+		, ticksum_(0)
 {
     for( int32_t i = 0; i < NUM_SAMPLES; ++i )
         ticklist_[i] = 0;
@@ -55,7 +56,6 @@ bool PerfMonitor::Update( float &fFPS )
 
     if( Time.tv_sec - tv_last_sec_ >= 1 )
     {
-        double time = Time.tv_sec + Time.tv_usec * 1.0 / 1000000.0;
         current_FPS_ = 1.f / d;
         tv_last_sec_ = Time.tv_sec;
         fFPS = current_FPS_;

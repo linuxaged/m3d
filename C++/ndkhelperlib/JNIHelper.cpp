@@ -115,7 +115,6 @@ bool JNIHelper::ReadFile( const char* fileName,
 
     //First, try reading from externalFileDir;
     JNIEnv *env;
-    jmethodID mid;
 
     pthread_mutex_lock( &mutex_ );
     activity_->vm->AttachCurrentThread( &env, NULL );
@@ -189,7 +188,6 @@ std::string JNIHelper::GetExternalFilesDir()
 
     //First, try reading from externalFileDir;
     JNIEnv *env;
-    jmethodID mid;
 
     activity_->vm->AttachCurrentThread( &env, NULL );
 
