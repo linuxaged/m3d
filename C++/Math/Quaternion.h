@@ -22,11 +22,10 @@ namespace M3D
 			float x, y, z, w;
 		public:
 			inline Quaternion() {};
-			inline Quaternion(Vector3& v, float fW);
 			inline Quaternion(float fX, float fY, float fZ, float fW);
 			inline Quaternion(const Quaternion& other);
 			inline explicit Quaternion(const Matrix4x4& mat);
-			inline Quaternion(Vector3 axis, float angleInRad);
+			inline Quaternion(const Vector3& axis, const float angleInRad);
 			
 			inline Quaternion Inverse() const;
 			
@@ -50,12 +49,6 @@ namespace M3D
 			inline void ToMatrix(Matrix4x4& mat);
 		};
 		
-		inline Quaternion::Quaternion(Vector3& v, float fW) :
-			x(v.x) , y(v.y), z(v.z), w(fW)
-		{
-			
-		}
-		
 		inline Quaternion::Quaternion(float fX, float fY, float fZ, float fW) :
 			x(fX), y(fY), z(fZ), w(fW)
 		{
@@ -68,6 +61,17 @@ namespace M3D
 			y = other.y;
 			z = other.z;
 			w = other.w;
+		}
+		
+		inline Quaternion::Quaternion(const Vector3& axis, const float angleInRad)
+		{
+			const float halfAngle = 0.5f * angleInRad;
+
+			float sinOfHalfAngle = std::sin(halfAngle);
+			x = sinOfHalfAngle * axis.x;
+			y = sinOfHalfAngle * axis.y;
+			z = sinOfHalfAngle * axis.z;
+			w = std::cos(halfAngle);	
 		}
 		
 		inline Quaternion::Quaternion(const Matrix4x4& mat4x4)

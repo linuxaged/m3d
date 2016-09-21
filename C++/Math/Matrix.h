@@ -35,7 +35,7 @@ namespace M3D {
 			{
 			}
 			
-			/// TODO: implement +=, *= operators ?
+			/// Arithmetic operators
 			inline Vector2 operator+(const Vector2& other) const
 			{
 				return Vector2 { x + other.x, y + other.y };
@@ -45,17 +45,27 @@ namespace M3D {
 			{
 				return Vector2 { x - other.x, y - other.y };
 			}
-			
-			inline Vector2 operator+(const float Bias) const
+
+			inline Vector2 operator*(const Vector2& other) const
 			{
-				return Vector2 { x + Bias, y + Bias };
+				return Vector2 { x * other.x, y * other.y };
 			}
 			
-			inline Vector2 operator-(const float Bias) const
+			inline Vector2 operator/(const Vector2& other) const
 			{
-				return Vector2 { x - Bias, y - Bias };
+				return Vector2 { x / other.x, y / other.y };
+			}
+
+			inline Vector2 operator+(const float bias) const
+			{
+				return Vector2 { x + bias, y + bias };
 			}
 			
+			inline Vector2 operator-(const float bias) const
+			{
+				return Vector2 { x - bias, y - bias };
+			}
+
 			inline Vector2 operator*(const float scale) const
 			{
 				return Vector2 { x * scale, y * scale };
@@ -64,6 +74,49 @@ namespace M3D {
 			inline Vector2 operator/(const float scale) const
 			{
 				return Vector2 { x / scale, y / scale };
+			}
+
+			/// Compound assignment operators
+			inline Vector2& operator+=(const Vector2& other)
+			{
+				this->x += other.x;
+				this->y += other.y;
+				return *this;
+			}
+			
+			inline Vector2& operator-=(const Vector2& other)
+			{
+				this->x -= other.x;
+				this->y -= other.y;
+				return *this;
+			}
+			
+			inline Vector2& operator+=(const float bias)
+			{
+				this->x += bias;
+				this->y +=bias;
+				return *this;
+			}
+			
+			inline Vector2& operator-=(const float bias)
+			{
+				this->x -= bias;
+				this->y -= bias;
+				return *this;
+			}
+			
+			inline Vector2& operator*=(const float scale)
+			{
+				this->x *= scale;
+				this->y *= scale;
+				return *this;
+			}
+			
+			inline Vector2& operator/=(const float scale)
+			{
+				this->x /= scale;
+				this->y /= scale;
+				return *this;
 			}
 			
 			/// dot multiply with other
@@ -77,9 +130,10 @@ namespace M3D {
 				return left | right;
 			}
 		};
-//-------------------------------------------------------------
-// Vector3
-//-------------------------------------------------------------
+		
+		//-------------------------------------------------------------
+		// Vector3
+		//-------------------------------------------------------------
 		struct Vector3
 		{
 		public:
@@ -92,16 +146,29 @@ namespace M3D {
 			inline Vector3(float InX, float InY, float InZ);
 			inline Vector3(Vector2& v, float fZ);
 			
-			inline Vector3 operator+(const Vector3& Other) const;
-			inline Vector3 operator-(const Vector3& Other) const;
+			inline Vector3 operator+(const Vector3& other) const;
+			inline Vector3 operator-(const Vector3& other) const;
+			inline Vector3 operator*(const Vector3& other) const;
+			inline Vector3 operator/(const Vector3& other) const;
 
-			inline Vector3 operator+(float Bias) const;
-			inline Vector3 operator-(float Bias) const;
-			inline Vector3 operator*(float Scale) const;
-			inline Vector3 operator/(float Scale) const;
-			inline float operator|(const Vector3& Other) const;
-			inline Vector3 operator^(const Vector3& Other) const;
+			inline Vector3 operator+(const float bias) const;
+			inline Vector3 operator-(const float bias) const;
+			inline Vector3 operator*(const float Scale) const;
+			inline Vector3 operator/(const float Scale) const;
+			inline float operator|(const Vector3& other) const;
+			inline Vector3 operator^(const Vector3& other) const;
 
+			inline Vector3& operator+=(const Vector3& other);
+			inline Vector3& operator-=(const Vector3& other);
+			inline Vector3& operator*=(const Vector3& other);
+			inline Vector3& operator/=(const Vector3& other);
+
+			inline Vector3& operator+=(const float bias);
+			inline Vector3& operator-=(const float bias);
+			inline Vector3& operator*=(const float Scale);
+			inline Vector3& operator/=(const float Scale);
+
+			
 			inline static Vector3 CrossProduct(const Vector3& Left, const Vector3& Right);
 			inline static float DotProduct(const Vector3& Left, const Vector3& Right);
 
@@ -127,47 +194,119 @@ namespace M3D {
 			
 		}
 		
-		inline Vector3 Vector3::operator+(const Vector3& Other) const
+		inline Vector3 Vector3::operator+(const Vector3& other) const
 		{
-			return Vector3(x + Other.x, y + Other.y, z + Other.z);
+			return Vector3(x + other.x, y + other.y, z + other.z);
 		}
 
-		inline Vector3 Vector3::operator-(const Vector3& Other) const
+		inline Vector3 Vector3::operator-(const Vector3& other) const
 		{
-			return Vector3(x - Other.x, y - Other.y, z - Other.z);
+			return Vector3(x - other.x, y - other.y, z - other.z);
 		}
 
-		inline Vector3 Vector3::operator+(float Bias) const
+		inline Vector3 Vector3::operator*(const Vector3& other) const
 		{
-			return Vector3(x + Bias, y + Bias, z + Bias);
+			return Vector3(x * other.x, y * other.y, z * other.z);
 		}
 
-		inline Vector3 Vector3::operator-(float Bias) const
+		inline Vector3 Vector3::operator/(const Vector3& other) const
 		{
-			return Vector3(x - Bias, y - Bias, z - Bias);
+			return Vector3(x / other.x, y / other.y, z / other.z);
 		}
 
-		inline Vector3 Vector3::operator*(float Scale) const
+		inline Vector3 Vector3::operator+(const float bias) const
+		{
+			return Vector3(x + bias, y + bias, z + bias);
+		}
+
+		inline Vector3 Vector3::operator-(const float bias) const
+		{
+			return Vector3(x - bias, y - bias, z - bias);
+		}
+
+		inline Vector3 Vector3::operator*(const float Scale) const
 		{
 			return Vector3(x * Scale, y * Scale, z * Scale);
 		}
 
-		inline Vector3 Vector3::operator/(float Scale) const
+		inline Vector3 Vector3::operator/(const float Scale) const
 		{
 			return Vector3(x / Scale, y / Scale, z / Scale);
 		}
 		
-		inline float Vector3::operator|(const Vector3& Other) const
+		inline float Vector3::operator|(const Vector3& other) const
 		{
-			return x * Other.x + y * Other.y + z * Other.z;
+			return x * other.x + y * other.y + z * other.z;
 		}
 
-		inline Vector3 Vector3::operator^(const Vector3& Other) const
+		inline Vector3 Vector3::operator^(const Vector3& other) const
 		{
-			return Vector3(   y * Other.z - z * Other.y,
-				z * Other.x - x * Other.z,
-				x * Other.y - y * Other.x);
+			return Vector3(   y * other.z - z * other.y,
+				z * other.x - x * other.z,
+				x * other.y - y * other.x);
 		}
+
+		// Compound assignment operators
+		inline Vector3& Vector3::operator+=(const Vector3& other)
+		{
+			this->x += other.x;
+			this->y += other.y;
+			this->z += other.z;
+			return *this;
+		}
+		inline Vector3& Vector3::operator-=(const Vector3& other)
+		{
+			this->x -= other.x;
+			this->y -= other.y;
+			this->z -= other.z;
+			return *this;
+		}
+
+		inline Vector3& Vector3::operator*=(const Vector3& other)
+		{
+			this->x *= other.x;
+			this->y *= other.y;
+			this->z *= other.z;
+			return *this;
+		}
+
+		inline Vector3& Vector3::operator/=(const Vector3& other)
+		{
+			this->x /= other.x;
+			this->y /= other.y;
+			this->z /= other.z;
+			return *this;
+		}
+
+		inline Vector3& Vector3::operator+=(const float bias)
+		{
+			this->x += bias;
+			this->y += bias;
+			this->z += bias;
+			return *this;
+		}
+		inline Vector3& Vector3::operator-=(const float bias)
+		{
+			this->x -= bias;
+			this->y -= bias;
+			this->z -= bias;
+			return *this;
+		}
+		inline Vector3& Vector3::operator*=(const float Scale)
+		{
+			this->x *= Scale;
+			this->y *= Scale;
+			this->z *= Scale;
+			return *this;
+		}
+		inline Vector3& Vector3::operator/=(const float Scale)
+		{
+			this->x /= Scale;
+			this->y /= Scale;
+			this->z /= Scale;
+			return *this;
+		}
+
 
 		inline float Vector3::DotProduct(const Vector3& Left, const Vector3& Right)
 		{
@@ -200,11 +339,11 @@ namespace M3D {
 
 			inline void SetIdentity();
 
-			inline Matrix4x4 operator+(Matrix4x4& Other);
-			inline Matrix4x4 operator-(Matrix4x4& Other);
-			inline Matrix4x4 operator*(Matrix4x4& Other);
-			inline void operator+=(Matrix4x4& Other);
-			inline void operator*=(Matrix4x4& Other);
+			inline Matrix4x4 operator+(Matrix4x4& other);
+			inline Matrix4x4 operator-(Matrix4x4& other);
+			inline Matrix4x4 operator*(Matrix4x4& other);
+			inline void operator+=(Matrix4x4& other);
+			inline void operator*=(Matrix4x4& other);
 
 			void print();
 			void ToString(char* const str, size_t size);
@@ -228,37 +367,37 @@ namespace M3D {
 			std::memcpy(m, array, 16 * sizeof(float));
 		}
 
-		inline Matrix4x4 Matrix4x4::operator+(Matrix4x4& Other)
+		inline Matrix4x4 Matrix4x4::operator+(Matrix4x4& other)
 		{
 			Matrix4x4 result;
 			for (int i = 0; i < 4; i++)
 			{
 				for (int j = 0; j < 4; j++)
 				{
-					result.m[i][j] = m[i][j] + Other.m[i][j];
+					result.m[i][j] = m[i][j] + other.m[i][j];
 				}
 			}
 			return result;
 		}
 
-		inline Matrix4x4 Matrix4x4::operator-(Matrix4x4& Other)
+		inline Matrix4x4 Matrix4x4::operator-(Matrix4x4& other)
 		{
 			Matrix4x4 result;
 			for (int i = 0; i < 4; i++)
 			{
 				for (int j = 0; j < 4; j++)
 				{
-					result.m[i][j] = m[i][j] - Other.m[i][j];
+					result.m[i][j] = m[i][j] - other.m[i][j];
 				}
 			}
 			return result;
 		}
 
-		inline Matrix4x4 Matrix4x4::operator*(Matrix4x4& Other)
+		inline Matrix4x4 Matrix4x4::operator*(Matrix4x4& other)
 		{
 			Matrix4x4 result;
 #if USE_SIMD
-			MatrixMultiply(&result, this, &Other);
+			MatrixMultiply(&result, this, &other);
 #else
 			
 			for (int i = 0; i < 4; i++)
@@ -268,7 +407,7 @@ namespace M3D {
 				{
 					for (int k = 0; k < 4; k++)
 					{
-						accumulator += m[i][k] * Other.m[k][j];
+						accumulator += m[i][k] * other.m[k][j];
 					}
 
 					result.m[i][j] = accumulator;
@@ -278,17 +417,17 @@ namespace M3D {
 			return result;
 		}
 
-		inline void Matrix4x4::operator+=(Matrix4x4& Other)
+		inline void Matrix4x4::operator+=(Matrix4x4& other)
 		{
-			*this = *this + Other;
+			*this = *this + other;
 		}
 
-		inline void Matrix4x4::operator*=(Matrix4x4& Other)
+		inline void Matrix4x4::operator*=(Matrix4x4& other)
 		{
 #if USE_SIMD
-			MatrixMultiply(this, this, &Other);
+			MatrixMultiply(this, this, &other);
 #else
-			*this = *this * Other;
+			*this = *this * other;
 #endif
 		}
 	} // namespace Math

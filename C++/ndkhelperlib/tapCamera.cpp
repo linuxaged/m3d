@@ -24,7 +24,7 @@
 
 using namespace M3D::Math;
 
-#define USE_M3D_MATH 0
+#define USE_M3D_MATH 1
 
 namespace ndk_helper
 {
@@ -119,22 +119,22 @@ namespace ndk_helper
 		{
 			float momenttum_steps = momemtum_steps_;
 
-			        //Momentum rotation
-			Vec2 v = vec_drag_delta_;
-			BeginDrag(Vec2()); //NOTE:This call reset _VDragDelta
-			Drag(v * vec_flip_);
+			//Momentum rotation
+			Vector2 v = m_Vec2DragDelta;
+			BeginDrag(Vector2(0,0)); //NOTE:This call reset _VDragDelta
+			Drag(v * m_Vec2Flip);
 
-			        //Momentum shift
-			vec_offset_ += vec_offset_delta_;
+			//Momentum shift
+			m_Vec3Offset += m_Vec3OffsetDelta;
 
 			BallUpdate();
 			EndDrag();
 
-			        //Decrease deltas
-			vec_drag_delta_ = v * MOMENTUM_FACTOR_DECREASE;
-			vec_offset_delta_ = vec_offset_delta_ * MOMENTUM_FACTOR_DECREASE_SHIFT;
+			//Decrease deltas
+			m_Vec2DragDelta = v * MOMENTUM_FACTOR_DECREASE;
+			m_Vec3OffsetDelta = m_Vec3OffsetDelta * MOMENTUM_FACTOR_DECREASE_SHIFT;
 
-			        //Count steps
+			//Count steps
 			momemtum_steps_ = momenttum_steps * MOMENTUM_FACTOR_DECREASE;
 			if (momemtum_steps_ < MOMENTUM_FACTOR_THRESHOLD)
 			{
@@ -143,17 +143,26 @@ namespace ndk_helper
 		}
 		else
 		{
-			vec_drag_delta_ *= MOMENTUM_FACTOR;
-			vec_offset_delta_ = vec_offset_delta_ * MOMENTUM_FACTOR;
+			m_Vec2DragDelta *= MOMENTUM_FACTOR;
+			m_Vec3OffsetDelta = m_Vec3OffsetDelta * MOMENTUM_FACTOR;
 			BallUpdate();
 		}
 
-		Vec3 vec = vec_offset_ + vec_offset_now_;
-		Vec3 vec_tmp(TRANSFORM_FACTOR, -TRANSFORM_FACTOR, TRANSFORM_FACTORZ);
+		Vector3 vec = m_Vec3Offset + m_Vec3OffsetNow;
+		Vector3 vec_tmp(TRANSFORM_FACTOR, -TRANSFORM_FACTOR, TRANSFORM_FACTORZ);
 
-		vec *= vec_tmp * vec_pinch_transform_factor_;
+		vec *= vec_tmp * m_Vec3PinchTransformFactor;
 
-		mat_transform_ = Mat4::Translation(vec);
+		float transform[4][4] = { 
+			{ 1.0f, 0.0f, 0.0f, 0.0f },
+			{ 0.0f, 1.0f, 0.0f, 0.0f },
+			{ 0.0f, 0.0f, 1.0f, 0.0f },
+			{ vec.x, vec.y, vec.z, 1.0f }
+		};
+		
+		m_Mat4Transform = Matrix4x4(
+			&transform[0][0]
+		);//Mat4::Translation(vec);
 	}
 
 	Mat4& TapCamera::GetRotationMatrix()
@@ -186,7 +195,7 @@ namespace ndk_helper
 	//----------------------------------------------------------
 	//Drag control
 	//----------------------------------------------------------
-	void TapCamera::BeginDrag(const Vec2& v)
+	void TapCamera::BeginDrag(const Vector2& v)
 	{
 		if (dragging_)
 			EndDrag();
@@ -194,42 +203,42 @@ namespace ndk_helper
 		if (pinching_)
 			EndPinch();
 
-		Vec2 vec = v * vec_flip_;
-		vec_ball_now_ = vec;
-		vec_ball_down_ = vec_ball_now_;
+		Vector2 vec = v * m_Vec2Flip;
+		m_Vec2BallNow = vec;
+		m_Vec2BallDown = m_Vec2BallNow;
 
 		dragging_ = true;
 		momentum_ = false;
-		vec_last_input_ = vec;
-		vec_drag_delta_ = Vec2();
+		m_Vec2LastInput = vec;
+		m_Vec2DragDelta = Vector2(0,0);
 	}
 
 	void TapCamera::EndDrag()
 	{
-		quat_ball_down_ = quat_ball_now_;
-		quat_ball_rot_ = Quaternion();
+		m_QuatBallDown = m_QuatBallNow;
+		m_QuatBallRot = M3D::Math::Quaternion(0,0,0,1);
 
 		dragging_ = false;
 		momentum_ = true;
 		momemtum_steps_ = 1.0f;
 	}
 
-	void TapCamera::Drag(const Vec2& v)
+	void TapCamera::Drag(const Vector2& v)
 	{
 		if (!dragging_)
 			return;
 
-		Vec2 vec = v * vec_flip_;
-		vec_ball_now_ = vec;
+		Vector2 vec = v * m_Vec2Flip;
+		m_Vec2BallNow = vec;
 
-		vec_drag_delta_ = vec_drag_delta_ * MOMENTUM_FACTOR + (vec - vec_last_input_);
-		vec_last_input_ = vec;
+		m_Vec2DragDelta = m_Vec2DragDelta * MOMENTUM_FACTOR + (vec - m_Vec2LastInput);
+		m_Vec2LastInput = vec;
 	}
 
 	//----------------------------------------------------------
 	//Pinch controll
 	//----------------------------------------------------------
-	void TapCamera::BeginPinch(const Vec2& v1, const Vec2& v2)
+	void TapCamera::BeginPinch(const Vector2& v1, const Vector2& v2)
 	{
 		if (dragging_)
 			EndDrag();
@@ -237,14 +246,16 @@ namespace ndk_helper
 		if (pinching_)
 			EndPinch();
 
-		BeginDrag(Vec2());
+		BeginDrag(Vector2(0,0));
 
-		vec_pinch_start_center_ = (v1 + v2) / 2.f;
+		m_Vec2PinchStartCenter = (v1 + v2) / 2.f;
 
-		Vec2 vec = v1 - v2;
+		Vector2 vec = v1 - v2;
 		float x_diff;
 		float y_diff;
-		vec.Value(x_diff, y_diff);
+		// vec.Value(x_diff, y_diff);
+		x_diff = vec.x;
+		y_diff = vec.y;
 
 		pinch_start_distance_SQ_ = x_diff * x_diff + y_diff * y_diff;
 		camera_rotation_start_ = atan2f(y_diff, x_diff);
@@ -254,7 +265,7 @@ namespace ndk_helper
 		momentum_ = false;
 
 		    //Init momentum factors
-		vec_offset_delta_ = Vec3();
+		m_Vec3OffsetDelta = Vector3(0,0,0);
 	}
 #if USE_M3D_MATH
 	void TapCamera::EndPinch()
@@ -390,13 +401,13 @@ namespace ndk_helper
 	{
 		if (dragging_)
 		{
-			Vector3 vec_from = PointOnSphere(vec_ball_down_);
-			Vector3 vec_to = PointOnSphere(vec_ball_now_);
+			Vector3 vec_from = PointOnSphere(m_Vec2BallDown);
+			Vector3 vec_to = PointOnSphere(m_Vec2BallNow);
 
 			Vector3 vec = vec_from ^ vec_to;
 			float w = vec_from | vec_to;
 
-			Quaternion qDrag = Quaternion(vec, w);
+			M3D::Math::Quaternion qDrag = M3D::Math::Quaternion(vec.x, vec.y, vec.z, w);
 			qDrag = qDrag * m_QuatBallDown;
 			m_QuatBallNow = m_QuatBallRot * qDrag;
 		}

@@ -23,8 +23,8 @@
 #include "vecmath.h"
 #include "interpolator.h"
 
-#include "Matrix.h"
-#include "Quaternion.h"
+#include "../Math/Matrix.h"
+#include "../Math/Quaternion.h"
 
 namespace ndk_helper
 {
@@ -107,9 +107,9 @@ private:
 public:
     TapCamera();
     virtual ~TapCamera();
-    void BeginDrag( const Vec2& vec );
+    void BeginDrag( const M3D::Math::Vector2& vec );
     void EndDrag();
-    void Drag( const Vec2& vec );
+    void Drag( const M3D::Math::Vector2& vec );
     void Update();
 
     Mat4& GetRotationMatrix();
@@ -117,7 +117,7 @@ public:
 	M3D::Math::Matrix4x4& GetRotation();
 	M3D::Math::Matrix4x4& GetTransform();
 
-    void BeginPinch( const Vec2& v1, const Vec2& v2 );
+    void BeginPinch( const M3D::Math::Vector2& v1, const M3D::Math::Vector2& v2 );
     void EndPinch();
     void Pinch( const Vec2& v1, const Vec2& v2 );
 	void Pinch(const M3D::Math::Vector2& v1, const M3D::Math::Vector2& v2);
