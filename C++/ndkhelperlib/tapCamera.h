@@ -20,7 +20,7 @@
 #include <GLES2/gl2.h>
 
 #include "JNIHelper.h"
-#include "vecmath.h"
+//#include "vecmath.h"
 #include "interpolator.h"
 
 #include "../Math/Matrix.h"
@@ -38,34 +38,26 @@ class TapCamera
 {
 private:
     //Trackball
-    Vec2 vec_ball_center_;
 	M3D::Math::Vector2 m_Vec2BallCenter;
 	
     float ball_radius_;
-    Quaternion quat_ball_now_;
-    Quaternion quat_ball_down_;
+
 	M3D::Math::Quaternion m_QuatBallNow;
 	M3D::Math::Quaternion m_QuatBallDown;
-    Vec2 vec_ball_now_;
-    Vec2 vec_ball_down_;
+
 	M3D::Math::Vector2 m_Vec2BallNow;
 	M3D::Math::Vector2 m_Vec2BallDown;
-    Quaternion quat_ball_rot_;
 	M3D::Math::Quaternion m_QuatBallRot;
 
     bool dragging_;
     bool pinching_;
 
     //Pinch related info
-    Vec2 vec_pinch_start_;
-    Vec2 vec_pinch_start_center_;
 	M3D::Math::Vector2 m_Vec2PinchStart;
 	M3D::Math::Vector2 m_Vec2PinchStartCenter;
     float pinch_start_distance_SQ_;
 
     //Camera shift
-    Vec3 vec_offset_;
-    Vec3 vec_offset_now_;
 	M3D::Math::Vector3 m_Vec3Offset;
 	M3D::Math::Vector3 m_Vec3OffsetNow;
 
@@ -76,10 +68,7 @@ private:
 
     //Momentum support
     bool momentum_;
-    Vec2 vec_drag_delta_;
-    Vec2 vec_last_input_;
-    Vec3 vec_offset_last_;
-    Vec3 vec_offset_delta_;
+
 	M3D::Math::Vector2 m_Vec2DragDelta;
 	M3D::Math::Vector2 m_Vec2LastInput;
 	M3D::Math::Vector3 m_Vec3OffsetLast;
@@ -87,19 +76,14 @@ private:
 	
     float momemtum_steps_;
 
-    Vec2 vec_flip_;
 	M3D::Math::Vector2 m_Vec2Flip;
     float flip_z_;
 
-    Mat4 mat_rotation_;
-    Mat4 mat_transform_;
 	M3D::Math::Matrix4x4 m_Mat4Rotation;
 	M3D::Math::Matrix4x4 m_Mat4Transform;
 
-    Vec3 vec_pinch_transform_factor_;
 	M3D::Math::Vector3 m_Vec3PinchTransformFactor;
 
-    Vec3 PointOnSphere( Vec2& point );
 	M3D::Math::Vector3 PointOnSphere(M3D::Math::Vector2& point);
 	
     void BallUpdate();
@@ -112,25 +96,25 @@ public:
     void Drag( const M3D::Math::Vector2& vec );
     void Update();
 
-    Mat4& GetRotationMatrix();
-    Mat4& GetTransformMatrix();
 	M3D::Math::Matrix4x4& GetRotation();
 	M3D::Math::Matrix4x4& GetTransform();
 
     void BeginPinch( const M3D::Math::Vector2& v1, const M3D::Math::Vector2& v2 );
     void EndPinch();
-    void Pinch( const Vec2& v1, const Vec2& v2 );
+//    void Pinch( const Vec2& v1, const Vec2& v2 );
 	void Pinch(const M3D::Math::Vector2& v1, const M3D::Math::Vector2& v2);
 	
     void SetFlip( const float x, const float y, const float z )
     {
-        vec_flip_ = Vec2( x, y );
+//        vec_flip_ = Vec2( x, y );
+	    m_Vec2Flip = M3D::Math::Vector2(x, y);
         flip_z_ = z;
     }
 
     void SetPinchTransformFactor( const float x, const float y, const float z )
     {
-        vec_pinch_transform_factor_ = Vec3( x, y, z );
+//        vec_pinch_transform_factor_ = Vec3( x, y, z );
+	    m_Vec3PinchTransformFactor = M3D::Math::Vector3(x,y,z);
     }
 
     void Reset( const bool bAnimate );

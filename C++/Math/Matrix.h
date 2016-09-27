@@ -143,8 +143,12 @@ namespace M3D {
 
 			inline Vector3() {}
 			;
-			inline Vector3(float InX, float InY, float InZ);
+			inline Vector3(float fX, float fY, float fZ);
 			inline Vector3(Vector2& v, float fZ);
+			
+			inline Vector3 operator-() const
+			{ return Vector3 { -x, -y, -z};}
+			;
 			
 			inline Vector3 operator+(const Vector3& other) const;
 			inline Vector3 operator-(const Vector3& other) const;
@@ -178,10 +182,10 @@ namespace M3D {
 			void ToString(char* const str, size_t size);
 		};
 		
-		inline Vector3::Vector3(float InX, float InY, float InZ)
-			: x(InX)
-			, y(InY)
-			, z(InZ)
+		inline Vector3::Vector3(float fX, float fY, float fZ)
+			: x(fX)
+			, y(fY)
+			, z(fZ)
 		{
 
 		}
@@ -345,6 +349,13 @@ namespace M3D {
 			inline void operator+=(Matrix4x4& other);
 			inline void operator*=(Matrix4x4& other);
 
+			static Matrix4x4 LookAt(const Vector3& eye, const Vector3& at, const Vector3& up);
+			static Matrix4x4 Perspective(float width, float height, float near, float far);
+			
+			static Matrix4x4 RotationX(float angleInRad);
+			static Matrix4x4 RotationY(float angleInRad);
+			static Matrix4x4 RotationZ(float angleInRad);
+			
 			void print();
 			void ToString(char* const str, size_t size);
 		};
@@ -430,6 +441,146 @@ namespace M3D {
 			*this = *this * other;
 #endif
 		}
+		
+		Matrix4x4 Matrix4x4::LookAt(const Vector3& eye, const Vector3& at, const Vector3& up)
+		{
+			Matrix4x4 result;
+			
+			Vector3 zAxis = (at - eye);
+			zAxis.Normalize();
+			Vector3 xAxis = (up ^ zAxis);
+			xAxis.Normalize();
+			Vector3 yAxis = zAxis ^ xAxis;
+
+			for (int row = 0; row < 3; row++)
+			{
+				result.m[row][0] = (&xAxis.x)[row];
+				result.m[row][1] = (&yAxis.x)[row];
+				result.m[row][2] = (&zAxis.x)[row];
+				result.m[row][3] = 0.0f;
+			}
+
+			result.m[3][0] = -eye | xAxis;
+			result.m[3][1] = -eye | yAxis;
+			result.m[3][2] = -eye | zAxis;
+			result.m[3][3] = 1.0f;
+			
+			return result;
+		}
+		
+		Matrix4x4 Matrix4x4::Perspective(float width, float height, float near, float far)
+		{
+			float n2 = 2.0f * nearPlane;
+			float rcpnmf = 1.f / (nearPlane - farPlane);
+
+			Matrix4x4 result;
+			result.m[0][0] = n2 / width;
+			result.m[0][1] = 0;
+			result.m[0][2] = 0;
+			result.m[0][3] = 0;
+			result.m[1][0] = 0;
+			result.m[1][1] = n2 / height;
+			result.m[1][2] = 0;
+			result.m[1][3] = 0;
+			result.m[2][0] = 0;
+			result.m[2][1] = 0;
+			result.m[2][2] = (farPlane + nearPlane) * rcpnmf;
+			result.m[2][3] = farPlane * rcpnmf * n2;
+			result.m[3][0] = 0;
+			result.m[3][1] = 0;
+			result.m[3][2] = -1.0;
+			result.m[3][3] = 0;
+			
+			return result;
+		}
+		
+		Matrix4x4 Matrix4x4::RotationX(float angleInRad)
+		{
+			Matrix4x4 result;
+
+			float fCosine, fSine;
+
+			fCosine = cosf(angleInRad);
+			fSine = sinf(angleInRad);
+
+			result.m[0][0] = 1.0f;
+			result.m[0][1] = 0.0f;
+			result.m[0][2] = 0.0f;
+			result.m[0][3] = 0.0f;
+			result.m[1][0] = 0.0f;
+			result.m[1][1] = fCosine;
+			result.m[1][2] = fSine;
+			result.m[1][3] = 0.0f;
+			result.m[2][0] = 0.0f;
+			result.m[2][1] = -fSine;
+			result.m[2][2] = fCosine;
+			result.m[2][3] = 0.0f;
+			result.m[3][0] = 0.0f;
+			result.m[3][1] = 0.0f;
+			result.m[3][2] = 0.0f;
+			result.m[3][3] = 1.0f;
+
+			return result;
+		}
+
+		Matrix4x4 Matrix4x4::RotationY(float angleInRad)
+		{
+			Matrix4x4 result;
+
+			float fCosine, fSine;
+
+			fCosine = cosf(angleInRad);
+			fSine = sinf(angleInRad);
+
+			result.m[0][0] = fCosine;
+			result.m[0][1] = 0.0f;
+			result.m[0][2] = -fSine;
+			result.m[0][3] = 0.0f;
+			result.m[1][0] = 0.0f;
+			result.m[1][1] = 1.0f;
+			result.m[1][2] = 0.0f;
+			result.m[1][3] = 0.0f;
+			result.m[2][0] = fSine;
+			result.m[2][1] = 0.0f;
+			result.m[2][2] = fCosine;
+			result.m[2][3] = 0.0f;
+			result.m[3][0] = 0.0f;
+			result.m[3][1] = 0.0f;
+			result.m[3][2] = 0.0f;
+			result.m[3][3] = 1.0f;
+
+			return result;
+		}
+
+		Matrix4x4 Matrix4x4::RotationZ(float angleInRad)
+		{
+			Matrix4x4 result;
+
+			float fCosine, fSine;
+
+			fCosine = cosf(angleInRad);
+			fSine = sinf(angleInRad);
+
+			result.m[0][0] = fCosine;
+			result.m[0][1] = fSine;
+			result.m[0][2] = 0.0f;
+			result.m[0][3] = 0.0f;
+			result.m[1][0] = -fSine;
+			result.m[1][1] = fCosine;
+			result.m[1][2] = 0.0f;
+			result.m[1][3] = 0.0f;
+			result.m[2][0] = 0.0f;
+			result.m[2][1] = 0.0f;
+			result.m[2][2] = 1.0f;
+			result.m[2][3] = 0.0f;
+			result.m[3][0] = 0.0f;
+			result.m[3][1] = 0.0f;
+			result.m[3][2] = 0.0f;
+			result.m[3][3] = 1.0f;
+
+			return result;
+		}
+		
 	} // namespace Math
 } // namespace M3D
 

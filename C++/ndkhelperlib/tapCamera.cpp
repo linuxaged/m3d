@@ -55,22 +55,15 @@ namespace ndk_helper
 	    //Init offset
 		InitParameters();
 
-		vec_flip_ = Vec2(1.f, -1.f);
 		m_Vec2Flip = Vector2(1.0f, -1.0f);
 		
 		flip_z_ = -1.f;
-		vec_pinch_transform_factor_ = Vec3(1.f, 1.f, 1.f);
 		m_Vec3PinchTransformFactor = Vector3(1.0f, 1.0f, 1.0f);
 
-		vec_ball_center_ = Vec2(0, 0);
-		vec_ball_now_ = Vec2(0, 0);
-		vec_ball_down_ = Vec2(0, 0);
 		m_Vec2BallCenter = Vector2(0, 0);
 		m_Vec2BallNow = Vector2(0, 0);
 		m_Vec2BallDown = Vector2(0, 0);
-		
-		vec_pinch_start_ = Vec2(0, 0);
-		vec_pinch_start_center_ = Vec2(0, 0);
+
 		m_Vec2PinchStart = Vector2(0, 0);
 		m_Vec2PinchStartCenter = Vector2(0, 0);
 		
@@ -81,15 +74,10 @@ namespace ndk_helper
 	void TapCamera::InitParameters()
 	{
 	    //Init parameters
-		vec_offset_ = Vec3();
-		vec_offset_now_ = Vec3();
 		
 		m_Vec3Offset = Vector3(0, 0, 0);
 		m_Vec3OffsetNow = Vector3(0, 0, 0);
 
-		quat_ball_rot_ = Quaternion();
-		quat_ball_now_ = Quaternion();
-		quat_ball_now_.ToMatrix(mat_rotation_);
 		
 		m_QuatBallRot = M3D::Math::Quaternion(0, 0, 0, 1);
 		m_QuatBallNow = M3D::Math::Quaternion(0, 0, 0, 1);
@@ -97,8 +85,6 @@ namespace ndk_helper
 		
 		camera_rotation_ = 0.f;
 
-		vec_drag_delta_ = Vec2();
-		vec_offset_delta_ = Vec3();
 		m_Vec2DragDelta = Vector2(0, 0);
 		m_Vec3OffsetDelta = Vector3(0, 0, 0);
 
@@ -307,13 +293,10 @@ namespace ndk_helper
 		if (!pinching_)
 			return;
 
-			    //Update momentum factor
-//		vec_offset_last_ = vec_offset_now_;
 		m_Vec3OffsetLast = m_Vec3OffsetNow;
 
 		float x_diff, y_diff;
 		Vector2 vec = v1 - v2;
-//		vec.Value(x_diff, y_diff);
 		x_diff = vec.x;
 		y_diff = vec.y;
 
@@ -327,68 +310,17 @@ namespace ndk_helper
 		if (isnan(f))
 			f = 0.f;
 
-//		vec = (v1 + v2) / 2.f - vec_pinch_start_center_;
 		vec = (v1 + v2) / 2.f - m_Vec2PinchStartCenter;
-//		vec_offset_now_ = Vec3(vec, flip_z_ * f);
 		m_Vec3OffsetNow = Vector3(vec, flip_z_ * f);
 
-		    //Update momentum factor
-//		vec_offset_delta_ = vec_offset_delta_ * MOMENTUM_FACTOR + (vec_offset_now_ - vec_offset_last_);
 		m_Vec3OffsetDelta = m_Vec3OffsetDelta * MOMENTUM_FACTOR + m_Vec3OffsetNow - m_Vec3OffsetLast;
-		            //
-		            //Update ration quaternion
+
 		float fRotation = atan2f(y_diff, x_diff);
 		camera_rotation_now_ = fRotation - camera_rotation_start_;
 
-		    //Trackball rotation
-//		quat_ball_rot_ = Quaternion( 0.f,
-//			0.f,
-//			sinf(-camera_rotation_now_ * 0.5f),
-//			cosf(-camera_rotation_now_ * 0.5f));
 		
 		m_QuatBallRot = M3D::Math::Quaternion(0,
 			0,
-			sinf(-camera_rotation_now_ * 0.5f),
-			cosf(-camera_rotation_now_ * 0.5f));
-	}
-	
-	void TapCamera::Pinch(const Vec2& v1, const Vec2& v2)
-	{
-		if (!pinching_)
-			return;
-
-			    //Update momentum factor
-		vec_offset_last_ = vec_offset_now_;
-
-		float x_diff, y_diff;
-		Vec2 vec = v1 - v2;
-		vec.Value(x_diff, y_diff);
-
-		float fDistanceSQ = x_diff * x_diff + y_diff * y_diff;
-
-		float f = pinch_start_distance_SQ_ / fDistanceSQ;
-		if (f < 1.f)
-			f = -1.f / f + 1.0f;
-		else
-			f = f - 1.f;
-		if (isnan(f))
-			f = 0.f;
-
-		vec = (v1 + v2) / 2.f - vec_pinch_start_center_;
-		vec_offset_now_ = Vec3(vec, flip_z_ * f);
-
-		    //Update momentum factor
-		vec_offset_delta_ = vec_offset_delta_ * MOMENTUM_FACTOR
-		        + (vec_offset_now_ - vec_offset_last_);
-
-		            //
-		            //Update ration quaternion
-		float fRotation = atan2f(y_diff, x_diff);
-		camera_rotation_now_ = fRotation - camera_rotation_start_;
-
-		    //Trackball rotation
-		quat_ball_rot_ = Quaternion( 0.f,
-			0.f,
 			sinf(-camera_rotation_now_ * 0.5f),
 			cosf(-camera_rotation_now_ * 0.5f));
 	}

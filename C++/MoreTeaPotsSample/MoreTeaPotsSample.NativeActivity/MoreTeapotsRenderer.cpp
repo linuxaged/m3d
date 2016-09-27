@@ -28,6 +28,8 @@
 //--------------------------------------------------------------------------------
 #include "teapot.inl"
 
+using namespace M3D::Math;
+
 //--------------------------------------------------------------------------------
 // Ctor
 //--------------------------------------------------------------------------------
@@ -215,7 +217,7 @@ void MoreTeapotsRenderer::UpdateViewport()
     const float CAM_NEAR = 5.f;
     const float CAM_FAR = 10000.f;
     bool bRotate = false;
-    mat_projection_ = ndk_helper::Mat4::Perspective( fAspect, 1.f, CAM_NEAR, CAM_FAR );
+    mat_projection_ = M3D::Math::Matrix4x4::Perspective( fAspect, 1.f, CAM_NEAR, CAM_FAR );
 }
 
 //--------------------------------------------------------------------------------
@@ -253,14 +255,17 @@ void MoreTeapotsRenderer::Update( float fTime )
     const float CAM_X = 0.f;
     const float CAM_Y = 0.f;
     const float CAM_Z = 2000.f;
-
-    mat_view_ = ndk_helper::Mat4::LookAt( ndk_helper::Vec3( CAM_X, CAM_Y, CAM_Z ),
-            ndk_helper::Vec3( 0.f, 0.f, 0.f ), ndk_helper::Vec3( 0.f, 1.f, 0.f ) );
+	
+	mat_view_ = M3D::Math::Matrix4x4::LookAt(
+		M3D::Math::Vector3(CAM_X, CAM_Y, CAM_Z),
+		M3D::Math::Vector3(0.f, 0.f, 0.f),
+		M3D::Math::Vector3(0.f, 1.f, 0.f),
+		);
 
     if( camera_ )
     {
         camera_->Update();
-        mat_view_ = camera_->GetTransformMatrix() * mat_view_ * camera_->GetRotationMatrix();
+        mat_view_ = camera_->GetTransform() * mat_view_ * camera_->GetRotation();
     }
 }
 
@@ -317,13 +322,13 @@ void MoreTeapotsRenderer::Render()
             //Rotation
             float fX, fY;
             vec_current_rotations_[i] += vec_rotations_[i];
-            vec_current_rotations_[i].Value( fX, fY );
-            ndk_helper::Mat4 mat_rotation = ndk_helper::Mat4::RotationX( fX )
-                    * ndk_helper::Mat4::RotationY( fY );
+
+	        Matrix4x4 mat_rotation = M3D::Math::Matrix4x4::RotationX(vec_current_rotations_[i].x)
+                    * M3D::Math::Matrix4x4::RotationY(vec_current_rotations_[i].y);
 
             // Feed Projection and Model View matrices to the shaders
-            ndk_helper::Mat4 mat_v = mat_view_ * vec_mat_models_[i] * mat_rotation;
-            ndk_helper::Mat4 mat_vp = mat_projection_ * mat_v;
+            Matrix4x4 mat_v = mat_view_ * vec_mat_models_[i] * mat_rotation;
+            Matrix4x4 mat_vp = mat_projection_ * mat_v;
 
             memcpy( pMVPMat, mat_vp.Ptr(), sizeof(mat_v) );
             pMVPMat += ubo_matrix_stride_;
@@ -351,14 +356,14 @@ void MoreTeapotsRenderer::Render()
             //Rotation
             vec_current_rotations_[i] += vec_rotations_[i];
             vec_current_rotations_[i].Value( x, y );
-            ndk_helper::Mat4 mat_rotation = ndk_helper::Mat4::RotationX( x )
-                    * ndk_helper::Mat4::RotationY( y );
+            Matrix4x4 mat_rotation = Matrix4x4::RotationX( x )
+                    * Matrix4x4::RotationY( y );
 
             // Feed Projection and Model View matrices to the shaders
-            ndk_helper::Mat4 mat_v = mat_view_ * vec_mat_models_[i] * mat_rotation;
-            ndk_helper::Mat4 mat_vp = mat_projection_ * mat_v;
-            glUniformMatrix4fv( shader_param_.matrix_projection_, 1, GL_FALSE, mat_vp.Ptr() );
-            glUniformMatrix4fv( shader_param_.matrix_view_, 1, GL_FALSE, mat_v.Ptr() );
+            Matrix4x4 mat_v = mat_view_ * vec_mat_models_[i] * mat_rotation;
+            Matrix4x4 mat_vp = mat_projection_ * mat_v;
+            glUniformMatrix4fv( shader_param_.matrix_projection_, 1, GL_FALSE, &mat_vp.m[0][0] );
+            glUniformMatrix4fv( shader_param_.matrix_view_, 1, GL_FALSE, &mat_v.m[0][0] );
 
             glDrawElements( GL_TRIANGLES, num_indices_, GL_UNSIGNED_SHORT, BUFFER_OFFSET(0) );
 
