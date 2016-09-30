@@ -36,7 +36,7 @@ namespace M3D
 			inline Quaternion operator-=(const Quaternion& other);
 			inline Quaternion operator*(const Quaternion& other) const;
 			inline Quaternion operator*=(const Quaternion& other);
-			float operator|(const Quaternion& other) const; // dot product
+			inline float operator|(const Quaternion& other) const; // dot product
 			
 			inline Vector3 operator*(const Vector3& v) const;
 			inline Matrix4x4 operator*(const Matrix4x4& mat) const;

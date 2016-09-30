@@ -27,7 +27,8 @@
 #include <android_native_app_glue.h>
 #include <android/native_window_jni.h>
 #include "JNIHelper.h"
-#include "vecmath.h"
+
+#include "../Math/Matrix.h"
 
 namespace ndk_helper
 {
@@ -137,7 +138,7 @@ public:
     {
     }
     virtual GESTURE_STATE Detect( const AInputEvent* event );
-    bool GetPointers( Vec2& v1, Vec2& v2 );
+    bool GetPointers( M3D::Math::Vector2& v1, M3D::Math::Vector2& v2 );
 };
 
 /******************************************************************
@@ -159,7 +160,7 @@ public:
     {
     }
     virtual GESTURE_STATE Detect( const AInputEvent* event );
-    bool GetPointer( Vec2& v );
+    bool GetPointer( M3D::Math::Vector2& v );
 };
 
 }   //namespace ndkHelper

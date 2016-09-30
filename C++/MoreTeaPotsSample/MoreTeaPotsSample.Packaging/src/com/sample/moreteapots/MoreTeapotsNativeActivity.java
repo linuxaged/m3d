@@ -30,6 +30,12 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 public class MoreTeapotsNativeActivity extends NativeActivity {
+
+	static {
+	   //System.loadLibrary("Math");
+       System.loadLibrary("MoreTeapotsNativeActivity");
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

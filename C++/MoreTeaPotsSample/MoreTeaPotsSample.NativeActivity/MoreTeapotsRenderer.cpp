@@ -116,23 +116,27 @@ void MoreTeapotsRenderer::Init( const int32_t numX,
     float offset_y = -total_width / 2.f;
     float offset_z = -total_width / 2.f;
 
-    for( int32_t iX = 0; iX < teapot_x_; ++iX )
-        for( int32_t iY = 0; iY < teapot_y_; ++iY )
-            for( int32_t iZ = 0; iZ < teapot_z_; ++iZ )
-            {
-                vec_mat_models_.push_back(
-                        ndk_helper::Mat4::Translation( iX * gap_x + offset_x, iY * gap_y + offset_y,
-                                iZ * gap_z + offset_z ) );
-                vec_colors_.push_back(
-                        ndk_helper::Vec3( random() / float( RAND_MAX * 1.1 ),
-                                random() / float( RAND_MAX * 1.1 ),
-                                random() / float( RAND_MAX * 1.1 ) ) );
+	for (int32_t iX = 0; iX < teapot_x_; ++iX)
+		for (int32_t iY = 0; iY < teapot_y_; ++iY)
+			for (int32_t iZ = 0; iZ < teapot_z_; ++iZ)
+			{
+				vec_mat_models_.push_back(
+					M3D::Math::Matrix4x4::Translation({
+					 iX * gap_x + offset_x,
+					iY * gap_y + offset_y,
+					iZ * gap_z + offset_z
+				}) 
+	);
+				vec_colors_.push_back(
+					M3D::Math::Vector3( random() / float(RAND_MAX * 1.1),
+					random() / float(RAND_MAX * 1.1),
+					random() / float(RAND_MAX * 1.1)));
 
-                float fX = random() / float( RAND_MAX ) - 0.5f;
-                float fY = random() / float( RAND_MAX ) - 0.5f;
-                vec_rotations_.push_back( ndk_helper::Vec2( fX * 0.05f, fY * 0.05f ) );
-                vec_current_rotations_.push_back( ndk_helper::Vec2( fX * M_PI, fY * M_PI ) );
-            }
+				float fX = random() / float(RAND_MAX) - 0.5f;
+				float fY = random() / float(RAND_MAX) - 0.5f;
+				vec_rotations_.push_back(M3D::Math::Vector2(fX * 0.05f, fY * 0.05f));
+				vec_current_rotations_.push_back(M3D::Math::Vector2(fX * M_PI, fY * M_PI));
+			}
 
     if( geometry_instancing_support_ )
     {
@@ -259,7 +263,7 @@ void MoreTeapotsRenderer::Update( float fTime )
 	mat_view_ = M3D::Math::Matrix4x4::LookAt(
 		M3D::Math::Vector3(CAM_X, CAM_Y, CAM_Z),
 		M3D::Math::Vector3(0.f, 0.f, 0.f),
-		M3D::Math::Vector3(0.f, 1.f, 0.f),
+		M3D::Math::Vector3(0.f, 1.f, 0.f)
 		);
 
     if( camera_ )
@@ -330,10 +334,10 @@ void MoreTeapotsRenderer::Render()
             Matrix4x4 mat_v = mat_view_ * vec_mat_models_[i] * mat_rotation;
             Matrix4x4 mat_vp = mat_projection_ * mat_v;
 
-            memcpy( pMVPMat, mat_vp.Ptr(), sizeof(mat_v) );
+            memcpy( pMVPMat, &mat_vp.m[0][0], sizeof(mat_v) );
             pMVPMat += ubo_matrix_stride_;
 
-            memcpy( pMVMat, mat_v.Ptr(), sizeof(mat_v) );
+            memcpy( pMVMat, &mat_v.m[0][0], sizeof(mat_v) );
             pMVMat += ubo_matrix_stride_;
         }
         glUnmapBuffer( GL_UNIFORM_BUFFER );
@@ -350,14 +354,17 @@ void MoreTeapotsRenderer::Render()
         {
             //Set diffuse
             float x, y, z;
-            vec_colors_[i].Value( x, y, z );
+	        x = vec_colors_[i].x;
+	        y = vec_colors_[i].y;
+	        z = vec_colors_[i].z;
+	        
             glUniform4f( shader_param_.material_diffuse_, x, y, z, 1.f );
 
             //Rotation
             vec_current_rotations_[i] += vec_rotations_[i];
-            vec_current_rotations_[i].Value( x, y );
-            Matrix4x4 mat_rotation = Matrix4x4::RotationX( x )
-                    * Matrix4x4::RotationY( y );
+
+            Matrix4x4 mat_rotation = Matrix4x4::RotationX(vec_current_rotations_[i].x)
+                    * Matrix4x4::RotationY(vec_current_rotations_[i].y);
 
             // Feed Projection and Model View matrices to the shaders
             Matrix4x4 mat_v = mat_view_ * vec_mat_models_[i] * mat_rotation;

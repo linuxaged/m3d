@@ -42,9 +42,9 @@ namespace ndk_helper
 	//----------------------------------------------------------
 	TapCamera::TapCamera()
 		: dragging_(false)
-		, momentum_(false)
 		, pinching_(false)
 		, ball_radius_(0.75f)
+		, momentum_(false)
 		, pinch_start_distance_SQ_(0.f)
 		, camera_rotation_(0.f)
 		, camera_rotation_start_(0.f)
@@ -149,16 +149,6 @@ namespace ndk_helper
 		m_Mat4Transform = Matrix4x4(
 			&transform[0][0]
 		);//Mat4::Translation(vec);
-	}
-
-	Mat4& TapCamera::GetRotationMatrix()
-	{
-		return mat_rotation_;
-	}
-
-	Mat4& TapCamera::GetTransformMatrix()
-	{
-		return mat_transform_;
 	}
 	
 	Matrix4x4& TapCamera::GetRotation()
@@ -379,25 +369,6 @@ namespace ndk_helper
 		else
 		{
 			ball_mouse = Vector3(vec, sqrtf(1.f - mag));
-		}
-		return ball_mouse;
-	}
-
-	Vec3 TapCamera::PointOnSphere(Vec2& point)
-	{
-		Vec3 ball_mouse;
-		float mag;
-		Vec2 vec = (point - vec_ball_center_) / ball_radius_;
-		mag = vec.Dot(vec);
-		if (mag > 1.f)
-		{
-			float scale = 1.f / sqrtf(mag);
-			vec = vec * scale;
-			ball_mouse = Vec3(vec, 0.f);
-		}
-		else
-		{
-			ball_mouse = Vec3(vec, sqrtf(1.f - mag));
 		}
 		return ball_mouse;
 	}

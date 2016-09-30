@@ -73,7 +73,7 @@ class Engine
 
     void UpdateFPS( float fps );
     void ShowUI();
-    void TransformPosition( ndk_helper::Vec2& vec );
+    void TransformPosition( M3D::Math::Vector2& vec );
 
 public:
     static void HandleCmd( struct android_app* app,
@@ -280,8 +280,6 @@ int32_t Engine::HandleInput( android_app* app,
             {
                 //Multi touch
                 //Start new pinch
-//                ndk_helper::Vec2 v1;
-//                ndk_helper::Vec2 v2;
 	            M3D::Math::Vector2 v1;
 	            M3D::Math::Vector2 v2;	
                 eng->pinch_detector_.GetPointers( v1, v2 );
@@ -407,11 +405,11 @@ bool Engine::IsReady()
     return false;
 }
 
-void Engine::TransformPosition( ndk_helper::Vec2& vec )
+void Engine::TransformPosition( M3D::Math::Vector2& vec )
 {
-    vec = ndk_helper::Vec2( 2.0f, 2.0f ) * vec
-            / ndk_helper::Vec2( gl_context_->GetScreenWidth(), gl_context_->GetScreenHeight() )
-            - ndk_helper::Vec2( 1.f, 1.f );
+	vec = M3D::Math::Vector2(2.0f, 2.0f) * vec
+            / M3D::Math::Vector2(gl_context_->GetScreenWidth(), gl_context_->GetScreenHeight())
+            - M3D::Math::Vector2(1.f, 1.f);
 }
 
 void Engine::ShowUI()

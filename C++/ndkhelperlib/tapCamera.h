@@ -101,19 +101,16 @@ public:
 
     void BeginPinch( const M3D::Math::Vector2& v1, const M3D::Math::Vector2& v2 );
     void EndPinch();
-//    void Pinch( const Vec2& v1, const Vec2& v2 );
 	void Pinch(const M3D::Math::Vector2& v1, const M3D::Math::Vector2& v2);
 	
     void SetFlip( const float x, const float y, const float z )
     {
-//        vec_flip_ = Vec2( x, y );
 	    m_Vec2Flip = M3D::Math::Vector2(x, y);
         flip_z_ = z;
     }
 
     void SetPinchTransformFactor( const float x, const float y, const float z )
     {
-//        vec_pinch_transform_factor_ = Vec3( x, y, z );
 	    m_Vec3PinchTransformFactor = M3D::Math::Vector3(x,y,z);
     }
 

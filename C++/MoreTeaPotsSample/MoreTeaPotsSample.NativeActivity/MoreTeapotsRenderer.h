@@ -41,7 +41,7 @@
 #define CLASS_NAME "android/app/NativeActivity"
 #define APPLICATION_CLASS_NAME "com/sample/moreteapotss/MoreTeapotsApplication"
 
-#include "NDKHelper.h"
+#include "../../ndkhelperlib/NDKHelper.h"
 #include "../../Math/Matrix.h"
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
@@ -92,8 +92,8 @@ class MoreTeapotsRenderer
             const char* strFsh,
             std::map<std::string, std::string>&shaderParameters );
 
-    ndk_helper::Mat4 mat_projection_;
-    ndk_helper::Mat4 mat_view_;
+	M3D::Math::Matrix4x4 mat_projection_;
+	M3D::Math::Matrix4x4 mat_view_;
     std::vector<M3D::Math::Matrix4x4> vec_mat_models_;
 	std::vector<M3D::Math::Vector3> vec_colors_;
 	std::vector<M3D::Math::Vector2> vec_rotations_;

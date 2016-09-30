@@ -76,7 +76,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <CompileAs>CompileAsCpp</CompileAs>
-      <AdditionalIncludeDirectories>$(NDKRoot)\platforms\$(AndroidAPILevel)\arch-arm\usr\include;$(NDKRoot)\sources\android\native_app_glue;$(NDKRoot)\sources\android\ndk_helper;$(NDKRoot)\sources\android\cpufeatures;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(NDKRoot)\platforms\$(AndroidAPILevel)\arch-arm\usr\include;$(NDKRoot)\sources\android\native_app_glue;$(NDKRoot)\sources\android\cpufeatures;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CLanguageStandard>c11</CLanguageStandard>
       <CppLanguageStandard>c++11</CppLanguageStandard>
     </ClCompile>

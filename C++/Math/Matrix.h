@@ -1,5 +1,7 @@
-#ifndef M3D_MATH_MATRIX_H
-#define M3D_MATH_MATRIX_H
+#pragma once
+
+//#ifndef M3D_MATH_MATRIX_H
+//#define M3D_MATH_MATRIX_H
 
 #include <cstring>
 #include <cstdio>
@@ -343,18 +345,18 @@ namespace M3D {
 
 			inline void SetIdentity();
 
-			inline Matrix4x4 operator+(Matrix4x4& other);
-			inline Matrix4x4 operator-(Matrix4x4& other);
-			inline Matrix4x4 operator*(Matrix4x4& other);
-			inline void operator+=(Matrix4x4& other);
-			inline void operator*=(Matrix4x4& other);
+			inline Matrix4x4 operator+(const Matrix4x4& other);
+			inline Matrix4x4 operator-(const Matrix4x4& other);
+			inline Matrix4x4 operator*(const Matrix4x4& other);
+			inline void operator+=(const Matrix4x4& other);
+			inline void operator*=(const Matrix4x4& other);
 
-			static Matrix4x4 LookAt(const Vector3& eye, const Vector3& at, const Vector3& up);
-			static Matrix4x4 Perspective(float width, float height, float near, float far);
-			
-			static Matrix4x4 RotationX(float angleInRad);
-			static Matrix4x4 RotationY(float angleInRad);
-			static Matrix4x4 RotationZ(float angleInRad);
+			static inline Matrix4x4 LookAt(const Vector3& eye, const Vector3& at, const Vector3& up);
+			static inline Matrix4x4 Perspective(float width, float height, float near, float far);
+			static inline Matrix4x4 Translation(const Vector3& v);
+			static inline Matrix4x4 RotationX(float angleInRad);
+			static inline Matrix4x4 RotationY(float angleInRad);
+			static inline Matrix4x4 RotationZ(float angleInRad);
 			
 			void print();
 			void ToString(char* const str, size_t size);
@@ -378,7 +380,7 @@ namespace M3D {
 			std::memcpy(m, array, 16 * sizeof(float));
 		}
 
-		inline Matrix4x4 Matrix4x4::operator+(Matrix4x4& other)
+		inline Matrix4x4 Matrix4x4::operator+(const Matrix4x4& other)
 		{
 			Matrix4x4 result;
 			for (int i = 0; i < 4; i++)
@@ -391,7 +393,7 @@ namespace M3D {
 			return result;
 		}
 
-		inline Matrix4x4 Matrix4x4::operator-(Matrix4x4& other)
+		inline Matrix4x4 Matrix4x4::operator-(const Matrix4x4& other)
 		{
 			Matrix4x4 result;
 			for (int i = 0; i < 4; i++)
@@ -404,7 +406,7 @@ namespace M3D {
 			return result;
 		}
 
-		inline Matrix4x4 Matrix4x4::operator*(Matrix4x4& other)
+		inline Matrix4x4 Matrix4x4::operator*(const Matrix4x4& other)
 		{
 			Matrix4x4 result;
 #if USE_SIMD
@@ -428,12 +430,12 @@ namespace M3D {
 			return result;
 		}
 
-		inline void Matrix4x4::operator+=(Matrix4x4& other)
+		inline void Matrix4x4::operator+=(const Matrix4x4& other)
 		{
 			*this = *this + other;
 		}
 
-		inline void Matrix4x4::operator*=(Matrix4x4& other)
+		inline void Matrix4x4::operator*=(const Matrix4x4& other)
 		{
 #if USE_SIMD
 			MatrixMultiply(this, this, &other);
@@ -470,8 +472,8 @@ namespace M3D {
 		
 		Matrix4x4 Matrix4x4::Perspective(float width, float height, float near, float far)
 		{
-			float n2 = 2.0f * nearPlane;
-			float rcpnmf = 1.f / (nearPlane - farPlane);
+			float n2 = 2.0f * near;
+			float rcpnmf = 1.f / (near - far);
 
 			Matrix4x4 result;
 			result.m[0][0] = n2 / width;
@@ -484,12 +486,36 @@ namespace M3D {
 			result.m[1][3] = 0;
 			result.m[2][0] = 0;
 			result.m[2][1] = 0;
-			result.m[2][2] = (farPlane + nearPlane) * rcpnmf;
-			result.m[2][3] = farPlane * rcpnmf * n2;
+			result.m[2][2] = (far + near) * rcpnmf;
+			result.m[2][3] = far * rcpnmf * n2;
 			result.m[3][0] = 0;
 			result.m[3][1] = 0;
 			result.m[3][2] = -1.0;
 			result.m[3][3] = 0;
+			
+			return result;
+		}
+		
+		Matrix4x4 Matrix4x4::Translation(const Vector3& v)
+		{
+			Matrix4x4 result;
+			
+			result.m[0][0] = 1.0f;
+			result.m[0][1] = 0.0f;
+			result.m[0][2] = 0.0f;
+			result.m[0][3] = v.x;
+			result.m[1][0] = 0.0f;
+			result.m[1][1] = 1.0f;
+			result.m[1][2] = 0.0f;
+			result.m[1][3] = v.y;
+			result.m[2][0] = 0.0f;
+			result.m[2][1] = 0.0f;
+			result.m[2][2] = 1.0f;
+			result.m[2][3] = v.z;
+			result.m[3][0] = 0.0f;
+			result.m[3][1] = 0.0f;
+			result.m[3][2] = 0.0f;
+			result.m[3][3] = 1.0f;
 			
 			return result;
 		}
@@ -584,4 +610,4 @@ namespace M3D {
 	} // namespace Math
 } // namespace M3D
 
-#endif // M3D_MATH_MATRIX_H
+//#endif // M3D_MATH_MATRIX_H
