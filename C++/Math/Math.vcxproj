@@ -138,6 +138,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <TargetName>libMath</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
   </PropertyGroup>
@@ -205,7 +206,8 @@
       <CppLanguageStandard>c++11</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalOptions>-lm %(AdditionalOptions)</AdditionalOptions>
+      <LibraryDependencies>m;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalOptions>-soname="libMath.so" %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='WinDebug|ARM'">

@@ -32,7 +32,8 @@ import android.widget.TextView;
 public class MoreTeapotsNativeActivity extends NativeActivity {
 
 	static {
-	   //System.loadLibrary("Math");
+		System.loadLibrary("");
+	   System.loadLibrary("Math");
        System.loadLibrary("MoreTeapotsNativeActivity");
     }
 
