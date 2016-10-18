@@ -13,10 +13,75 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="base">
+      <UniqueIdentifier>{43a71ba3-7299-47fc-a836-15ab9a2e9e0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math">
+      <UniqueIdentifier>{6ddcc072-a8d2-4b72-9888-b16bfcef5df7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\base\common.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\vulkanContext.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\C++\Math\Matrix.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\C++\Math\Quaternion.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\C++\Math\SIMD_SSE.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\C++\Math\MathBase.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\vulkanDebug.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\vulkanShaders.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\vulkanTools.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\base\common.hpp">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\base\vulkanContext.hpp">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\base\vulkanSwapChain.hpp">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\C++\Math\Matrix.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\C++\Math\Quaternion.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\C++\Math\SIMD_SSE.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\C++\Math\MathBase.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\base\vulkanDebug.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\base\vulkanShaders.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\base\vulkanTools.h">
+      <Filter>base</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

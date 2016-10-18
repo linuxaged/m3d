@@ -148,7 +148,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\C++\Math\MathBase.cpp" />
+    <ClCompile Include="..\..\C++\Math\Matrix.cpp" />
+    <ClCompile Include="..\..\C++\Math\Quaternion.cpp" />
+    <ClCompile Include="..\..\C++\Math\SIMD_SSE.cpp" />
+    <ClCompile Include="..\base\common.cpp" />
+    <ClCompile Include="..\base\vulkanContext.cpp" />
+    <ClCompile Include="..\base\vulkanDebug.cpp" />
+    <ClCompile Include="..\base\vulkanShaders.cpp" />
+    <ClCompile Include="..\base\vulkanTools.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\C++\Math\MathBase.h" />
+    <ClInclude Include="..\..\C++\Math\Matrix.h" />
+    <ClInclude Include="..\..\C++\Math\Quaternion.h" />
+    <ClInclude Include="..\..\C++\Math\SIMD_SSE.h" />
+    <ClInclude Include="..\base\common.hpp" />
+    <ClInclude Include="..\base\vulkanContext.hpp" />
+    <ClInclude Include="..\base\vulkanDebug.h" />
+    <ClInclude Include="..\base\vulkanShaders.h" />
+    <ClInclude Include="..\base\vulkanSwapChain.hpp" />
+    <ClInclude Include="..\base\vulkanTools.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
