@@ -259,7 +259,7 @@ vk::Viewport viewport(
 }
 
 vk::Viewport viewport(
-    const glm::uvec2& size,
+    const M3D::Math::Vector2& size,
     float minDepth,
     float maxDepth) {
     return viewport((float)size.x, (float)size.y, minDepth, maxDepth);
@@ -286,7 +286,7 @@ vk::Rect2D rect2D(
     return rect2D;
 }
 
-vk::Rect2D rect2D(const glm::uvec2& size, const glm::ivec2& offset) {
+vk::Rect2D rect2D(const M3D::Math::Vector2& size, const M3D::Math::Vector2& offset) {
     return rect2D(size.x, size.y, offset.x, offset.y);
 }
 
@@ -552,10 +552,10 @@ vk::PushConstantRange pushConstantRange(
     return pushConstantRange;
 }
 
-vk::ClearColorValue clearColor(const glm::vec4& v = glm::vec4(0)) {
-    vk::ClearColorValue result;
-    memcpy(&result.float32, &v, sizeof(result.float32));
-    return result;
+vk::ClearColorValue clearColor(const float r, const float g,
+	const float b, const float a) 
+{
+	return vk::ClearColorValue (std::array<float, 4>{r, g, b, a});
 }
 
 const std::string& getAssetPath() {

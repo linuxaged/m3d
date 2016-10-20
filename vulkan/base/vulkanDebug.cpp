@@ -130,7 +130,7 @@ namespace vkx {
                 }
             }
 
-            void beginRegion(VkCommandBuffer cmdbuffer, const std::string& pMarkerName, const glm::vec4& color) {
+            void beginRegion(VkCommandBuffer cmdbuffer, const std::string& pMarkerName, const std::array<float, 4>& color) {
                 // Check for valid function pointer (may not be present if not running in a debugging application)
                 if (pfnCmdDebugMarkerBegin) {
                     VkDebugMarkerMarkerInfoEXT markerInfo = {};
@@ -141,7 +141,7 @@ namespace vkx {
                 }
             }
 
-            void insert(VkCommandBuffer cmdbuffer, std::string markerName, glm::vec4 color) {
+            void insert(VkCommandBuffer cmdbuffer, std::string markerName, std::array<float, 4> color) {
                 // Check for valid function pointer (may not be present if not running in a debugging application)
                 if (pfnCmdDebugMarkerInsert) {
                     VkDebugMarkerMarkerInfoEXT markerInfo = {};

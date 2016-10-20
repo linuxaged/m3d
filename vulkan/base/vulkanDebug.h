@@ -3,7 +3,7 @@
 #include <string>
 #include <algorithm>
 #include <vulkan/vulkan.hpp>
-#include <glm/glm.hpp>
+//#include <glm/glm.hpp>
 
 namespace vkx {
     namespace debug {
@@ -49,10 +49,10 @@ namespace vkx {
             void setObjectTag(VkDevice device, uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag);
 
             // Start a new debug marker region
-            void beginRegion(VkCommandBuffer cmdbuffer, const std::string& pMarkerName, const glm::vec4& color);
+            void beginRegion(VkCommandBuffer cmdbuffer, const std::string& pMarkerName, const std::array<float, 4>& color);
 
             // Insert a new debug marker into the command buffer
-            void insert(VkCommandBuffer cmdbuffer, const std::string& markerName, const glm::vec4& color);
+            void insert(VkCommandBuffer cmdbuffer, const std::string& markerName, const std::array<float, 4>& color);
 
             // End the current debug marker region
             void endRegion(VkCommandBuffer cmdBuffer);
@@ -77,7 +77,7 @@ namespace vkx {
 
             class Marker {
             public:
-                Marker(const vk::CommandBuffer& cmdBuffer, const std::string& name, const glm::vec4& color = glm::vec4(0.8f)) : cmdBuffer(cmdBuffer) {
+				Marker(const vk::CommandBuffer& cmdBuffer, const std::string& name, const std::array<float, 4>& color = {0.8f, 0.8f, 0.8f, 0.8f}) : cmdBuffer(cmdBuffer) {
                     if (active) {
                         beginRegion(cmdBuffer, name, color);
                     }

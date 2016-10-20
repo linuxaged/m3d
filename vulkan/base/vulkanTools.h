@@ -205,7 +205,7 @@ namespace vkx {
     // Contains often used vulkan object initializers
     // Save lot of VK_STRUCTURE_TYPE assignments
     // Some initializers are parameterized for convenience
-    vk::ClearColorValue clearColor(const glm::vec4& v);
+    vk::ClearColorValue clearColor(const float r, const float g, const float b, const float a);
 
     vk::CommandBufferAllocateInfo commandBufferAllocateInfo(vk::CommandPool commandPool, vk::CommandBufferLevel level, uint32_t bufferCount);
 
@@ -218,7 +218,7 @@ namespace vkx {
         float maxDepth = 1);
 
     vk::Viewport viewport(
-        const glm::uvec2& size,
+        const M3D::Math::Vector2& size,
         float minDepth = 0,
         float maxDepth = 1);
 
@@ -234,8 +234,8 @@ namespace vkx {
         int32_t offsetY = 0);
 
     vk::Rect2D rect2D(
-        const glm::uvec2& size,
-        const glm::ivec2& offset = glm::ivec2(0));
+		const M3D::Math::Vector2& size,
+        const M3D::Math::Vector2& offset = M3D::Math::Vector2(0,0));
 
     vk::Rect2D rect2D(
         const vk::Extent2D& size,
