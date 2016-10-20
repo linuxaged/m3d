@@ -108,12 +108,12 @@ namespace M3D
 		}
 		
 		inline void QuaternionMultiply(
-			void* __restrict__ result,
+			void* __restrict__ resultSIMD,
 			const void* __restrict__ quat0,
 			const void* __restrict__ quat1
 		)
 		{
-			*((VectorSIMD *)result) = QuaternionMultiply2(*((const VectorSIMD *)quat0), *((const VectorSIMD *)quat1));
+			*((VectorSIMD *)resultSIMD) = QuaternionMultiply2(*((const VectorSIMD *)quat0), *((const VectorSIMD *)quat1));
 		}
 	}
 }

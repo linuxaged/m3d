@@ -352,7 +352,7 @@ namespace M3D {
 			inline void operator*=(const Matrix4x4& other);
 
 			static inline Matrix4x4 LookAt(const Vector3& eye, const Vector3& at, const Vector3& up);
-			static inline Matrix4x4 Perspective(float width, float height, float near, float far);
+			static inline Matrix4x4 Perspective(const float width, const float height, const float fNear, const float fFar);
 			static inline Matrix4x4 Translation(const Vector3& v);
 			static inline Matrix4x4 RotationX(float angleInRad);
 			static inline Matrix4x4 RotationY(float angleInRad);
@@ -470,10 +470,10 @@ namespace M3D {
 			return result;
 		}
 		
-		Matrix4x4 Matrix4x4::Perspective(float width, float height, float near, float far)
+		Matrix4x4 Matrix4x4::Perspective(const float width, const float height, const const float fNear, const float fFar)
 		{
-			float n2 = 2.0f * near;
-			float rcpnmf = 1.f / (near - far);
+			float n2 = 2.0f * fNear;
+			float rcpnmf = 1.0f / (fNear - fFar);
 
 			Matrix4x4 result;
 			result.m[0][0] = n2 / width;
@@ -486,8 +486,8 @@ namespace M3D {
 			result.m[1][3] = 0;
 			result.m[2][0] = 0;
 			result.m[2][1] = 0;
-			result.m[2][2] = (far + near) * rcpnmf;
-			result.m[2][3] = far * rcpnmf * n2;
+			result.m[2][2] = (fFar + fNear) * rcpnmf;
+			result.m[2][3] = fFar * rcpnmf * n2;
 			result.m[3][0] = 0;
 			result.m[3][1] = 0;
 			result.m[3][2] = -1.0;
