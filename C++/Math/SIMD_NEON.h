@@ -6,7 +6,12 @@ namespace M3D
 {
 	namespace Math
 	{
-		using VectorSIMD = float32x4_t __attribute((aligned(16)));
+		// TODO: use c++11 align
+#ifdef _MSC_VER
+		using VectorSIMD = float32x4_t __declspec(align(16));
+#else
+		using VectorSIMD = float32x4_t __attribute__((aligned(16)));
+#endif
 
 		inline VectorSIMD MakeVectorSIMD(float fX, float fY, float fZ, float fW)
 		{
@@ -60,11 +65,11 @@ namespace M3D
 			return vmlaq_f32(v0, v1, v2);
 		}
 		
-		inline void MatrixMultiply(void* result, const void* m0, const void* m1)
+		inline void MatrixMultiply(void* resultSIMD, const void* m0, const void* m1)
 		{
 			const VectorSIMD *left	= (const VectorSIMD *) m0;
 			const VectorSIMD *right	= (const VectorSIMD *) m1;
-			VectorSIMD *_result		= (VectorSIMD *) result;
+			VectorSIMD *_result		= (VectorSIMD *) resultSIMD;
 			VectorSIMD temp, row0, row1, row2, row3;
 			// row 1
 			temp    = vmulq_lane_f32(right[0], vget_low_f32(left[0]), 0);
@@ -99,18 +104,25 @@ namespace M3D
 		
 		inline VectorSIMD QuaternionMultiply2(const VectorSIMD& quat0, const VectorSIMD& quat1)
 		{
-			VectorSIMD result = VectorMultiply(VectorReplicate(quat0, 3), quat1);
-			result = VectorMultiplyAdd(VectorMultiply(VectorReplicate(quat0, 0), VectorSwizzle(quat1, 3, 2, 1, 0)), QMULTI_SIGN_MASK0, result);
-			result = VectorMultiplyAdd(VectorMultiply(VectorReplicate(quat0, 1), VectorSwizzle(quat1, 2, 3, 0, 1)), QMULTI_SIGN_MASK1, result);
-			result = VectorMultiplyAdd(VectorMultiply(VectorReplicate(quat0, 2), VectorSwizzle(quat1, 1, 0, 3, 2)), QMULTI_SIGN_MASK2, result);
+			VectorSIMD resultSIMD = VectorMultiply(VectorReplicate(quat0, 3), quat1);
+			resultSIMD = VectorMultiplyAdd(VectorMultiply(VectorReplicate(quat0, 0), VectorSwizzle(quat1, 3, 2, 1, 0)), QMULTI_SIGN_MASK0, resultSIMD);
+			resultSIMD = VectorMultiplyAdd(VectorMultiply(VectorReplicate(quat0, 1), VectorSwizzle(quat1, 2, 3, 0, 1)), QMULTI_SIGN_MASK1, resultSIMD);
+			resultSIMD = VectorMultiplyAdd(VectorMultiply(VectorReplicate(quat0, 2), VectorSwizzle(quat1, 1, 0, 3, 2)), QMULTI_SIGN_MASK2, resultSIMD);
 
-			return result;
+			return resultSIMD;
 		}
 		
 		inline void QuaternionMultiply(
+#ifdef _MSC_VER
+			void* __restrict resultSIMD,
+			const void* __restrict quat0,
+			const void* __restrict quat1
+#else 
 			void* __restrict__ resultSIMD,
 			const void* __restrict__ quat0,
 			const void* __restrict__ quat1
+#endif
+			
 		)
 		{
 			*((VectorSIMD *)resultSIMD) = QuaternionMultiply2(*((const VectorSIMD *)quat0), *((const VectorSIMD *)quat1));
