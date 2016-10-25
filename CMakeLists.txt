@@ -63,15 +63,14 @@ list(APPEND EXTERNALS glslang)
 include_directories(${GLSLANG_INCLUDE_DIRS})
 link_libraries(${GLSLANG_LIBRARIES})
 
+# add Math lib
+add_subdirectory(Math)
+link_libraries(Math)
+include_directories(Math)
+
 add_subdirectory(VkUtils)
 link_libraries(VkUtils)
 include_directories(VkUtils)
-
-# add Math lib
-add_subdirectory(Math)
-list(APPEND EXTERNALS Math)
-link_libraries(Math)
-include_directories(Math)
 
 foreach(EXTERNAL ${EXTERNALS})
     add_dependencies(VkUtils ${EXTERNAL})

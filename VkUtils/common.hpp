@@ -51,8 +51,8 @@
 #endif
 
 // Math
-#include "../Math/Matrix.h"
-#include "../Math/Quaternion.h"
+#include "Matrix.h"
+#include "Quaternion.h"
 
 //#include <glm/glm.hpp>
 //
