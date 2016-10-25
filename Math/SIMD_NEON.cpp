@@ -1,2 +1,3 @@
+#ifdef __ANDROID__
 #include "SIMD_NEON.h"
-#include <arm_neon.h>
+#endif
