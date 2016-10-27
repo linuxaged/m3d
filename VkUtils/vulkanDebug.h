@@ -79,12 +79,12 @@ namespace vkx {
             public:
 				Marker(const vk::CommandBuffer& cmdBuffer, const std::string& name, const std::array<float, 4>& color = {0.8f, 0.8f, 0.8f, 0.8f}) : cmdBuffer(cmdBuffer) {
                     if (active) {
-                        beginRegion(cmdBuffer, name, color);
+                        beginRegion(VkCommandBuffer(cmdBuffer), name, color);
                     }
                 }
                 ~Marker() {
                     if (active) {
-                        endRegion(cmdBuffer);
+                        endRegion(VkCommandBuffer(cmdBuffer));
                     }
                 }
             private:

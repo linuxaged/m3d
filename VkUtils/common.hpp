@@ -27,7 +27,7 @@
 #include <streambuf>
 #include <thread>
 #include <vector>
-
+#include <queue>
 
 #ifdef GLEW_STATIC
 #include <GL/glew.h>
@@ -115,7 +115,6 @@
 //#include <gli/gli.hpp>
 
 // Vulkan!
-#define VK_USE_PLATFORM_WIN32_KHR
 #include <vulkan/vulkan.hpp>
 
 // Boilerplate for running an example

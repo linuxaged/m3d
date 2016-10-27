@@ -47,9 +47,9 @@ public:
 	}  uniformDataVS;
 
 	struct {
-		glm::mat4 projectionMatrix;
-		glm::mat4 modelMatrix;
-		glm::mat4 viewMatrix;
+		M3D::Math::Matrix4x4 projectionMatrix;
+		M3D::Math::Matrix4x4 modelMatrix;
+		M3D::Math::Matrix4x4 viewMatrix;
 	} uboVS;
 
 	struct {
@@ -123,7 +123,7 @@ public:
 			vkx::debug::setupDebugging(instance, vk::DebugReportFlagBitsEXT::eError | vk::DebugReportFlagBitsEXT::eWarning | vk::DebugReportFlagBitsEXT::ePerformanceWarning);
 		}
 		if (enableDebugMarkers) {
-			vkx::debug::marker::setup(device);
+			vkx::debug::marker::setup(VkDevice(device));
 		}
 		cmdPool = getCommandPool();
 		swapChain.createSurface(window);
@@ -344,7 +344,7 @@ public:
 		copySubmitInfo.commandBufferCount = 1;
 		copySubmitInfo.pCommandBuffers = &copyCommandBuffer;
 
-		queue.submit(copySubmitInfo, VK_NULL_HANDLE);
+		queue.submit(copySubmitInfo, vk::Fence());
 		queue.waitIdle();
 
 		device.freeCommandBuffers(cmdPool, copyCommandBuffer);
@@ -416,14 +416,29 @@ public:
 		uniformDataVS.descriptor.range = sizeof(uboVS);
 
 		// Update matrices
-		uboVS.projectionMatrix = glm::perspective(glm::radians(60.0f), (float)size.width / (float)size.height, 0.1f, 256.0f);
-		uboVS.viewMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, zoom));
-		uboVS.modelMatrix = glm::mat4();
+		float pMat[16] = {
+			2.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 2.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, -1.22f, -2.22f,
+			0.0f, 0.0f, -1.0f, 0.0f
+		};
+		uboVS.projectionMatrix = M3D::Math::Matrix4x4( pMat ); //::Perspective(45.0f / 180.0f * 3.14f, (float)size.width , (float)size.height, 0.1f, 256.0f);
+		float vMat[16] = {
+			1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, -10.0f,
+			0.0f, 0.0f, 0.0f, 1.0f
+		};
+		uboVS.viewMatrix = M3D::Math::Matrix4x4(vMat);//M3D::Math::Matrix4x4::Translation(M3D::Math::Vector3(0.0f, 0.0f, zoom));
+		uboVS.modelMatrix = M3D::Math::Matrix4x4();
 
 		// Map uniform buffer and update it
 		// If you want to keep a handle to the memory and not unmap it afer updating, 
 		// create the memory with the vk::MemoryPropertyFlagBits::eHostCoherent 
 		void *pData = device.mapMemory(uniformDataVS.memory, 0, sizeof(uboVS), vk::MemoryMapFlags());
+		// TODO:
+		size_t uboSize = sizeof(uboVS);
+		printf("sizeof ubo = %d", uboSize);
 		memcpy(pData, &uboVS, sizeof(uboVS));
 		device.unmapMemory(uniformDataVS.memory);
 	}
@@ -603,8 +618,8 @@ public:
 		// Load shaders
 		// Shaders are loaded from the SPIR-V format, which can be generated from glsl
 		std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
-		shaderStages[0] = loadShader(vkx::getAssetPath() + "shaders/triangle/triangle.vert.spv", vk::ShaderStageFlagBits::eVertex);
-		shaderStages[1] = loadShader(vkx::getAssetPath() + "shaders/triangle/triangle.frag.spv", vk::ShaderStageFlagBits::eFragment);
+		shaderStages[0] = loadShader(vkx::getAssetPath() + "shaders/triangle/triangle.vert", vk::ShaderStageFlagBits::eVertex);
+		shaderStages[1] = loadShader(vkx::getAssetPath() + "shaders/triangle/triangle.frag", vk::ShaderStageFlagBits::eFragment);
 
 		// Assign states
 		// Assign pipeline state create information
@@ -653,17 +668,17 @@ public:
 
 		vk::CommandBufferBeginInfo cmdBufInfo;
 		vk::ClearValue clearValues[2];
-		clearValues[0].color = vkx::clearColor(glm::vec4({ 0.025f, 0.025f, 0.025f, 1.0f }));;
+		clearValues[0].color = vkx::clearColor(0.025f, 0.025f, 0.025f, 1.0f);
 
 		vk::RenderPassBeginInfo renderPassBeginInfo;
 		renderPassBeginInfo.renderPass = renderPass;
 		renderPassBeginInfo.renderArea.extent = size;
 		renderPassBeginInfo.clearValueCount = 1;
 		renderPassBeginInfo.pClearValues = clearValues;
-		glm::vec2 offset;
+
 		float minDepth = 0;
 		float maxDepth = 1;
-		vk::Viewport viewport = vk::Viewport{ offset.x, offset.y, (float)size.width, (float)size.height, minDepth, maxDepth };
+		vk::Viewport viewport = vk::Viewport{ 0, 0, (float)size.width, (float)size.height, minDepth, maxDepth };
 		vk::Rect2D scissor = vk::Rect2D{ vk::Offset2D(), size };
 		vk::DeviceSize offsets = 0;
 		for (size_t i = 0; i < swapChain.imageCount; ++i) {

@@ -10,6 +10,7 @@
 #include <iterator>
 #include <iostream>
 #include <fstream>
+#include <cerrno>
 
 namespace vkx {
 
@@ -124,6 +125,10 @@ void setImageLayout(
 
 void exitFatal(std::string message, std::string caption) {
 #ifdef _WIN32
+	// TODO: only work for single byte charactors
+	std::wstring wmsg = std::wstring(message.begin(), message.end());
+	std::wstring wcap = std::wstring(caption.begin(), caption.end());
+
     MessageBox(NULL, message.c_str(), caption.c_str(), MB_OK | MB_ICONERROR);
 #else
     // TODO : Linux
@@ -133,28 +138,45 @@ void exitFatal(std::string message, std::string caption) {
 }
 
 std::vector<uint8_t> readBinaryFile(const std::string& filename) {
-    // open the file:
-    std::ifstream file(filename, std::ios::binary);
-    // Stop eating new lines in binary mode!!!
-    file.unsetf(std::ios::skipws);
+	std::FILE *fp = std::fopen(filename.c_str(), "rb");
+	std::vector<uint8_t> contents;
+	if (fp)
+	{
+		std::fseek(fp, 0, SEEK_END);
+		contents.resize(std::ftell(fp));
+		std::rewind(fp);
+		std::fread(&contents[0], 1, contents.size(), fp);
+		std::fclose(fp);
+	}
+	else
+	{
+		printf("fopen %s error: %s\n", filename.c_str(), strerror(errno));
+	}
+	return (contents);
+ //   // open the file:
+	//std::ifstream file;
+	//file.open(filename, std::ios::binary);
 
-    // get its size:
-    std::streampos fileSize;
+ //   // Stop eating new lines in binary mode!!!
+ //   file.unsetf(std::ios::skipws);
 
-    file.seekg(0, std::ios::end);
-    fileSize = file.tellg();
-    file.seekg(0, std::ios::beg);
+ //   // get its size:
+ //   std::streampos fileSize;
 
-    // reserve capacity
-    std::vector<uint8_t> vec;
-    vec.reserve(fileSize);
+ //   file.seekg(0, std::ios::end);
+ //   fileSize = file.tellg();
+ //   file.seekg(0, std::ios::beg);
 
-    // read the data:
-    vec.insert(vec.begin(),
-        std::istream_iterator<uint8_t>(file),
-        std::istream_iterator<uint8_t>());
+ //   // reserve capacity
+ //   std::vector<uint8_t> vec;
+ //   vec.reserve(fileSize);
 
-    return vec;
+ //   // read the data:
+ //   vec.insert(vec.begin(),
+ //       std::istream_iterator<uint8_t>(file),
+ //       std::istream_iterator<uint8_t>());
+
+ //   return vec;
 }
 
 std::string readTextFile(const std::string& fileName) {

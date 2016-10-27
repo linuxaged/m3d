@@ -63,9 +63,9 @@ namespace vkx {
         }
 
         void setupDebugging(vk::Instance instance, vk::DebugReportFlagsEXT flags) {
-            CreateDebugReportCallback = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
-            DestroyDebugReportCallback = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
-            dbgBreakCallback = (PFN_vkDebugReportMessageEXT)vkGetInstanceProcAddr(instance, "vkDebugReportMessageEXT");
+            CreateDebugReportCallback = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(VkInstance(instance), "vkCreateDebugReportCallbackEXT");
+            DestroyDebugReportCallback = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(VkInstance(instance), "vkDestroyDebugReportCallbackEXT");
+            dbgBreakCallback = (PFN_vkDebugReportMessageEXT)vkGetInstanceProcAddr(VkInstance(instance), "vkDebugReportMessageEXT");
 
             VkDebugReportCallbackCreateInfoEXT dbgCreateInfo = {};
             dbgCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT;
@@ -73,7 +73,7 @@ namespace vkx {
             dbgCreateInfo.flags = flags.operator VkSubpassDescriptionFlags();
 
             VkResult err = CreateDebugReportCallback(
-                instance,
+				VkInstance(instance),
                 &dbgCreateInfo,
                 nullptr,
                 &msgCallback);
@@ -81,7 +81,7 @@ namespace vkx {
         }
 
         void freeDebugCallback(vk::Instance instance) {
-            DestroyDebugReportCallback(instance, msgCallback, nullptr);
+            DestroyDebugReportCallback(VkInstance(instance), msgCallback, nullptr);
         }
 
         namespace marker {
