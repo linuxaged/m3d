@@ -116,7 +116,7 @@ namespace vkx {
             }
 
             if (enableDebugMarkers) {
-                debug::marker::setup(device);
+                debug::marker::setup(VkDevice(device));
             }
             pipelineCache = device.createPipelineCache(vk::PipelineCacheCreateInfo());
             // Find a queue that supports graphics operations
@@ -300,7 +300,7 @@ namespace vkx {
         }
 
 #ifdef WIN32
-        static __declspec(thread) VkCommandPool s_cmdPool;
+        static __declspec(thread) vk::CommandPool s_cmdPool;
 #else
         static thread_local vk::CommandPool s_cmdPool;
 #endif
@@ -418,15 +418,15 @@ namespace vkx {
             return result;
         }
 
-        CreateImageResult stageToDeviceImage(const vk::ImageCreateInfo& imageCreateInfo, const vk::MemoryPropertyFlags& memoryPropertyFlags, const gli::texture2D& tex2D) const {
-            std::vector<MipData> mips;
-            for (size_t i = 0; i < imageCreateInfo.mipLevels; ++i) {
-                const auto& mip = tex2D[i];
-                const auto dims = mip.dimensions();
-                mips.push_back({ vk::Extent3D{ (uint32_t)dims.x, (uint32_t)dims.y, 1}, (uint32_t)mip.size() });
-            }
-            return stageToDeviceImage(imageCreateInfo, memoryPropertyFlags, (vk::DeviceSize)tex2D.size(), tex2D.data(), mips);
-        }
+        //CreateImageResult stageToDeviceImage(const vk::ImageCreateInfo& imageCreateInfo, const vk::MemoryPropertyFlags& memoryPropertyFlags, const gli::texture2D& tex2D) const {
+        //    std::vector<MipData> mips;
+        //    for (size_t i = 0; i < imageCreateInfo.mipLevels; ++i) {
+        //        const auto& mip = tex2D[i];
+        //        const auto dims = mip.dimensions();
+        //        mips.push_back({ vk::Extent3D{ (uint32_t)dims.x, (uint32_t)dims.y, 1}, (uint32_t)mip.size() });
+        //    }
+        //    return stageToDeviceImage(imageCreateInfo, memoryPropertyFlags, (vk::DeviceSize)tex2D.size(), tex2D.data(), mips);
+        //}
 
         CreateBufferResult createBuffer(const vk::BufferUsageFlags& usageFlags, const vk::MemoryPropertyFlags& memoryPropertyFlags, vk::DeviceSize size, const void * data = nullptr) const {
             CreateBufferResult result;
@@ -623,29 +623,29 @@ namespace vkx {
     };
 
     // Template specialization for texture objects
-    template <>
-    inline CreateBufferResult Context::createBuffer(const vk::BufferUsageFlags& usage, const gli::textureCube& texture) const {
-        return createBuffer(usage, (vk::DeviceSize)texture.size(), texture.data());
-    }
+    //template <>
+    //inline CreateBufferResult Context::createBuffer(const vk::BufferUsageFlags& usage, const gli::textureCube& texture) const {
+    //    return createBuffer(usage, (vk::DeviceSize)texture.size(), texture.data());
+    //}
 
-    template <>
-    inline CreateBufferResult Context::createBuffer(const vk::BufferUsageFlags& usage, const gli::texture2D& texture) const {
-        return createBuffer(usage, (vk::DeviceSize)texture.size(), texture.data());
-    }
+    //template <>
+    //inline CreateBufferResult Context::createBuffer(const vk::BufferUsageFlags& usage, const gli::texture2D& texture) const {
+    //    return createBuffer(usage, (vk::DeviceSize)texture.size(), texture.data());
+    //}
 
-    template <>
-    inline CreateBufferResult Context::createBuffer(const vk::BufferUsageFlags& usage, const gli::texture& texture) const {
-        return createBuffer(usage, (vk::DeviceSize)texture.size(), texture.data());
-    }
+    //template <>
+    //inline CreateBufferResult Context::createBuffer(const vk::BufferUsageFlags& usage, const gli::texture& texture) const {
+    //    return createBuffer(usage, (vk::DeviceSize)texture.size(), texture.data());
+    //}
 
-    template <>
-    inline CreateBufferResult Context::createBuffer(const vk::BufferUsageFlags& usage, const vk::MemoryPropertyFlags& memoryPropertyFlags, const gli::texture& texture) const {
-        return createBuffer(usage, memoryPropertyFlags, (vk::DeviceSize)texture.size(), texture.data());
-    }
+    //template <>
+    //inline CreateBufferResult Context::createBuffer(const vk::BufferUsageFlags& usage, const vk::MemoryPropertyFlags& memoryPropertyFlags, const gli::texture& texture) const {
+    //    return createBuffer(usage, memoryPropertyFlags, (vk::DeviceSize)texture.size(), texture.data());
+    //}
 
-    template <>
-    inline void Context::copyToMemory(const vk::DeviceMemory &memory, const gli::texture& texture, size_t offset) const {
-        copyToMemory(memory, texture.data(), vk::DeviceSize(texture.size()), offset);
-    }
+    //template <>
+    //inline void Context::copyToMemory(const vk::DeviceMemory &memory, const gli::texture& texture, size_t offset) const {
+    //    copyToMemory(memory, texture.data(), vk::DeviceSize(texture.size()), offset);
+    //}
 
 }

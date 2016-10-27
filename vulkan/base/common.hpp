@@ -27,7 +27,7 @@
 #include <streambuf>
 #include <thread>
 #include <vector>
-
+#include <queue>
 
 #ifdef GLEW_STATIC
 #include <GL/glew.h>

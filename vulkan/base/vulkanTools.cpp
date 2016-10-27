@@ -124,7 +124,11 @@ void setImageLayout(
 
 void exitFatal(std::string message, std::string caption) {
 #ifdef _WIN32
-    MessageBox(NULL, message.c_str(), caption.c_str(), MB_OK | MB_ICONERROR);
+	// TODO: only work for single byte charactors
+	std::wstring wmsg = std::wstring(message.begin(), message.end());
+	std::wstring wcap = std::wstring(caption.begin(), caption.end());
+
+    MessageBox(NULL, wmsg.c_str(), wcap.c_str(), MB_OK | MB_ICONERROR);
 #else
     // TODO : Linux
 #endif
