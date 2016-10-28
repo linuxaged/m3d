@@ -16,6 +16,11 @@
 
 #define VERTEX_BUFFER_BIND_ID 0
 
+//#define USE_GLM
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include "glm/ext.hpp"
+
 class TriangleExample : public vkx::Context {
 public:
 	GLFWwindow* window{ nullptr };
@@ -47,9 +52,15 @@ public:
 	}  uniformDataVS;
 
 	struct {
+	#ifdef USE_GLM
+		glm::mat4 projectionMatrix;
+        glm::mat4 modelMatrix;
+        glm::mat4 viewMatrix;
+	#else
 		M3D::Math::Matrix4x4 projectionMatrix;
 		M3D::Math::Matrix4x4 modelMatrix;
 		M3D::Math::Matrix4x4 viewMatrix;
+		#endif
 	} uboVS;
 
 	struct {
@@ -416,6 +427,14 @@ public:
 		uniformDataVS.descriptor.range = sizeof(uboVS);
 
 		// Update matrices
+#ifdef USE_GLM
+		uboVS.projectionMatrix = glm::perspective(glm::radians(60.0f), (float)size.width / (float)size.height, 0.1f, 256.0f);
+		std::cout << "pMat: " << glm::to_string(uboVS.projectionMatrix) << std::endl;
+        uboVS.viewMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, zoom));
+		std::cout << "vMat: " << glm::to_string(uboVS.viewMatrix) << std::endl;
+        uboVS.modelMatrix = glm::mat4();
+		std::cout << "mMat: " << glm::to_string(uboVS.modelMatrix) << std::endl;
+#else
 		float pMat[16] = {
 			2.0f, 0.0f, 0.0f, 0.0f,
 			0.0f, 2.0f, 0.0f, 0.0f,
@@ -431,6 +450,8 @@ public:
 		};
 		uboVS.viewMatrix = M3D::Math::Matrix4x4(vMat);//M3D::Math::Matrix4x4::Translation(M3D::Math::Vector3(0.0f, 0.0f, zoom));
 		uboVS.modelMatrix = M3D::Math::Matrix4x4();
+#endif
+		
 
 		// Map uniform buffer and update it
 		// If you want to keep a handle to the memory and not unmap it afer updating, 
@@ -675,10 +696,10 @@ public:
 		renderPassBeginInfo.renderArea.extent = size;
 		renderPassBeginInfo.clearValueCount = 1;
 		renderPassBeginInfo.pClearValues = clearValues;
-
+glm::vec2 offset;
 		float minDepth = 0;
 		float maxDepth = 1;
-		vk::Viewport viewport = vk::Viewport{ 0, 0, (float)size.width, (float)size.height, minDepth, maxDepth };
+		vk::Viewport viewport = vk::Viewport{ offset.x, offset.y, (float)size.width, (float)size.height, minDepth, maxDepth };
 		vk::Rect2D scissor = vk::Rect2D{ vk::Offset2D(), size };
 		vk::DeviceSize offsets = 0;
 		for (size_t i = 0; i < swapChain.imageCount; ++i) {
