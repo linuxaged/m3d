@@ -24,7 +24,7 @@
 class TriangleExample : public vkx::Context {
 public:
 	GLFWwindow* window{ nullptr };
-	float zoom{ -2.5f };
+	float zoom{ -10.0f };
 	std::string title{ "Vulkan Example - Basic indexed triangle" };
 	vk::Extent2D size{ 1280, 720 };
 	vkx::SwapChain swapChain;
@@ -441,14 +441,19 @@ public:
 			0.0f, 0.0f, -1.22f, -2.22f,
 			0.0f, 0.0f, -1.0f, 0.0f
 		};
-		uboVS.projectionMatrix = M3D::Math::Matrix4x4( pMat ); //::Perspective(45.0f / 180.0f * 3.14f, (float)size.width , (float)size.height, 0.1f, 256.0f);
+		uboVS.projectionMatrix = M3D::Math::Matrix4x4::Perspective(120.0f, 1.0f, 0.1f, 256.0f);
+		char buf[512];
+		uboVS.projectionMatrix.ToString(buf, 512);
+		printf("pmat = %s\n", buf);
 		float vMat[16] = {
 			1.0f, 0.0f, 0.0f, 0.0f,
 			0.0f, 1.0f, 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, -10.0f,
 			0.0f, 0.0f, 0.0f, 1.0f
 		};
-		uboVS.viewMatrix = M3D::Math::Matrix4x4(vMat);//M3D::Math::Matrix4x4::Translation(M3D::Math::Vector3(0.0f, 0.0f, zoom));
+		uboVS.viewMatrix = M3D::Math::Matrix4x4::Translation(M3D::Math::Vector3(0.0f, 0.0f, zoom));
+		uboVS.viewMatrix.ToString(buf, 512);
+		printf("vmat = %s\n", buf);
 		uboVS.modelMatrix = M3D::Math::Matrix4x4();
 #endif
 		

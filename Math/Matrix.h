@@ -353,6 +353,8 @@ namespace M3D {
 
 			static inline Matrix4x4 LookAt(const Vector3& eye, const Vector3& at, const Vector3& up);
 			static inline Matrix4x4 Perspective(const float halfFOV, const float width, const float height, const float fNear, const float fFar);
+			static inline Matrix4x4 Perspective(float fovY, float aspectRatio, float front, float back);
+			static inline Matrix4x4 Perspective(float l, float r, float b, float t, float n, float f);
 			static inline Matrix4x4 Translation(const Vector3& v);
 			static inline Matrix4x4 RotationX(float angleInRad);
 			static inline Matrix4x4 RotationY(float angleInRad);
@@ -470,29 +472,55 @@ namespace M3D {
 			return result;
 		}
 		
-		Matrix4x4 Matrix4x4::Perspective(const float halfFOV, const float width, const float height, const const float fNear, const float fFar)
+		///////////////////////////////////////////////////////////////////////////////
+		// set a perspective frustum with 6 params similar to glFrustum()
+		// (left, right, bottom, top, near, far)
+		// Note: this is for row-major notation. OpenGL needs transpose it
+		///////////////////////////////////////////////////////////////////////////////
+		Matrix4x4 Matrix4x4::Perspective(float l, float r, float b, float t, float n, float f)
 		{
-			float n2 = 2.0f * fNear;
-			float rcpnmf = 1.0f / (fNear - fFar);
-
 			Matrix4x4 result;
-			result.m[0][0] = 1.0f / tanf(halfFOV);
-			result.m[0][1] = 0;
-			result.m[0][2] = 0;
-			result.m[0][3] = 0;
-			result.m[1][0] = 0;
-			result.m[1][1] = width / tanf(halfFOV) / height;
-			result.m[1][2] = 0;
-			result.m[1][3] = 0;
-			result.m[2][0] = 0;
-			result.m[2][1] = 0;
-			result.m[2][2] = fFar / (fFar - fNear);
-			result.m[2][3] = 1.0;
-			result.m[3][0] = 0;
-			result.m[3][1] = 0;
-			result.m[3][2] = -fNear * fFar / (fFar - fNear);
+
+			result.m[0][0] = 2 * n / (r - l);
+			result.m[0][2] = (r + l) / (r - l);
+			result.m[1][1] = 2 * n / (t - b);
+			result.m[1][2] = (t + b) / (t - b);
+			result.m[2][2] = -(f + n) / (f - n);
+			result.m[2][3] = -(2 * f * n) / (f - n);
+			result.m[3][2] = -1;
 			result.m[3][3] = 0;
-			
+
+			return result;
+		}
+
+
+
+		///////////////////////////////////////////////////////////////////////////////
+		// set a symmetric perspective frustum with 4 params similar to gluPerspective
+		// (vertical field of view, aspect ratio, near, far)
+		///////////////////////////////////////////////////////////////////////////////
+		Matrix4x4 Matrix4x4::Perspective(float fovY, float aspectRatio, float front, float back)
+		{
+			float tangent = tanf(fovY / 2 * 3.14f / 180.0f);   // tangent of half fovY
+			float height = front * tangent;           // half height of near plane
+			float width = height * aspectRatio;       // half width of near plane
+
+													  // params: left, right, bottom, top, near, far
+			return Perspective(-width, width, -height, height, front, back);
+		}
+
+		Matrix4x4 Matrix4x4::Perspective(const float fov, const float width, const float height, const const float zNear, const float zFar)
+		{
+			Matrix4x4 result;
+			// set the basic projection matrix
+			float scale = 1 / tan(fov * 0.5f * M_PI / 180);
+			result.m[0][0] = scale; // scale the x coordinates of the projected point 
+			result.m[1][1] = scale; // scale the y coordinates of the projected point 
+			result.m[2][2] = -zFar / (zFar - zNear); // used to remap z to [0,1] 
+			result.m[3][2] = -zFar * zNear / (zFar - zNear); // used to remap z [0,1] 
+			result.m[2][3] = -1; // set w = -z 
+			result.m[3][3] = 0;
+
 			return result;
 		}
 		
