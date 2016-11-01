@@ -68,9 +68,15 @@ add_subdirectory(Math)
 link_libraries(Math)
 include_directories(Math)
 
+# Vulkan Utils
 add_subdirectory(VkUtils)
 link_libraries(VkUtils)
 include_directories(VkUtils)
+
+# GUI
+add_subdirectory(Gui)
+link_libraries(Gui)
+include_directories(Gui)
 
 foreach(EXTERNAL ${EXTERNALS})
     add_dependencies(VkUtils ${EXTERNAL})
