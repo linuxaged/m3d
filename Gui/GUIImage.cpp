@@ -1,4 +1,4 @@
-#include "../header/GUIImage.h"
+#include "GUIImage.h"
 
 #include "../../Utils/header/Logger.h"
 

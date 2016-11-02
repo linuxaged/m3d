@@ -2,7 +2,7 @@
 #define GUI_SYSTEM_BUTTON_H
 
 #include "../../Macros.h"
-#include "../../Utils/header/MyString.h"
+#include <string>
 #include "../../Utils/header/FastDelegate.h"
 
 #include "./GUIStructures.h"

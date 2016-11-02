@@ -12,7 +12,7 @@ namespace GUISystem
 class IControls;
 
 #include "../../Macros.h"
-#include "../../Utils/header/MyString.h"
+#include <string>
 
 #include "./GUIStructures.h"
 

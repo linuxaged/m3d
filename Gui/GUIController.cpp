@@ -1,15 +1,14 @@
-#include "../header/GUIController.h"
+#include "GUIController.h"
 
-#include "../header/GUIElement.h"
-#include "../header/GUIButton.h"
-#include "../header/GUICheckBox.h"
-#include "../header/GUIScreen.h"
-#include "../header/GUIStructures.h"
+#include "GUIElement.h"
+#include "GUIButton.h"
+#include "GUICheckBox.h"
+#include "GUIScreen.h"
+#include "GUIStructures.h"
 
-#include "../../MyMath/header/MyMathUtils.h"
-#include "../../MyMath/header/Vector3.h"
+#include "Matrix.h"
 
-#include "../../IControls.h"
+#include "IControls.h"
 
 #include <climits>
 

@@ -332,6 +332,15 @@ namespace M3D {
 			z /= length;
 		}
 		
+		typedef struct Vector4
+		{
+			union { float x; float r; };
+			union { float y; float g; };
+			union { float z; float b; };
+			union { float w; float a; };
+		} Vector4;
+		typedef Vector4 Color;
+
 		//-------------------------------------------------------------
 		// Matrix4x4
 		//-------------------------------------------------------------

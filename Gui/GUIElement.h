@@ -19,7 +19,7 @@ namespace GUISystem
 
 #include "../../Macros.h"
 #include <string>
-#include "Math/Matrix.h"
+#include "Matrix.h"
 
 #include "GUIStructures.h"
 
@@ -50,7 +50,7 @@ namespace GUISystem
 
 			bool CanBeBaked() const;
 			virtual void SetCanBaBaked(bool val);
-			const MyMath::Vector4 & GetColor() const;
+			const M3D::Math::Vector4 & GetColor() const;
 
 			void SetVisible(bool val);
 
@@ -81,7 +81,7 @@ namespace GUISystem
 			ElementProportions proportions;
 
 
-			MyMath::Vector4 color;
+			M3D::Math::Vector4 color;
 
 			IUserData * userData;
 

@@ -1,4 +1,4 @@
-#include "../header/GUICheckBox.h"
+#include "GUICheckBox.h"
 
 
 using namespace GUISystem;

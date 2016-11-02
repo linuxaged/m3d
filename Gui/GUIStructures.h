@@ -12,7 +12,7 @@ namespace MyGraphics
 	class G_GraphicsObject;
 }
 
-#include "Math/Matrix.h"
+#include "Matrix.h"
 
 #include "../../Utils/header/FastDelegate.h"
 

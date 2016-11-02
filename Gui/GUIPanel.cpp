@@ -1,5 +1,4 @@
-#include "../header/GUIPanel.h"
-
+#include "GUIPanel.h"
 
 using namespace GUISystem;
 

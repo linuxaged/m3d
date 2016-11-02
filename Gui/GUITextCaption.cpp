@@ -1,7 +1,7 @@
-#include "../header/GUITextCaption.h"
-#include "../header/GUIFontRenderer.h"
+#include "GUITextCaption.h"
+#include "GUIFontRenderer.h"
 #include "../../Utils/header/Logger.h"
-#include "../../MyMath/header/Vector4.h"
+#include "Matrix.h"
 #include "../../OpenGL/G_Device.h"
 
 using namespace GUISystem;

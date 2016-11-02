@@ -3,10 +3,10 @@
 
 
 #include "../../Macros.h"
-#include "../../Utils/header/MyString.h"
+#include <string>
 
-#include "./GUIStructures.h"
-#include "./GUIElement.h"
+#include "GUIStructures.h"
+#include "GUIElement.h"
 
 namespace GUISystem
 {

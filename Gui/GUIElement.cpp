@@ -1,6 +1,5 @@
-#include "../header/GUIElement.h"
-
-#include "../header/GUITextCaption.h"
+#include "GUIElement.h"
+#include "GUITextCaption.h"
 
 using namespace GUISystem;
 

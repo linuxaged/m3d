@@ -1,12 +1,10 @@
 #ifndef GUI_SYSTEM_CHECK_BOX_H
 #define GUI_SYSTEM_CHECK_BOX_H
 
-
 #include "../../Macros.h"
-#include "../../Utils/header/MyString.h"
-
-#include "./GUIStructures.h"
-#include "./GUIElement.h"
+#include <string>
+#include "GUIStructures.h"
+#include "GUIElement.h"
 
 namespace GUISystem
 {
