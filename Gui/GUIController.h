@@ -11,7 +11,6 @@ namespace GUISystem
 
 class IControls;
 
-#include "../../Macros.h"
 #include <string>
 
 #include "./GUIStructures.h"

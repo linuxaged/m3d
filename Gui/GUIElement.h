@@ -17,7 +17,6 @@ namespace GUISystem
 
 #include <vector>
 
-#include "../../Macros.h"
 #include <string>
 #include "Matrix.h"
 

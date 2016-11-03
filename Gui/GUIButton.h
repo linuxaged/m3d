@@ -1,7 +1,6 @@
 #ifndef GUI_SYSTEM_BUTTON_H
 #define GUI_SYSTEM_BUTTON_H
 
-#include "../../Macros.h"
 #include <string>
 #include "../../Utils/header/FastDelegate.h"
 

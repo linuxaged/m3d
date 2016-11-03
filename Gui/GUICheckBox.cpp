@@ -1,6 +1,5 @@
 #include "GUICheckBox.h"
 
-
 using namespace GUISystem;
 
 GUICheckBox::GUICheckBox(const std::string & name) : GUIElement(name)

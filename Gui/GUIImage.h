@@ -1,8 +1,6 @@
 #ifndef GUI_SYSTEM_IMAGE_H
 #define GUI_SYSTEM_IMAGE_H
 
-
-#include "../../Macros.h"
 #include <string>
 
 #include "GUIStructures.h"

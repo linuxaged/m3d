@@ -7,7 +7,6 @@ namespace GUISystem
 class GUIFontRenderer;
 }
 
-#include "../../Macros.h"
 #include <string>
 
 

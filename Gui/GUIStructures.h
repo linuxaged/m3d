@@ -1,7 +1,6 @@
 #ifndef GUI_SYSTEM_STRUCTURES_H
 #define GUI_SYSTEM_STRUCTURES_H
 
-
 namespace GUISystem
 {
 	class GUIElement;

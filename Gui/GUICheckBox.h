@@ -1,7 +1,6 @@
 #ifndef GUI_SYSTEM_CHECK_BOX_H
 #define GUI_SYSTEM_CHECK_BOX_H
 
-#include "../../Macros.h"
 #include <string>
 #include "GUIStructures.h"
 #include "GUIElement.h"
