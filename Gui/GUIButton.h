@@ -2,7 +2,7 @@
 #define GUI_SYSTEM_BUTTON_H
 
 #include <string>
-#include "../../Utils/header/FastDelegate.h"
+#include "GUIEvents.h"
 
 #include "./GUIStructures.h"
 #include "./GUIElement.h"

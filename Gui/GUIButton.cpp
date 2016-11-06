@@ -1,6 +1,4 @@
 #include "GUIButton.h"
-#include "../../Utils/header/Logger.h"
-
 using namespace GUISystem;
 
 GUIButton::GUIButton(const std::string & name) : GUIElement(name)

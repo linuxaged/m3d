@@ -1,6 +1,5 @@
 #include "GUIImage.h"
 
-#include "../../Utils/header/Logger.h"
 
 using namespace GUISystem;
 
@@ -31,7 +30,7 @@ void GUIImage::SetCanBaBaked(bool val)
 {
 	if (val)
 	{
-		MyUtils::Logger::LogError("GUI Image can not be baked. Settings will be ignored.");
+		printf("GUI Image can not be baked. Settings will be ignored.\n");
 	}
 }
 

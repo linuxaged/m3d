@@ -8,7 +8,7 @@ using namespace GUISystem;
 
 GUITextCaption::GUITextCaption(const std::string & name) : GUIElement(name)
 {
-	this->color = MyMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	this->color = M3D::Math::Vector4{ 1.0f, 1.0f, 1.0f, 1.0f };
 	this->canBeBaked = false;
 	this->fontSize = 10;
 	this->fontAtlasName = "";
@@ -29,7 +29,7 @@ void GUITextCaption::SetCanBaBaked(bool val)
 {
 	if (val)
 	{
-		MyUtils::Logger::LogError("GUI Text Caption can not be baked. Settings will be ignored.");
+		printf("GUI Text Caption can not be baked. Settings will be ignored.\n");
 	}
 }
 
@@ -188,8 +188,8 @@ void GUITextCaption::Update(const ElementProportions & parentProportions, GUIFon
 		y -= (h * 0.5f);
 	}
 
-	this->proportions.topLeft = MyMath::Vector2(x, y);
-	this->proportions.botRight = MyMath::Vector2(x + w, y + h);
+	this->proportions.topLeft = M3D::Math::Vector2(x, y);
+	this->proportions.botRight = M3D::Math::Vector2(x + w, y + h);
 	this->proportions.width = w;
 	this->proportions.height = h;
 

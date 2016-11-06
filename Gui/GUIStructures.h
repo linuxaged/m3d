@@ -13,7 +13,7 @@ namespace MyGraphics
 
 #include "Matrix.h"
 
-#include "../../Utils/header/FastDelegate.h"
+#include "Delegate.h"
 
 namespace GUISystem
 {
@@ -80,8 +80,8 @@ namespace GUISystem
 	//Real size of elements in current resolution and screen size
 	typedef struct ElementProportions
 	{
-		MyMath::Vector2 topLeft;
-		MyMath::Vector2 botRight;
+		M3D::Math::Vector2 topLeft;
+		M3D::Math::Vector2 botRight;
 
 		float width;
 		float height;
@@ -96,7 +96,7 @@ namespace GUISystem
 	{
 		static const int BAKED_SIZE = 64;
 
-		MyStringAnsi textureName;
+		std::string textureName;
 
 		MyGraphics::G_GraphicsObject * bakedGUI;
 		int bakedStates[BakedGUIScreen::BAKED_SIZE];
@@ -153,21 +153,21 @@ namespace GUISystem
 
 	//Trigger action for click - control down / control up
 	//on element
-	typedef fastdelegate::FastDelegate1<GUIElement *> OnClickDelegate;
+	typedef delegate<void(GUIElement *)> OnClickDelegate;
 
 	//Trigger state change from control
-	typedef fastdelegate::FastDelegate1<GUIElement *> OnOverDelegate;
-	typedef fastdelegate::FastDelegate1<GUIElement *> OnDownDelegate;
-	typedef fastdelegate::FastDelegate1<GUIElement *> OnUpDelegate;
-	typedef fastdelegate::FastDelegate1<GUIElement *> OnStateChangeDelegate;
+	typedef delegate<void(GUIElement *)> OnOverDelegate;
+	typedef delegate<void(GUIElement *)> OnDownDelegate;
+	typedef delegate<void(GUIElement *)> OnUpDelegate;
+	typedef delegate<void(GUIElement *)> OnStateChangeDelegate;
 
 	//Trigger repeated actions
 	//While state is not changed, call trigger
-	typedef fastdelegate::FastDelegate1<GUIElement *> WhileDownDelegate;
-	typedef fastdelegate::FastDelegate1<GUIElement *> WhileHoverDelegate;
+	typedef delegate<void(GUIElement *)> WhileDownDelegate;
+	typedef delegate<void(GUIElement *)> WhileHoverDelegate;
 
 	//Universal triggers for movements
-	typedef fastdelegate::FastDelegate3<GUIElement *, float, float> OnMoveDelegate;
+	typedef delegate<void(GUIElement *, float, float)> OnMoveDelegate;
 
 
 	struct IUserData

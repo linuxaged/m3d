@@ -19,6 +19,7 @@ namespace GUISystem
 
 #include <string>
 #include "Matrix.h"
+#include "GUIEvents.h"
 
 #include "GUIStructures.h"
 

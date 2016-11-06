@@ -21,7 +21,7 @@ GUIElement::GUIElement(const std::string & name)
 	this->max.pixelW = 0;
 	this->max.pixelH = 0;
 
-	this->color = MyMath::Vector4(0.0f, 0.0f, 0.0f, 0.0f);
+	this->color = M3D::Math::Vector4{ 0.0f, 0.0f, 0.0f, 0.0f };
 
 	this->parent = NULL;
 
@@ -125,7 +125,7 @@ const ElementProportions & GUIElement::GetProportions() const
 	return this->proportions;
 }
 
-const MyMath::Vector4 & GUIElement::GetColor() const
+const M3D::Math::Vector4 & GUIElement::GetColor() const
 {
 	return this->color;
 }
@@ -164,10 +164,10 @@ Color is blended with texture according to set alpha color
 -------------------------------------------------------------*/
 void GUIElement::SetColor(int r, int g, int b, int a)
 {
-	this->color.X = r / 255.0f;
-	this->color.Y = g / 255.0f;
-	this->color.Z = b / 255.0f;
-	this->color.W = a / 255.0f;
+	this->color.x = r / 255.0f;
+	this->color.y = g / 255.0f;
+	this->color.z = b / 255.0f;
+	this->color.w = a / 255.0f;
 
 	this->needRebaked = true;
 }
