@@ -262,8 +262,8 @@ void GUIElement::SetMouseMove(int x, int y)
 {
 	if (this->onMove.empty() == false)
 	{
-		float relX = x - this->proportions.topLeft.X;
-		float relY = y - this->proportions.topLeft.Y;
+		float relX = x - this->proportions.topLeft.x;
+		float relY = y - this->proportions.topLeft.y;
 
 		//trigger action for "mouse move"
 		this->onMove(this, relX, relY);
@@ -285,11 +285,11 @@ void GUIElement::CalculateProportions(const ElementProportions & parentProportio
 
 	if (this->needRebaked)
 	{
-		float x = parentProportions.topLeft.X;
+		float x = parentProportions.topLeft.x;
 		x += this->pos.x * parentProportions.width;
 		x += this->pos.offsetX;
 
-		float y = parentProportions.topLeft.Y;
+		float y = parentProportions.topLeft.y;
 		y += this->pos.y * parentProportions.height;
 		y += this->pos.offsetY;
 
@@ -324,20 +324,20 @@ void GUIElement::CalculateProportions(const ElementProportions & parentProportio
 		else if (this->pos.origin == TR)
 		{
 			//swap x coordinate
-			x = parentProportions.botRight.X - (x - parentProportions.topLeft.X); //put x back to top left
+			x = parentProportions.botRight.x - (x - parentProportions.topLeft.x); //put x back to top left
 			x -= w;
 		}
 		else if (this->pos.origin == BL)
 		{
 			//swap y coordinate
-			y = parentProportions.botRight.Y - (y - parentProportions.topLeft.Y); //put y back to top left
+			y = parentProportions.botRight.y - (y - parentProportions.topLeft.y); //put y back to top left
 			y -= h;
 		}
 		else if (this->pos.origin == BR)
 		{
 			//swap x & y coordinate
-			x = parentProportions.botRight.X - (x - parentProportions.topLeft.X); //put x back to top left
-			y = parentProportions.botRight.Y - (y - parentProportions.topLeft.Y); //put y back to top left
+			x = parentProportions.botRight.x - (x - parentProportions.topLeft.x); //put x back to top left
+			y = parentProportions.botRight.y - (y - parentProportions.topLeft.y); //put y back to top left
 
 			x -= w;
 			y -= h;
@@ -345,16 +345,16 @@ void GUIElement::CalculateProportions(const ElementProportions & parentProportio
 		else if (this->pos.origin == C)
 		{
 			//center of parent element
-			x = x + (parentProportions.botRight.X - parentProportions.topLeft.X) * 0.5f; //put x back to top left
-			y = y + (parentProportions.botRight.Y - parentProportions.topLeft.Y) * 0.5f; //put y back to top left
+			x = x + (parentProportions.botRight.x - parentProportions.topLeft.x) * 0.5f; //put x back to top left
+			y = y + (parentProportions.botRight.y - parentProportions.topLeft.y) * 0.5f; //put y back to top left
 
 			x -= (w * 0.5f);
 			y -= (h * 0.5f);
 		}
 
 		//this will overflow from parent element
-		this->proportions.topLeft = MyMath::Vector2(x, y);
-		this->proportions.botRight = MyMath::Vector2(x + w, y + h);
+		this->proportions.topLeft = M3D::Math::Vector2(x, y);
+		this->proportions.botRight = M3D::Math::Vector2(x + w, y + h);
 		this->proportions.width = w;
 		this->proportions.height = h;
 		this->proportions.depth = parentProportions.depth + 0.01f;
