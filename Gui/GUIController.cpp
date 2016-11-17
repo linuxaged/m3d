@@ -107,7 +107,7 @@ GUIElement * GUIController::GetMouseOverElement() const
 
 	std::vector<GUIElement *> & els = this->screen->GetElements();
 
-	for (uint32 i = 0; i < els.size(); i++)
+	for (uint32_t i = 0; i < els.size(); i++)
 	{
 		if (els[i]->GetTextCaption() != NULL)
 		{

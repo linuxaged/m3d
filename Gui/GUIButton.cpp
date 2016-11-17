@@ -112,7 +112,7 @@ void GUIButton::SetOnStateChangeCallback(OnStateChangeDelegate onStateChange)
 void GUIButton::SetState(ButtonElementState newState)
 {
 
-	for (uint32 i = 0; i < this->joined.size(); i++)
+	for (uint32_t i = 0; i < this->joined.size(); i++)
 	{
 		this->joined[i]->SetStateJoined(newState);
 	}
@@ -131,7 +131,8 @@ void GUIButton::SetStateJoined(ButtonElementState newState)
 		if ((this->hasBeenDown) && (this->actState == BTN_STATE_CLICKED))
 		{
 			//printf("whileDown button (x) ");
-			if (this->delegates.whileDown.empty() == false)
+			// TODO:
+			//if (this->delegates.whileDown.empty() == false)
 			{
 				this->delegates.whileDown(this);
 			}
@@ -140,7 +141,8 @@ void GUIButton::SetStateJoined(ButtonElementState newState)
 		if (this->actState == BTN_STATE_OVER)
 		{
 			//printf("whileHover button (x) ");
-			if (this->delegates.whileHover.empty() == false)
+			// TODO:
+			//if (this->delegates.whileHover.empty() == false)
 			{
 				this->delegates.whileHover(this);
 			}
@@ -158,8 +160,8 @@ void GUIButton::SetStateJoined(ButtonElementState newState)
         this->actState = BTN_STATE_NON_ACTIVE;
         return;
     }
-
-	if (this->delegates.onStateChange.empty() == false)
+	// TODO:
+	//if (this->delegates.onStateChange.empty() == false)
 	{
 		//trigger action for state change
 		this->delegates.onStateChange(this);
@@ -170,11 +172,11 @@ void GUIButton::SetStateJoined(ButtonElementState newState)
 	if ((this->actState == BTN_STATE_NON_ACTIVE) && (newState == BTN_STATE_OVER))
 	{
 		//printf("onHover button \n");
-		if (this->delegates.onOver.empty() == false)
+		//if (this->delegates.onOver.empty() == false)
 		{
 			this->delegates.onOver(this);
 		}
-        if (this->delegates.whileHover.empty() == false)
+        //if (this->delegates.whileHover.empty() == false)
         {
             this->delegates.whileHover(this);
         }
@@ -186,7 +188,7 @@ void GUIButton::SetStateJoined(ButtonElementState newState)
         if (this->hasBeenDown)
         {
            // printf("onClick button \n");
-            if (this->delegates.onClick.empty() == false)
+            //if (this->delegates.onClick.empty() == false)
             {
                 this->delegates.onClick(this);
             }
@@ -194,7 +196,7 @@ void GUIButton::SetStateJoined(ButtonElementState newState)
         else
         {
            // printf("onUp button \n");
-            if (this->delegates.onUp.empty() == false)
+            //if (this->delegates.onUp.empty() == false)
             {
                 this->delegates.onUp(this);
             }
@@ -214,11 +216,11 @@ void GUIButton::SetStateJoined(ButtonElementState newState)
 	{
 		this->hasBeenDown = true;
 		//printf("onDown button \n");
-		if (this->delegates.onDown.empty() == false)
+		//if (this->delegates.onDown.empty() == false)
 		{
 			this->delegates.onDown(this);
 		}
-        if (this->delegates.whileDown.empty() == false)
+        //if (this->delegates.whileDown.empty() == false)
         {
             this->delegates.whileDown(this);
         }

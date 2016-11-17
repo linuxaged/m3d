@@ -522,7 +522,7 @@ namespace M3D {
 		{
 			Matrix4x4 result;
 			// set the basic projection matrix
-			float scale = 1 / tan(fov * 0.5f * M_PI / 180);
+			float scale = 1 / tanf(fov * 0.5f * M_PI / 180);
 			result.m[0][0] = scale; // scale the x coordinates of the projected point 
 			result.m[1][1] = scale; // scale the y coordinates of the projected point 
 			result.m[2][2] = -zFar / (zFar - zNear); // used to remap z to [0,1] 

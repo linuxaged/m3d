@@ -1,8 +1,8 @@
 #include "GUITextCaption.h"
-#include "GUIFontRenderer.h"
-#include "../../Utils/header/Logger.h"
+// TODO:
+//#include "GUIFontRenderer.h"
 #include "Matrix.h"
-#include "../../OpenGL/G_Device.h"
+//#include "../../OpenGL/G_Device.h"
 
 using namespace GUISystem;
 
@@ -137,18 +137,18 @@ void GUITextCaption::Update(const ElementProportions & parentProportions, GUIFon
 	this->SetFontSize(size);
 
 
-	fontRenderer->SetFontSize(this->fontSize);
-	GUISystem::ElementDim dim = fontRenderer->GetFontDimension(this->caption);
-	float w = dim.w;
-	float h = dim.h; // static_cast<float>(this->fontSize);
+	//fontRenderer->SetFontSize(this->fontSize);
+	//GUISystem::ElementDim dim = fontRenderer->GetFontDimension(this->caption);
+	float w = 10.0F;//= dim.w;
+	float h = 10.0F;//= dim.h; // static_cast<float>(this->fontSize);
 
 	//-----
 
-	float x = parentProportions.topLeft.X;
+	float x = parentProportions.topLeft.x;
 	x += this->pos.x * parentProportions.width;
 	x += this->pos.offsetX;
 
-	float y = parentProportions.topLeft.Y;
+	float y = parentProportions.topLeft.y;
 	y += this->pos.y * parentProportions.height;
 	y += this->pos.offsetY;
 
@@ -160,20 +160,20 @@ void GUITextCaption::Update(const ElementProportions & parentProportions, GUIFon
 	else if (this->pos.origin == TR)
 	{
 		//swap x coordinate
-		x = parentProportions.botRight.X - (x - parentProportions.topLeft.X); //put x back to top left
+		x = parentProportions.botRight.x - (x - parentProportions.topLeft.x); //put x back to top left
 		x -= w;
 	}
 	else if (this->pos.origin == BL)
 	{
 		//swap y coordinate
-		y = parentProportions.botRight.Y - (y - parentProportions.topLeft.Y); //put y back to top left
+		y = parentProportions.botRight.y - (y - parentProportions.topLeft.y); //put y back to top left
 		y -= h;
 	}
 	else if (this->pos.origin == BR)
 	{
 		//swap x & y coordinate
-		x = parentProportions.botRight.X - (x - parentProportions.topLeft.X); //put x back to top left
-		y = parentProportions.botRight.Y - (y - parentProportions.topLeft.Y); //put y back to top left
+		x = parentProportions.botRight.x - (x - parentProportions.topLeft.x); //put x back to top left
+		y = parentProportions.botRight.y - (y - parentProportions.topLeft.y); //put y back to top left
 
 		x -= w;
 		y -= h;
@@ -181,8 +181,8 @@ void GUITextCaption::Update(const ElementProportions & parentProportions, GUIFon
 	else if (this->pos.origin == C)
 	{
 		//center of parent element
-		x = x + (parentProportions.botRight.X - parentProportions.topLeft.X) * 0.5f; //put x back to top left
-		y = y + (parentProportions.botRight.Y - parentProportions.topLeft.Y) * 0.5f; //put y back to top left
+		x = x + (parentProportions.botRight.x - parentProportions.topLeft.x) * 0.5f; //put x back to top left
+		y = y + (parentProportions.botRight.y - parentProportions.topLeft.y) * 0.5f; //put y back to top left
 
 		x -= (w * 0.5f);
 		y -= (h * 0.5f);

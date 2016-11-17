@@ -3,13 +3,15 @@
 
 namespace GUISystem
 {
+	class IControls;
+
 	class GUIElement;
 	class GUIScreen;
 	class GUIButton;
 	class GUICheckBox;
 }
 
-class IControls;
+
 
 #include <string>
 

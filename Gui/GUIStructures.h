@@ -12,8 +12,8 @@ namespace MyGraphics
 }
 
 #include "Matrix.h"
-
-#include "Delegate.h"
+#include "FastDelegate.h"
+#include <vector>
 
 namespace GUISystem
 {
@@ -153,21 +153,21 @@ namespace GUISystem
 
 	//Trigger action for click - control down / control up
 	//on element
-	typedef delegate<void(GUIElement *)> OnClickDelegate;
+	typedef fastdelegate::FastDelegate1<GUIElement *> OnClickDelegate;
 
 	//Trigger state change from control
-	typedef delegate<void(GUIElement *)> OnOverDelegate;
-	typedef delegate<void(GUIElement *)> OnDownDelegate;
-	typedef delegate<void(GUIElement *)> OnUpDelegate;
-	typedef delegate<void(GUIElement *)> OnStateChangeDelegate;
+	typedef fastdelegate::FastDelegate1<GUIElement *> OnOverDelegate;
+	typedef fastdelegate::FastDelegate1<GUIElement *> OnDownDelegate;
+	typedef fastdelegate::FastDelegate1<GUIElement *> OnUpDelegate;
+	typedef fastdelegate::FastDelegate1<GUIElement *> OnStateChangeDelegate;
 
 	//Trigger repeated actions
 	//While state is not changed, call trigger
-	typedef delegate<void(GUIElement *)> WhileDownDelegate;
-	typedef delegate<void(GUIElement *)> WhileHoverDelegate;
+	typedef fastdelegate::FastDelegate1<GUIElement *> WhileDownDelegate;
+	typedef fastdelegate::FastDelegate1<GUIElement *> WhileHoverDelegate;
 
 	//Universal triggers for movements
-	typedef delegate<void(GUIElement *, float, float)> OnMoveDelegate;
+	typedef fastdelegate::FastDelegate3<GUIElement *, float, float> OnMoveDelegate;
 
 
 	struct IUserData

@@ -1,8 +1,10 @@
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-cmake_policy(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+cmake_policy(VERSION 3.1)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include("cmake/defaults.cmake")
 set(NAME m3d)
+
+set(CMAKE_CXX_STANDARD 11)
 
 project(${NAME})
 

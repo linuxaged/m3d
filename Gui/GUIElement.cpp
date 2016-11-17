@@ -260,7 +260,7 @@ void GUIElement::AddChild(GUIElement * el)
 
 void GUIElement::SetMouseMove(int x, int y)
 {
-	if (this->onMove.empty() == false)
+	//if (this->onMove.empty() == false)
 	{
 		float relX = x - this->proportions.topLeft.x;
 		float relY = y - this->proportions.topLeft.y;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Delegate.h"
+//#include "Delegate.h"
 
 namespace GUISystem
 {
