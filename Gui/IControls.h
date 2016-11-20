@@ -23,4 +23,5 @@ namespace GUISystem
 		virtual bool 		IsReleased() = 0;
 
 	
+	};
 }
