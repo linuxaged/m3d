@@ -178,7 +178,81 @@ int main()
 	vk::Semaphore presentComplete = device.createSemaphore(semaphoreCreateInfo);
 	vk::Semaphore renderComplete = device.createSemaphore(semaphoreCreateInfo);
 
-	// Create swapChain
+	/*
+	 * SwapChain
+	 */
+	vk::SurfaceCapabilitiesKHR surfaceCapabilitiesKHR = physicalDevice.getSurfaceCapabilitiesKHR(surface);
+	std::vector<vk::PresentModeKHR> presentModes = physicalDevice.getSurfacePresentModesKHR(surface);
+	std::vector<vk::SurfaceFormatKHR> surfaceFormats = physicalDevice.getSurfaceFormatsKHR(surface);
+	size_t formatCount = surfaceFormats.size();
+	vk::Format colorFormat;
+	vk::ColorSpaceKHR colorSpace;
+	// If the surface format list only includes one entry with  vk::Format::eUndefined,
+	// there is no preferered format, so we assume  vk::Format::eB8G8R8A8Unorm
+	if ((formatCount == 1) && (surfaceFormats[0].format == vk::Format::eUndefined)) {
+		colorFormat = vk::Format::eB8G8R8A8Unorm;
+	}
+	else {
+		// Always select the first available color format
+		// If you need a specific format (e.g. SRGB) you'd need to
+		// iterate over the list of available surface format and
+		// check for it's presence
+		colorFormat = surfaceFormats[0].format;
+	}
+	colorSpace = surfaceFormats[0].colorSpace;
+
+	// Determine the number of images
+	uint32_t desiredNumberOfSwapchainImages = surfaceCapabilitiesKHR.minImageCount + 1;
+	if ((surfaceCapabilitiesKHR.maxImageCount > 0) && (desiredNumberOfSwapchainImages > surfaceCapabilitiesKHR.maxImageCount)) {
+		desiredNumberOfSwapchainImages = surfaceCapabilitiesKHR.maxImageCount;
+	}
+	// Select the size of Swap Chain Images
+	vk::Extent2D size{ 1280, 720 };
+	vk::Extent2D swapchainExtent;
+	// width and height are either both -1, or both not -1.
+	if (surfaceCapabilitiesKHR.currentExtent.width == -1) {
+		// If the surface size is undefined, the size is set to
+		// the size of the images requested.
+		swapchainExtent = size;
+	}
+	else {
+		// If the surface size is defined, the swap chain size must match
+		swapchainExtent = surfaceCapabilitiesKHR.currentExtent;
+		size = surfaceCapabilitiesKHR.currentExtent;
+	}
+	// pre transform
+	vk::SurfaceTransformFlagBitsKHR preTransform;
+	if (surfaceCapabilitiesKHR.supportedTransforms & vk::SurfaceTransformFlagBitsKHR::eIdentity) {
+		preTransform = vk::SurfaceTransformFlagBitsKHR::eIdentity;
+	}
+	else {
+		preTransform = surfaceCapabilitiesKHR.currentTransform;
+	}
+	// Prefer mailbox mode if present, it's the lowest latency non-tearing present  mode
+	vk::PresentModeKHR swapchainPresentMode = vk::PresentModeKHR::eFifo;
+
+	vk::SwapchainCreateInfoKHR swapchainCI;
+	swapchainCI.surface = surface;
+	swapchainCI.minImageCount = desiredNumberOfSwapchainImages;
+	swapchainCI.imageFormat = colorFormat;
+	swapchainCI.imageColorSpace = colorSpace;
+	swapchainCI.imageExtent = vk::Extent2D{ swapchainExtent.width, swapchainExtent.height };
+	swapchainCI.imageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst;
+	swapchainCI.preTransform = preTransform;
+	swapchainCI.imageArrayLayers = 1;
+	swapchainCI.imageSharingMode = vk::SharingMode::eExclusive;
+	swapchainCI.queueFamilyIndexCount = 0;
+	swapchainCI.pQueueFamilyIndices = NULL;
+	swapchainCI.presentMode = swapchainPresentMode;
+	// TODO:
+	//swapchainCI.oldSwapchain = oldSwapchain;
+	swapchainCI.clipped = true;
+	swapchainCI.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
+
+	vk::SwapchainKHR swapChain = device.createSwapchainKHR(swapchainCI);
+
+
+
 
 
     // This is where most initializtion for a program should be performed
