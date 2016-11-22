@@ -146,6 +146,10 @@ int main()
 	vk::PhysicalDeviceFeatures deviceFeatures;
 	deviceFeatures = physicalDevice.getFeatures();
 
+	// TODO:
+	// check queue family from a physical device support swapchain
+	//physicalDevice.getSurfaceSupportKHR();
+
 	// Vulkan device
 	vk::Device device;
 	{
@@ -252,6 +256,17 @@ int main()
 	vk::SwapchainKHR swapChain = device.createSwapchainKHR(swapchainCI);
 
 
+	// DRAW
+	uint32_t currentImage;
+
+	auto resultValue = device.acquireNextImageKHR(swapChain, UINT64_MAX, presentComplete, vk::Fence());
+	vk::Result result = resultValue.result;
+	if (result != vk::Result::eSuccess) {
+		// TODO handle eSuboptimalKHR
+		std::cerr << "Invalid acquire result: " << vk::to_string(result);
+		throw std::error_code(result);
+	}
+	currentImage = resultValue.value;
 
 
 
@@ -279,13 +294,19 @@ int main()
         SDL_Delay(10);
     }
 
-    // Clean up.
+    /*
+	 * Clean up
+	 */
+	// destroy swap chain
+	device.destroySwapchainKHR(swapChain);
+	// 
     instance.destroySurfaceKHR(surface);
     SDL_DestroyWindow(window);
     SDL_Quit();
 	//
 	device.destroySemaphore(presentComplete);
 	device.destroySemaphore(renderComplete);
+	
     instance.destroy();
 
     return 0;
