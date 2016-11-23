@@ -152,7 +152,6 @@ int main()
 
 	// Vulkan device
 	vk::Device device;
-	{
 		// Find a queue that supports graphics operations
 		uint32_t graphicsQueueIndex = findQueue(physicalDevice, vk::QueueFlagBits::eGraphics);
 		std::array<float, 1> queuePriorities = { 0.0f };
@@ -175,7 +174,6 @@ int main()
 		}
 
 		device = physicalDevice.createDevice(deviceCreateInfo);
-	}
 
 	// Create semaphores
 	vk::SemaphoreCreateInfo semaphoreCreateInfo;
@@ -267,8 +265,35 @@ int main()
 		throw std::error_code(result);
 	}
 	currentImage = resultValue.value;
+	// Present the current image to the queue
+	//vk::PresentInfoKHR presentInfo;
+	//vk::Result queuePresent(vk::Semaphore waitSemaphore) {
+	//	presentInfo.waitSemaphoreCount = waitSemaphore ? 1 : 0;
+	//	presentInfo.pWaitSemaphores = &waitSemaphore;
+	//	return context.queue.presentKHR(presentInfo);
+	//}
+	
+	/*
+	 * Create Command Buffer Memory Pool
+	 */
+	vk::CommandPool cmdPool;
+	vk::CommandPoolCreateInfo cmdPoolInfo;
+	cmdPoolInfo.queueFamilyIndex = graphicsQueueIndex;
+	cmdPoolInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
+	cmdPool = device.createCommandPool(cmdPoolInfo);
+	/*
+	 * Allocate Command Buffers
+	 */
+	uint32_t swapChainImagesCount;
+	device.getSwapchainImagesKHR(swapChain, &swapChainImagesCount, nullptr);
 
+	vk::CommandBufferAllocateInfo cmdBufferAllocInfo;
+	cmdBufferAllocInfo.setSType(vk::StructureType::eCommandBufferAllocateInfo);
+	cmdBufferAllocInfo.setCommandPool(cmdPool);
+	cmdBufferAllocInfo.setLevel(vk::CommandBufferLevel::ePrimary);
+	cmdBufferAllocInfo.setCommandBufferCount(swapChainImagesCount);
 
+	vk::CommandBuffer cmdBuffer = device.allocateCommandBuffers(cmdBufferAllocInfo)[0];
 
     // This is where most initializtion for a program should be performed
 
