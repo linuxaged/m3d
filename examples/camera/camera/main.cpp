@@ -42,143 +42,133 @@ Create and destroy a Vulkan surface on an SDL window.
 #include <iostream>
 #include <vector>
 
-vk::SurfaceKHR createVulkanSurface(const vk::Instance& instance, SDL_Window* window);
-std::vector<const char*> getAvailableWSIExtensions();
+/*
+ * Vulkan
+ */
 
-uint32_t findQueue(vk::PhysicalDevice& physicalDevice, const vk::QueueFlags& flags, const vk::SurfaceKHR& presentSurface = vk::SurfaceKHR()) {
-	std::vector<vk::QueueFamilyProperties> queueProps = physicalDevice.getQueueFamilyProperties();
-	size_t queueCount = queueProps.size();
-	for (uint32_t i = 0; i < queueCount; i++) {
-		if (queueProps[i].queueFlags & flags) {
-			if (presentSurface && !physicalDevice.getSurfaceSupportKHR(i, presentSurface)) {
-				continue;
-			}
-			return i;
-		}
-	}
-	throw std::runtime_error("No queue matches the flags " + vk::to_string(flags));
+bool CreateInstance()
+{
+	return true;
 }
 
-vk::Bool32 checkDeviceExtensionPresent(vk::PhysicalDevice physicalDevice, const char* extensionName) {
-	uint32_t extensionCount = 0;
-	std::vector<vk::ExtensionProperties> extensions = physicalDevice.enumerateDeviceExtensionProperties();
-	for (auto& ext : extensions) {
-		if (!strcmp(extensionName, ext.extensionName)) {
-			return true;
-		}
+bool CreateSurface()
+{
+	return true;
+}
+
+bool CreateDevice()
+{
+	return true;
+}
+
+bool GetDeviceQueue()
+{
+	return true;
+}
+
+bool CreateSemaphores()
+{
+	return true;
+}
+
+bool SetupVulkan()
+{
+	if (!CreateInstance())
+	{
+		return false;
 	}
+	if (!CreateSurface())
+	{
+		return false;
+	}
+	if (!CreateDevice())
+	{
+		return false;
+	}
+	if (!GetDeviceQueue())
+	{
+		return false;
+	}
+	if (!CreateSemaphores())
+	{
+		return false;
+	}
+}
+
+/* Render Pass */
+bool CreateRenderPass()
+{
+	return true;
+}
+
+bool CreateFramebuffers()
+{
+	return true;
+}
+
+bool CreatePipeline()
+{
+	return true;
+}
+
+bool CreateCommandBuffers()
+{
+	return true;
+}
+
+bool RecordCommandBuffers()
+{
+	return true;
+}
+
+bool OnWindowSizeChanged()
+{
+	if (!CreateRenderPass())
+	{
+		return false;
+	}
+	if (!CreateFramebuffers())
+	{
+		return false;
+	}
+	if (!CreatePipeline())
+	{
+		return false;
+	}
+	if (!CreateCommandBuffers())
+	{
+		return false;
+	}
+	if (!RecordCommandBuffers())
+	{
+		return false;
+	}
+	return true;
+}
+
+/* Draw Loop */
+bool Draw()
+{
+
 	return false;
 }
 
+vk::SurfaceKHR createVulkanSurface(const vk::Instance& instance, SDL_Window* window);
+std::vector<const char*> getAvailableWSIExtensions();
+
+
+
+
+
 int main()
 {
-    // Use validation layers if this is a debug build, and use WSI extensions regardless
-    std::vector<const char*> extensions = getAvailableWSIExtensions();
-    std::vector<const char*> layers;
-#if defined(_DEBUG)
-    layers.push_back("VK_LAYER_LUNARG_standard_validation");
-#endif
+	SetupVulkan();
 
-    // vk::ApplicationInfo allows the programmer to specifiy some basic information about the
-    // program, which can be useful for layers and tools to provide more debug information.
-    vk::ApplicationInfo appInfo = vk::ApplicationInfo()
-        .setPApplicationName("Vulkan C++ Windowed Program Template")
-        .setApplicationVersion(1)
-        .setPEngineName("LunarG SDK")
-        .setEngineVersion(1)
-        .setApiVersion(VK_API_VERSION_1_0);
+    
 
-    // vk::InstanceCreateInfo is where the programmer specifies the layers and/or extensions that
-    // are needed.
-    vk::InstanceCreateInfo instInfo = vk::InstanceCreateInfo()
-        .setFlags(vk::InstanceCreateFlags())
-        .setPApplicationInfo(&appInfo)
-        .setEnabledExtensionCount(static_cast<uint32_t>(extensions.size()))
-        .setPpEnabledExtensionNames(extensions.data())
-        .setEnabledLayerCount(static_cast<uint32_t>(layers.size()))
-        .setPpEnabledLayerNames(layers.data());
-
-    // Create the Vulkan instance.
-    vk::Instance instance;
-    try {
-        instance = vk::createInstance(instInfo);
-    } catch(const std::exception& e) {
-        std::cout << "Could not create a Vulkan instance: " << e.what() << std::endl;
-        return 1;
-    }
-
-    // Create an SDL window that supports Vulkan and OpenGL rendering.
-    if(SDL_Init(SDL_INIT_VIDEO) != 0) {
-        std::cout << "Could not initialize SDL." << std::endl;
-        return 1;
-    }
-    SDL_Window* window = SDL_CreateWindow("Vulkan Window", SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_OPENGL);
-    if(window == NULL) {
-        std::cout << "Could not create SDL window." << std::endl;
-        return 1;
-    }
-
-    // Create a Vulkan surface for rendering
-    vk::SurfaceKHR surface;
-    try {
-        surface = createVulkanSurface(instance, window);
-    } catch(const std::exception& e) {
-        std::cout << "Failed to create Vulkan surface: " << e.what() << std::endl;
-        instance.destroy();
-        return 1;
-    }
-
-	// Create physical device
-	std::vector<vk::PhysicalDevice> physicalDevices;
 	
-	try {
-		physicalDevices = instance.enumeratePhysicalDevices();
-	}
-	catch (const std::exception& e)
-	{
-		std::cout << "Failed to create physical device: " << e.what() << std::endl;
-		instance.destroy();
-		return 1;
-	}
 
-	vk::PhysicalDevice physicalDevice = physicalDevices[0];
-	vk::PhysicalDeviceFeatures deviceFeatures;
-	deviceFeatures = physicalDevice.getFeatures();
-
-	// TODO:
-	// check queue family from a physical device support swapchain
-	//physicalDevice.getSurfaceSupportKHR();
-
-	// Vulkan device
-	vk::Device device;
-		// Find a queue that supports graphics operations
-		uint32_t graphicsQueueIndex = findQueue(physicalDevice, vk::QueueFlagBits::eGraphics);
-		std::array<float, 1> queuePriorities = { 0.0f };
-		vk::DeviceQueueCreateInfo queueCreateInfo;
-		queueCreateInfo.queueFamilyIndex = graphicsQueueIndex;
-		queueCreateInfo.queueCount = 1;
-		queueCreateInfo.pQueuePriorities = queuePriorities.data();
-		std::vector<const char*> enabledExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
-		vk::DeviceCreateInfo deviceCreateInfo;
-		deviceCreateInfo.queueCreateInfoCount = 1;
-		deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
-		deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
-		// enable the debug marker extension if it is present (likely meaning a debugging tool is present)
-		if (checkDeviceExtensionPresent(physicalDevice, VK_EXT_DEBUG_MARKER_EXTENSION_NAME)) {
-			enabledExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
-		}
-		if (enabledExtensions.size() > 0) {
-			deviceCreateInfo.enabledExtensionCount = (uint32_t)enabledExtensions.size();
-			deviceCreateInfo.ppEnabledExtensionNames = enabledExtensions.data();
-		}
-
-		device = physicalDevice.createDevice(deviceCreateInfo);
-
-	// Create semaphores
-	vk::SemaphoreCreateInfo semaphoreCreateInfo;
-	vk::Semaphore presentComplete = device.createSemaphore(semaphoreCreateInfo);
-	vk::Semaphore renderComplete = device.createSemaphore(semaphoreCreateInfo);
+	
 
 	/*
 	 * SwapChain
@@ -294,12 +284,22 @@ int main()
 	cmdBufferAllocInfo.setCommandBufferCount(swapChainImagesCount);
 
 	vk::CommandBuffer cmdBuffer = device.allocateCommandBuffers(cmdBufferAllocInfo)[0];
-
+	/*
+	 * Record Comand Buffers
+	 */
+	vk::CommandBufferBeginInfo cmdBufferBeginInfo;
+	vk::ImageSubresourceRange range(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
     // This is where most initializtion for a program should be performed
+
+
 
     // Poll for user input.
     bool stillRunning = true;
     while(stillRunning) {
+
+		/*
+		* Draw
+		*/
 
         SDL_Event event;
         while(SDL_PollEvent(&event)) {
