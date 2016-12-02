@@ -45,16 +45,16 @@ else()
     link_libraries(${GLFW3_LIBRARIES})
     include_directories(${GLFW3_INCLUDEDIR})
     link_directories(${GLFW3_LIBRARY_DIRS})
-    
+
     # find_package(assimp)
     # link_libraries(${ASSIMP_LIBRARIES})
     # include_directories(${ASSIMP_INCLUDEDIR})
     # link_directories(${ASSIMP_LIBRARY_DIRS})
 endif()
 
- add_dependency_external_projects(glm)
- list(APPEND EXTERNALS glm)
- include_directories(${GLM_INCLUDE_DIRS})
+add_dependency_external_projects(glm)
+list(APPEND EXTERNALS glm)
+include_directories(${GLM_INCLUDE_DIRS})
 
 add_dependency_external_projects(gli)
 list(APPEND EXTERNALS gli)
@@ -64,6 +64,10 @@ add_dependency_external_projects(glslang)
 list(APPEND EXTERNALS glslang)
 include_directories(${GLSLANG_INCLUDE_DIRS})
 link_libraries(${GLSLANG_LIBRARIES})
+
+add_dependency_external_projects(glog)
+list(APPEND EXTERNALS glog)
+include_directories(${GLOG_INCLUDE_DIRS})
 
 # add Math lib
 add_subdirectory(Math)
