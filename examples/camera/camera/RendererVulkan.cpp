@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+#define VERTEX_BUFFER_BIND_ID 0
+#define DEFAULT_FENCE_TIMEOUT 100000000000
 /*
  * Utils
  */
@@ -112,6 +114,26 @@ uint32_t findQueue(vk::PhysicalDevice& physicalDevice, const vk::QueueFlags& fla
 	throw std::runtime_error("No queue matches the flags " + vk::to_string(flags));
 }
 
+vk::Bool32 getMemoryType(vk::PhysicalDevice& device, uint32_t typeBits, const vk::MemoryPropertyFlags& properties, uint32_t * typeIndex) {
+	for (uint32_t i = 0; i < 32; i++) {
+		if ((typeBits & 1) == 1) {
+			if ((device.getMemoryProperties().memoryTypes[i].propertyFlags & properties) == properties) {
+				*typeIndex = i;
+				return true;
+			}
+		}
+		typeBits >>= 1;
+	}
+	return false;
+}
+
+uint32_t getMemoryType(vk::PhysicalDevice& device, uint32_t typeBits, const vk::MemoryPropertyFlags& properties) {
+	uint32_t result = 0;
+	if (!getMemoryType(device, typeBits, properties, &result)) {
+		// todo : throw error
+	}
+	return result;
+}
 /*
  * Setup Vulkan
  */
@@ -204,7 +226,7 @@ bool RendererVulkan::CreateDevice()
 	//physicalDevice.getSurfaceSupportKHR();
 
 	// Find a queue that supports graphics operations
-	uint32_t graphicsQueueIndex = findQueue(physicalDevice, vk::QueueFlagBits::eGraphics);
+	graphicsQueueIndex = findQueue(physicalDevice, vk::QueueFlagBits::eGraphics);
 	std::array<float, 1> queuePriorities = { 0.0f };
 	vk::DeviceQueueCreateInfo queueCreateInfo;
 	queueCreateInfo.queueFamilyIndex = graphicsQueueIndex;
@@ -226,6 +248,8 @@ bool RendererVulkan::CreateDevice()
 
 	// Create Vulkan Device
 	device = physicalDevice.createDevice(deviceCreateInfo);
+
+	queue = device.getQueue(graphicsQueueIndex, 0);
 	return true;
 }
 
@@ -279,7 +303,7 @@ bool RendererVulkan::CreateRenderPass()
 	std::array<vk::AttachmentReference, 1> attachmentReferences;
 
 	// Color attachment
-	attachments[0].format = swapChain.colorFormat;
+	attachments[0].format = vk::Format::eR8G8B8A8Uint;
 	attachments[0].loadOp = vk::AttachmentLoadOp::eClear;
 	attachments[0].storeOp = vk::AttachmentStoreOp::eStore;
 	attachments[0].initialLayout = vk::ImageLayout::eUndefined;
@@ -395,6 +419,40 @@ bool RendererVulkan::CreateSwapChain()
 
 	swapChain = device.createSwapchainKHR(swapchainCI);
 
+	// present info
+	presentInfo.setSwapchainCount = 1;
+	presentInfo.pSwapchains = &swapChain;
+	presentInfo.pImageIndices = &currentImage;
+
+	// If an existing sawp chain is re-created, destroy the old swap chain
+	// This also cleans up all the presentable images
+	if (oldSwapChain) {
+		for (uint32_t i = 0; i < imageCount; i++) {
+			device.destroyImageView(images[i].view);
+		}
+		device.destroySwapchainKHR(oldSwapChain);
+	}
+
+	vk::ImageViewCreateInfo colorAttachmentView;
+	colorAttachmentView.format = colorFormat;
+	colorAttachmentView.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+	colorAttachmentView.subresourceRange.levelCount = 1;
+	colorAttachmentView.subresourceRange.layerCount = 1;
+	colorAttachmentView.viewType = vk::ImageViewType::e2D;
+
+	// Get the swap chain images
+	auto swapChainImages = device.getSwapchainImagesKHR(swapChain);
+	imageCount = (uint32_t)swapChainImages.size();
+
+	// Get the swap chain buffers containing the image and imageview
+	images.resize(imageCount);
+	for (uint32_t i = 0; i < imageCount; i++) {
+		images[i].image = swapChainImages[i];
+		colorAttachmentView.image = swapChainImages[i];
+		images[i].view = device.createImageView(colorAttachmentView);
+		images[i].fence = vk::Fence();
+	}
+
 	return true;
 }
 
@@ -410,13 +468,9 @@ bool RendererVulkan::CreateFramebuffers()
 	framebufferCreateInfo.height = 720;// size.height;
 	framebufferCreateInfo.layers = 1;
 
-	// Create frame buffers for every swap chain image
-	framebuffers = swapChain.createFramebuffers(framebufferCreateInfo);
-
 	// Verify that the first attachment is null
 	assert(framebufferCreateInfo.pAttachments[0] == vk::ImageView());
 
-	std::vector<vk::Framebuffer> framebuffers;
 	// TODO:
 	const size_t imageCount = 3;
 	framebuffers.resize(imageCount);
@@ -427,8 +481,81 @@ bool RendererVulkan::CreateFramebuffers()
 	return true;
 }
 
+void setupDescriptorSetLayout() {
+	
+}
+
+std::vector<uint8_t> readBinaryFile(const std::string& filename)
+{
+	std::FILE* fp = std::fopen(filename.c_str(), "rb");
+	if (fp)
+	{
+		std::vector<uint8_t> contents;
+		std::fseek(fp, 0, SEEK_END);
+		contents.resize(std::ftell(fp));
+		std::rewind(fp);
+		std::fread(&contents[0], 1, contents.size(), fp);
+		std::fclose(fp);
+		return (contents);
+	}
+	throw(errno);
+}
+
+vk::ShaderModule _loadShader(const std::string& filename, vk::Device device, vk::ShaderStageFlagBits stage) {
+	std::vector<uint8_t> binaryData = readBinaryFile(filename);
+	vk::ShaderModuleCreateInfo moduleCreateInfo;
+	moduleCreateInfo.codeSize = binaryData.size();
+	moduleCreateInfo.pCode = (uint32_t*)binaryData.data();
+	return device.createShaderModule(moduleCreateInfo);
+}
+
+vk::PipelineShaderStageCreateInfo RendererVulkan::loadShader(const std::string& fileName, vk::ShaderStageFlagBits stage) {
+	vk::PipelineShaderStageCreateInfo shaderStage;
+	shaderStage.stage = stage;
+#if defined(__ANDROID__)
+	shaderStage.module = _loadShader(androidApp->activity->assetManager, fileName.c_str(), device, stage);
+#else
+	shaderStage.module = _loadShader(fileName.c_str(), device, stage);
+#endif
+	shaderStage.pName = "main"; // todo : make param
+	assert(shaderStage.module);
+	shaderModules.push_back(shaderStage.module);
+	return shaderStage;
+}
+
 bool RendererVulkan::CreatePipeline()
 {
+	/* Pipeline Layout */
+
+	// Setup layout of descriptors used in this example
+	// Basically connects the different shader stages to descriptors
+	// for binding uniform buffers, image samplers, etc.
+	// So every shader binding should map to one descriptor set layout
+	// binding
+
+	// Binding 0 : Uniform buffer (Vertex shader)
+	vk::DescriptorSetLayoutBinding layoutBinding;
+	layoutBinding.descriptorType = vk::DescriptorType::eUniformBuffer;
+	layoutBinding.descriptorCount = 1;
+	layoutBinding.stageFlags = vk::ShaderStageFlagBits::eVertex;
+	layoutBinding.pImmutableSamplers = NULL;
+
+	vk::DescriptorSetLayoutCreateInfo descriptorLayout;
+	descriptorLayout.bindingCount = 1;
+	descriptorLayout.pBindings = &layoutBinding;
+
+	vk::DescriptorSetLayout descriptorSetLayout = device.createDescriptorSetLayout(descriptorLayout, NULL);
+
+	// Create the pipeline layout that is used to generate the rendering pipelines that
+	// are based on this descriptor set layout
+	// In a more complex scenario you would have different pipeline layouts for different
+	// descriptor set layouts that could be reused
+	vk::PipelineLayoutCreateInfo pPipelineLayoutCreateInfo;
+	pPipelineLayoutCreateInfo.setLayoutCount = 1;
+	pPipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
+
+	pipelineLayout = device.createPipelineLayout(pPipelineLayoutCreateInfo);
+
 	// Create our rendering pipeline used in this example
 	// Vulkan uses the concept of rendering pipelines to encapsulate
 	// fixed states
@@ -522,8 +649,8 @@ bool RendererVulkan::CreatePipeline()
 	// Load shaders
 	// Shaders are loaded from the SPIR-V format, which can be generated from glsl
 	std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
-	shaderStages[0] = loadShader(vkx::getAssetPath() + "shaders/triangle/triangle.vert", vk::ShaderStageFlagBits::eVertex);
-	shaderStages[1] = loadShader(vkx::getAssetPath() + "shaders/triangle/triangle.frag", vk::ShaderStageFlagBits::eFragment);
+	shaderStages[0] = loadShader("shaders/triangle/triangle.vert", vk::ShaderStageFlagBits::eVertex);
+	shaderStages[1] = loadShader("shaders/triangle/triangle.frag", vk::ShaderStageFlagBits::eFragment);
 
 	// Assign states
 	// Assign pipeline state create information
@@ -540,12 +667,397 @@ bool RendererVulkan::CreatePipeline()
 	pipelineCreateInfo.pDynamicState = &dynamicState;
 
 	// Create rendering pipeline
+	vk::PipelineCache pipelineCache = device.createPipelineCache(vk::PipelineCacheCreateInfo());
 	pipeline = device.createGraphicsPipelines(pipelineCache, pipelineCreateInfo, nullptr)[0];
+	return true;
+}
+
+bool RendererVulkan::CreateVertices()
+{
+	struct Vertex {
+		float pos[3];
+		float col[3];
+	};
+
+	// Setup vertices
+	std::vector<Vertex> vertexBuffer = {
+		{ { 1.0f,  1.0f, 0.0f },{ 1.0f, 0.0f, 0.0f } },
+		{ { -1.0f,  1.0f, 0.0f },{ 0.0f, 1.0f, 0.0f } },
+		{ { 0.0f, -1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f } }
+	};
+	uint32_t vertexBufferSize = (uint32_t)(vertexBuffer.size() * sizeof(Vertex));
+
+	// Setup indices
+	std::vector<uint32_t> indexBuffer = { 0, 1, 2 };
+	uint32_t indexBufferSize = (uint32_t)(indexBuffer.size() * sizeof(uint32_t));
+	indexCount = (uint32_t)indexBuffer.size();
+
+	vk::MemoryAllocateInfo memAlloc;
+	vk::MemoryRequirements memReqs;
+
+	void *data;
+
+	// Static data like vertex and index buffer should be stored on the device memory 
+	// for optimal (and fastest) access by the GPU
+	//
+	// To achieve this we use so-called "staging buffers" :
+	// - Create a buffer that's visible to the host (and can be mapped)
+	// - Copy the data to this buffer
+	// - Create another buffer that's local on the device (VRAM) with the same size
+	// - Copy the data from the host to the device using a command buffer
+	// - Delete the host visible (staging) buffer
+	// - Use the device local buffers for rendering
+
+	struct StagingBuffer {
+		vk::DeviceMemory memory;
+		vk::Buffer buffer;
+	};
+
+	struct {
+		StagingBuffer vertices;
+		StagingBuffer indices;
+	} stagingBuffers;
+
+	// vk::Buffer copies are done on the queue, so we need a command buffer for them
+	vk::CommandBufferAllocateInfo cmdBufInfo;
+	cmdBufInfo.commandPool = cmdPool;
+	cmdBufInfo.level = vk::CommandBufferLevel::ePrimary;
+	cmdBufInfo.commandBufferCount = 1;
+
+	vk::CommandBuffer copyCommandBuffer = device.allocateCommandBuffers(cmdBufInfo)[0];
+
+	// Vertex buffer
+	vk::BufferCreateInfo vertexBufferInfo;
+	vertexBufferInfo.size = vertexBufferSize;
+	// vk::Buffer is used as the copy source
+	vertexBufferInfo.usage = vk::BufferUsageFlagBits::eTransferSrc;
+	// Create a host-visible buffer to copy the vertex data to (staging buffer)
+	stagingBuffers.vertices.buffer = device.createBuffer(vertexBufferInfo);
+	memReqs = device.getBufferMemoryRequirements(stagingBuffers.vertices.buffer);
+	memAlloc.allocationSize = memReqs.size;
+	memAlloc.memoryTypeIndex = getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible);
+	stagingBuffers.vertices.memory = device.allocateMemory(memAlloc);
+	// Map and copy
+	data = device.mapMemory(stagingBuffers.vertices.memory, 0, memAlloc.allocationSize, vk::MemoryMapFlags());
+	memcpy(data, vertexBuffer.data(), vertexBufferSize);
+	device.unmapMemory(stagingBuffers.vertices.memory);
+	device.bindBufferMemory(stagingBuffers.vertices.buffer, stagingBuffers.vertices.memory, 0);
+
+	// Create the destination buffer with device only visibility
+	// vk::Buffer will be used as a vertex buffer and is the copy destination
+	vertexBufferInfo.usage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst;
+	vertices.buffer = device.createBuffer(vertexBufferInfo);
+	memReqs = device.getBufferMemoryRequirements(vertices.buffer);
+	memAlloc.allocationSize = memReqs.size;
+	memAlloc.memoryTypeIndex = getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
+	vertices.memory = device.allocateMemory(memAlloc);
+	device.bindBufferMemory(vertices.buffer, vertices.memory, 0);
+
+	// Index buffer
+	vk::BufferCreateInfo indexbufferInfo;
+	indexbufferInfo.size = indexBufferSize;
+	indexbufferInfo.usage = vk::BufferUsageFlagBits::eTransferSrc;
+	// Copy index data to a buffer visible to the host (staging buffer)
+	stagingBuffers.indices.buffer = device.createBuffer(indexbufferInfo);
+	memReqs = device.getBufferMemoryRequirements(stagingBuffers.indices.buffer);
+	memAlloc.allocationSize = memReqs.size;
+	memAlloc.memoryTypeIndex = getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible);
+	stagingBuffers.indices.memory = device.allocateMemory(memAlloc);
+	data = device.mapMemory(stagingBuffers.indices.memory, 0, indexBufferSize, vk::MemoryMapFlags());
+	memcpy(data, indexBuffer.data(), indexBufferSize);
+	device.unmapMemory(stagingBuffers.indices.memory);
+	device.bindBufferMemory(stagingBuffers.indices.buffer, stagingBuffers.indices.memory, 0);
+
+	// Create destination buffer with device only visibility
+	indexbufferInfo.usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst;
+	indices.buffer = device.createBuffer(indexbufferInfo);
+	memReqs = device.getBufferMemoryRequirements(indices.buffer);
+	memAlloc.allocationSize = memReqs.size;
+	memAlloc.memoryTypeIndex = getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
+	indices.memory = device.allocateMemory(memAlloc);
+	device.bindBufferMemory(indices.buffer, indices.memory, 0);
+
+	vk::CommandBufferBeginInfo cmdBufferBeginInfo;
+	vk::BufferCopy copyRegion;
+
+	// Put buffer region copies into command buffer
+	// Note that the staging buffer must not be deleted before the copies 
+	// have been submitted and executed
+	copyCommandBuffer.begin(cmdBufferBeginInfo);
+
+	// Vertex buffer
+	copyRegion.size = vertexBufferSize;
+	copyCommandBuffer.copyBuffer(stagingBuffers.vertices.buffer, vertices.buffer, copyRegion);
+	// Index buffer
+	copyRegion.size = indexBufferSize;
+	copyCommandBuffer.copyBuffer(stagingBuffers.indices.buffer, indices.buffer, copyRegion);
+	copyCommandBuffer.end();
+
+	// Submit copies to the queue
+	vk::SubmitInfo copySubmitInfo;
+	copySubmitInfo.commandBufferCount = 1;
+	copySubmitInfo.pCommandBuffers = &copyCommandBuffer;
+
+	queue.submit(copySubmitInfo, vk::Fence());
+	queue.waitIdle();
+
+	device.freeCommandBuffers(cmdPool, copyCommandBuffer);
+
+	// Destroy staging buffers
+	device.destroyBuffer(stagingBuffers.vertices.buffer);
+	device.freeMemory(stagingBuffers.vertices.memory);
+	device.destroyBuffer(stagingBuffers.indices.buffer);
+	device.freeMemory(stagingBuffers.indices.memory);
+
+	// Binding description
+	bindingDescriptions.resize(1);
+	bindingDescriptions[0].binding = VERTEX_BUFFER_BIND_ID;
+	bindingDescriptions[0].stride = sizeof(Vertex);
+	bindingDescriptions[0].inputRate = vk::VertexInputRate::eVertex;
+
+	// Attribute descriptions
+	// Describes memory layout and shader attribute locations
+	attributeDescriptions.resize(2);
+	// Location 0 : Position
+	attributeDescriptions[0].binding = VERTEX_BUFFER_BIND_ID;
+	attributeDescriptions[0].location = 0;
+	attributeDescriptions[0].format = vk::Format::eR32G32B32Sfloat;
+	attributeDescriptions[0].offset = 0;
+	// Location 1 : Color
+	attributeDescriptions[1].binding = VERTEX_BUFFER_BIND_ID;
+	attributeDescriptions[1].location = 1;
+	attributeDescriptions[1].format = vk::Format::eR32G32B32Sfloat;
+	attributeDescriptions[1].offset = sizeof(float) * 3;
+
+	// Assign to vertex input state
+	inputState.vertexBindingDescriptionCount = (uint32_t)bindingDescriptions.size();
+	inputState.pVertexBindingDescriptions = bindingDescriptions.data();
+	inputState.vertexAttributeDescriptionCount = (uint32_t)attributeDescriptions.size();
+	inputState.pVertexAttributeDescriptions = attributeDescriptions.data();
+	return true;
+}
+
+bool RendererVulkan::CreateUniformBuffers()
+{
+	// Prepare and initialize a uniform buffer block containing shader uniforms
+	// In Vulkan there are no more single uniforms like in GL
+	// All shader uniforms are passed as uniform buffer blocks 
+	vk::MemoryRequirements memReqs;
+
+	// Vertex shader uniform buffer block
+	vk::BufferCreateInfo bufferInfo;
+	vk::MemoryAllocateInfo allocInfo;
+	allocInfo.allocationSize = 0;
+	allocInfo.memoryTypeIndex = 0;
+	bufferInfo.size = sizeof(uboVS);
+	bufferInfo.usage = vk::BufferUsageFlagBits::eUniformBuffer;
+
+	// Create a new buffer
+	uniformDataVS.buffer = device.createBuffer(bufferInfo);
+	// Get memory requirements including size, alignment and memory type 
+	memReqs = device.getBufferMemoryRequirements(uniformDataVS.buffer);
+	allocInfo.allocationSize = memReqs.size;
+	// Get the memory type index that supports host visibile memory access
+	// Most implementations offer multiple memory tpyes and selecting the 
+	// correct one to allocate memory from is important
+	allocInfo.memoryTypeIndex = getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible);
+	// Allocate memory for the uniform buffer
+	(uniformDataVS.memory) = device.allocateMemory(allocInfo);
+	// Bind memory to buffer
+	device.bindBufferMemory(uniformDataVS.buffer, uniformDataVS.memory, 0);
+
+	// Store information in the uniform's descriptor
+	uniformDataVS.descriptor.buffer = uniformDataVS.buffer;
+	uniformDataVS.descriptor.offset = 0;
+	uniformDataVS.descriptor.range = sizeof(uboVS);
+
+	// Update matrices
+#ifdef USE_GLM
+	uboVS.projectionMatrix = glm::perspective(glm::radians(60.0f), (float)size.width / (float)size.height, 0.1f, 256.0f);
+	std::cout << "pMat: " << glm::to_string(uboVS.projectionMatrix) << std::endl;
+	uboVS.viewMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, zoom));
+	std::cout << "vMat: " << glm::to_string(uboVS.viewMatrix) << std::endl;
+	uboVS.modelMatrix = glm::mat4();
+	std::cout << "mMat: " << glm::to_string(uboVS.modelMatrix) << std::endl;
+#else
+	float pMat[16] = {
+		2.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 2.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, -1.22f, -2.22f,
+		0.0f, 0.0f, -1.0f, 0.0f
+	};
+	uboVS.projectionMatrix = M3D::Math::Matrix4x4::Perspective(120.0f, 1.0f, 0.1f, 256.0f);
+	char buf[512];
+	uboVS.projectionMatrix.ToString(buf, 512);
+	printf("pmat = %s\n", buf);
+	float vMat[16] = {
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, -10.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	};
+	uboVS.viewMatrix = M3D::Math::Matrix4x4::Translation(M3D::Math::Vector3(0.0f, 0.0f, zoom));
+	uboVS.viewMatrix.ToString(buf, 512);
+	printf("vmat = %s\n", buf);
+	uboVS.modelMatrix = M3D::Math::Matrix4x4();
+#endif
+
+
+	// Map uniform buffer and update it
+	// If you want to keep a handle to the memory and not unmap it afer updating, 
+	// create the memory with the vk::MemoryPropertyFlagBits::eHostCoherent 
+	void *pData = device.mapMemory(uniformDataVS.memory, 0, sizeof(uboVS), vk::MemoryMapFlags());
+	// TODO:
+	size_t uboSize = sizeof(uboVS);
+	printf("sizeof ubo = %d", uboSize);
+	memcpy(pData, &uboVS, sizeof(uboVS));
+	device.unmapMemory(uniformDataVS.memory);
+	return true;
+}
+
+bool RendererVulkan::CreateDescriptorSetLayout()
+{
+	// Setup layout of descriptors used in this example
+	// Basically connects the different shader stages to descriptors
+	// for binding uniform buffers, image samplers, etc.
+	// So every shader binding should map to one descriptor set layout
+	// binding
+
+	// Binding 0 : Uniform buffer (Vertex shader)
+	vk::DescriptorSetLayoutBinding layoutBinding;
+	layoutBinding.descriptorType = vk::DescriptorType::eUniformBuffer;
+	layoutBinding.descriptorCount = 1;
+	layoutBinding.stageFlags = vk::ShaderStageFlagBits::eVertex;
+	layoutBinding.pImmutableSamplers = NULL;
+
+	vk::DescriptorSetLayoutCreateInfo descriptorLayout;
+	descriptorLayout.bindingCount = 1;
+	descriptorLayout.pBindings = &layoutBinding;
+
+	descriptorSetLayout = device.createDescriptorSetLayout(descriptorLayout, NULL);
+
+	// Create the pipeline layout that is used to generate the rendering pipelines that
+	// are based on this descriptor set layout
+	// In a more complex scenario you would have different pipeline layouts for different
+	// descriptor set layouts that could be reused
+	vk::PipelineLayoutCreateInfo pPipelineLayoutCreateInfo;
+	pPipelineLayoutCreateInfo.setLayoutCount = 1;
+	pPipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
+
+	pipelineLayout = device.createPipelineLayout(pPipelineLayoutCreateInfo);
+	return true;
+}
+
+bool RendererVulkan::CreateDescriptorPool()
+{
+	// We need to tell the API the number of max. requested descriptors per type
+	vk::DescriptorPoolSize typeCounts[1];
+	// This example only uses one descriptor type (uniform buffer) and only
+	// requests one descriptor of this type
+	typeCounts[0].type = vk::DescriptorType::eUniformBuffer;
+	typeCounts[0].descriptorCount = 1;
+	// For additional types you need to add new entries in the type count list
+	// E.g. for two combined image samplers :
+	// typeCounts[1].type = vk::DescriptorType::eCombinedImageSampler;
+	// typeCounts[1].descriptorCount = 2;
+
+	// Create the global descriptor pool
+	// All descriptors used in this example are allocated from this pool
+	vk::DescriptorPoolCreateInfo descriptorPoolInfo;
+	descriptorPoolInfo.poolSizeCount = 1;
+	descriptorPoolInfo.pPoolSizes = typeCounts;
+	// Set the max. number of sets that can be requested
+	// Requesting descriptors beyond maxSets will result in an error
+	descriptorPoolInfo.maxSets = 1;
+
+	descriptorPool = device.createDescriptorPool(descriptorPoolInfo);
+	return true;
+}
+bool RendererVulkan::CreateDescriptorSet()
+{
+	// Allocate a new descriptor set from the global descriptor pool
+	vk::DescriptorSetAllocateInfo allocInfo;
+	allocInfo.descriptorPool = descriptorPool;
+	allocInfo.descriptorSetCount = 1;
+	allocInfo.pSetLayouts = &descriptorSetLayout;
+
+	descriptorSet = device.allocateDescriptorSets(allocInfo)[0];
+
+	// Update the descriptor set determining the shader binding points
+	// For every binding point used in a shader there needs to be one
+	// descriptor set matching that binding point
+
+	vk::WriteDescriptorSet writeDescriptorSet;
+
+	// Binding 0 : Uniform buffer
+	writeDescriptorSet.dstSet = descriptorSet;
+	writeDescriptorSet.descriptorCount = 1;
+	writeDescriptorSet.descriptorType = vk::DescriptorType::eUniformBuffer;
+	writeDescriptorSet.pBufferInfo = &uniformDataVS.descriptor;
+	// Binds this uniform buffer to binding point 0
+	writeDescriptorSet.dstBinding = 0;
+
+	device.updateDescriptorSets(writeDescriptorSet, nullptr);
 	return true;
 }
 
 bool RendererVulkan::CreateCommandBuffers()
 {
+	vk::CommandPoolCreateInfo cmdPoolInfo;
+	cmdPoolInfo.queueFamilyIndex = graphicsQueueIndex;
+	cmdPoolInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
+	cmdPool = device.createCommandPool(cmdPoolInfo);
+
+	// Create one command buffer per image in the swap chain
+
+	// Command buffers store a reference to the
+	// frame buffer inside their render pass info
+	// so for static usage without having to rebuild
+	// them each frame, we use one per frame buffer
+	vk::CommandBufferAllocateInfo cmdBufAllocateInfo;
+	cmdBufAllocateInfo.commandPool = cmdPool;
+	cmdBufAllocateInfo.commandBufferCount = imageCount;
+	cmdBuffers = device.allocateCommandBuffers(cmdBufAllocateInfo);
+
+	vk::CommandBufferBeginInfo cmdBufInfo;
+	vk::ClearValue clearValues[2];
+	clearValues[0].color = std::array<float, 4>{0.025f, 0.025f, 0.025f, 1.0f};
+
+	vk::RenderPassBeginInfo renderPassBeginInfo;
+	vk::Extent2D size{ 1280, 720 };
+	renderPassBeginInfo.renderPass = renderPass;
+	renderPassBeginInfo.renderArea.extent = size;
+	renderPassBeginInfo.clearValueCount = 1;
+	renderPassBeginInfo.pClearValues = clearValues;
+
+	float minDepth = 0;
+	float maxDepth = 1;
+	vk::Viewport viewport = vk::Viewport{ 0, 0, (float)size.width, (float)size.height, minDepth, maxDepth };
+	vk::Rect2D scissor = vk::Rect2D{ vk::Offset2D(), size };
+	vk::DeviceSize offsets = 0;
+	for (size_t i = 0; i < imageCount; ++i) {
+		const auto& cmdBuffer = cmdBuffers[i];
+		cmdBuffer.reset(vk::CommandBufferResetFlagBits::eReleaseResources);
+		cmdBuffer.begin(cmdBufInfo);
+		renderPassBeginInfo.framebuffer = framebuffers[i];
+		cmdBuffer.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
+		// Update dynamic viewport state
+		cmdBuffer.setViewport(0, viewport);
+		// Update dynamic scissor state
+		cmdBuffer.setScissor(0, scissor);
+		// Bind descriptor sets describing shader binding points
+		cmdBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, descriptorSet, nullptr);
+		// Bind the rendering pipeline (including the shaders)
+		cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
+		// Bind triangle vertices
+		cmdBuffer.bindVertexBuffers(VERTEX_BUFFER_BIND_ID, vertices.buffer, offsets);
+		// Bind triangle indices
+		cmdBuffer.bindIndexBuffer(indices.buffer, 0, vk::IndexType::eUint32);
+		// Draw indexed triangle
+		cmdBuffer.drawIndexed(indexCount, 1, 0, 0, 1);
+		cmdBuffer.endRenderPass();
+		cmdBuffer.end();
+	}
 	return true;
 }
 
@@ -582,6 +1094,61 @@ bool RendererVulkan::OnWindowSizeChanged()
 /* Draw Loop */
 bool RendererVulkan::Draw()
 {
+	// Get next image in the swap chain (back/front buffer)
+	auto resultValue = device.acquireNextImageKHR(swapChain, UINT64_MAX, presentComplete, vk::Fence());
+	vk::Result result = resultValue.result;
+	if (result != vk::Result::eSuccess) {
+		// TODO handle eSuboptimalKHR
+		std::cerr << "Invalid acquire result: " << vk::to_string(result);
+		throw std::error_code(result);
+	}
 
+	currentImage = resultValue.value;
+
+	// The submit infor strcuture contains a list of
+	// command buffers and semaphores to be submitted to a queue
+	// If you want to submit multiple command buffers, pass an array
+	vk::PipelineStageFlags pipelineStages = vk::PipelineStageFlagBits::eBottomOfPipe;
+	vk::SubmitInfo submitInfo;
+	submitInfo.pWaitDstStageMask = &pipelineStages;
+	// The wait semaphore ensures that the image is presented 
+	// before we start submitting command buffers agein
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = &presentComplete;
+	// Submit the currently active command buffer
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &cmdBuffers[currentBuffer];
+	// The signal semaphore is used during queue presentation
+	// to ensure that the image is not rendered before all
+	// commands have been submitted
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores = &renderComplete;
+
+	// Submit to the graphics queue
+	// TODO explain submit fence
+	
+
+	{
+		auto& image = images[currentImage];
+		while (image.fence) {
+			vk::Result fenceRes = device.waitForFences(image.fence, VK_TRUE, DEFAULT_FENCE_TIMEOUT);
+			if (fenceRes == vk::Result::eSuccess) {
+				if (false /*destroy*/) {
+					device.destroyFence(image.fence);
+				}
+				image.fence = vk::Fence();
+			}
+		}
+
+		image.fence = device.createFence(vk::FenceCreateFlags());
+		queue.submit(submitInfo, image.fence);
+	}
+	// Present the current buffer to the swap chain
+	// We pass the signal semaphore from the submit info
+	// to ensure that the image is not rendered until
+	// all commands have been submitted
+	presentInfo.waitSemaphoreCount = renderComplete ? 1 : 0;
+	presentInfo.pWaitSemaphores = &renderComplete;
+	queue.presentKHR(presentInfo);
 	return false;
 }
