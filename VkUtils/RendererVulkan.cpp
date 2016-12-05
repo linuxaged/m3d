@@ -370,6 +370,10 @@ bool RendererVulkan::SetupVulkan()
 	{
 		return false;
 	}
+	if (!CreateSwapChain())
+	{
+		return false;
+	}
 	if (!CreateSemaphores())
 	{
 		return false;
@@ -565,10 +569,10 @@ bool RendererVulkan::CreateFramebuffers()
 	}
 	framebufferCreateInfo.pAttachments = _attachments.data();
 
-	std::vector<vk::Framebuffer> framebuffers;
+	imageCount = 3;
 	framebuffers.resize(imageCount);
 	for (uint32_t i = 0; i < imageCount; i++) {
-		attachments[0] = images[i].view;
+		_attachments[0] = images[i].view;
 		framebuffers[i] = device.createFramebuffer(framebufferCreateInfo);
 	}
 
@@ -743,8 +747,8 @@ bool RendererVulkan::CreatePipeline()
 	// Load shaders
 	// Shaders are loaded from the SPIR-V format, which can be generated from glsl
 	std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
-	shaderStages[0] = loadShader("shaders/triangle/triangle.vert", vk::ShaderStageFlagBits::eVertex);
-	shaderStages[1] = loadShader("shaders/triangle/triangle.frag", vk::ShaderStageFlagBits::eFragment);
+	shaderStages[0] = loadShader("D:\\workspace\\m3d\\data\\shaders\\camera\\triangle.vert", vk::ShaderStageFlagBits::eVertex);
+	shaderStages[1] = loadShader("D:\\workspace\\m3d\\data\\shaders\\camera\\triangle.frag", vk::ShaderStageFlagBits::eFragment);
 
 	// Assign states
 	// Assign pipeline state create information
