@@ -393,7 +393,7 @@ bool RendererVulkan::CreateRenderPass()
 	std::array<vk::AttachmentReference, 1> attachmentReferences;
 
 	// Color attachment
-	attachments[0].format = vk::Format::eR8G8B8A8Uint;
+	attachments[0].format = vk::Format::eB8G8R8A8Unorm;
 	attachments[0].loadOp = vk::AttachmentLoadOp::eClear;
 	attachments[0].storeOp = vk::AttachmentStoreOp::eStore;
 	attachments[0].initialLayout = vk::ImageLayout::eUndefined;
@@ -747,8 +747,8 @@ bool RendererVulkan::CreatePipeline()
 	// Load shaders
 	// Shaders are loaded from the SPIR-V format, which can be generated from glsl
 	std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
-	shaderStages[0] = loadShader("D:\\workspace\\m3d\\data\\shaders\\camera\\triangle.vert", vk::ShaderStageFlagBits::eVertex);
-	shaderStages[1] = loadShader("D:\\workspace\\m3d\\data\\shaders\\camera\\triangle.frag", vk::ShaderStageFlagBits::eFragment);
+	shaderStages[0] = loadShader("G:\\workspace\\m3d\\data\\shaders\\camera\\triangle.vert.spv", vk::ShaderStageFlagBits::eVertex);
+	shaderStages[1] = loadShader("G:\\workspace\\m3d\\data\\shaders\\camera\\triangle.frag.spv", vk::ShaderStageFlagBits::eFragment);
 
 	// Assign states
 	// Assign pipeline state create information
