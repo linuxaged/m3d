@@ -24,12 +24,13 @@ private:
 
 	bool CreateFramebuffers();
 
+	bool CreateCommandPool();
+
 	bool CreatePipeline();
 
 	bool CreateVertices();
 	bool CreateUniformBuffers();
 	bool CreateDescriptorPool();
-	bool CreateDescriptorSetLayout();
 	bool CreateDescriptorSet();
 
 	bool CreateCommandBuffers();
@@ -130,7 +131,6 @@ private:
 	std::vector<vk::VertexInputAttributeDescription> attributeDescriptions;
 	/* Render Pass */
 	uint32_t							currentImage;
-	uint32_t							currentBuffer;
 	vk::PresentInfoKHR					presentInfo;
 	std::vector<vk::ShaderModule>		shaderModules;
 	vk::RenderPass						renderPass;

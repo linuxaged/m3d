@@ -51,7 +51,12 @@ int main()
 {
 	RendererVulkan renderer;
 	renderer.SetupVulkan();
-	renderer.Draw();
+
+	while (1)
+	{
+		renderer.Draw();
+	}
+	
     return 0;
 }
 

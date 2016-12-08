@@ -1,7 +1,5 @@
 #include "RendererVulkan.h"
 #include "Matrix.h"
-//#include <SDL2/SDL.h>
-//#include <SDL2/SDL_syswm.h>
 
 #include <iostream>
 
@@ -642,7 +640,7 @@ bool RendererVulkan::CreatePipeline()
 	descriptorLayout.bindingCount = 1;
 	descriptorLayout.pBindings = &layoutBinding;
 
-	vk::DescriptorSetLayout descriptorSetLayout = device.createDescriptorSetLayout(descriptorLayout, NULL);
+	descriptorSetLayout = device.createDescriptorSetLayout(descriptorLayout, NULL);
 
 	// Create the pipeline layout that is used to generate the rendering pipelines that
 	// are based on this descriptor set layout
@@ -747,8 +745,8 @@ bool RendererVulkan::CreatePipeline()
 	// Load shaders
 	// Shaders are loaded from the SPIR-V format, which can be generated from glsl
 	std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
-	shaderStages[0] = loadShader("G:\\workspace\\m3d\\data\\shaders\\camera\\triangle.vert.spv", vk::ShaderStageFlagBits::eVertex);
-	shaderStages[1] = loadShader("G:\\workspace\\m3d\\data\\shaders\\camera\\triangle.frag.spv", vk::ShaderStageFlagBits::eFragment);
+	shaderStages[0] = loadShader("G:\\workspace\\m3d\\data\\shaders\\triangle\\triangle_vertex.spv", vk::ShaderStageFlagBits::eVertex);
+	shaderStages[1] = loadShader("G:\\workspace\\m3d\\data\\shaders\\triangle\\triangle_fragment.spv", vk::ShaderStageFlagBits::eFragment);
 
 	// Assign states
 	// Assign pipeline state create information
@@ -1013,38 +1011,38 @@ bool RendererVulkan::CreateUniformBuffers()
 	return true;
 }
 
-bool RendererVulkan::CreateDescriptorSetLayout()
-{
-	// Setup layout of descriptors used in this example
-	// Basically connects the different shader stages to descriptors
-	// for binding uniform buffers, image samplers, etc.
-	// So every shader binding should map to one descriptor set layout
-	// binding
-
-	// Binding 0 : Uniform buffer (Vertex shader)
-	vk::DescriptorSetLayoutBinding layoutBinding;
-	layoutBinding.descriptorType = vk::DescriptorType::eUniformBuffer;
-	layoutBinding.descriptorCount = 1;
-	layoutBinding.stageFlags = vk::ShaderStageFlagBits::eVertex;
-	layoutBinding.pImmutableSamplers = NULL;
-
-	vk::DescriptorSetLayoutCreateInfo descriptorLayout;
-	descriptorLayout.bindingCount = 1;
-	descriptorLayout.pBindings = &layoutBinding;
-
-	descriptorSetLayout = device.createDescriptorSetLayout(descriptorLayout, NULL);
-
-	// Create the pipeline layout that is used to generate the rendering pipelines that
-	// are based on this descriptor set layout
-	// In a more complex scenario you would have different pipeline layouts for different
-	// descriptor set layouts that could be reused
-	vk::PipelineLayoutCreateInfo pPipelineLayoutCreateInfo;
-	pPipelineLayoutCreateInfo.setLayoutCount = 1;
-	pPipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
-
-	pipelineLayout = device.createPipelineLayout(pPipelineLayoutCreateInfo);
-	return true;
-}
+//bool RendererVulkan::CreateDescriptorSetLayout()
+//{
+//	// Setup layout of descriptors used in this example
+//	// Basically connects the different shader stages to descriptors
+//	// for binding uniform buffers, image samplers, etc.
+//	// So every shader binding should map to one descriptor set layout
+//	// binding
+//
+//	// Binding 0 : Uniform buffer (Vertex shader)
+//	vk::DescriptorSetLayoutBinding layoutBinding;
+//	layoutBinding.descriptorType = vk::DescriptorType::eUniformBuffer;
+//	layoutBinding.descriptorCount = 1;
+//	layoutBinding.stageFlags = vk::ShaderStageFlagBits::eVertex;
+//	layoutBinding.pImmutableSamplers = NULL;
+//
+//	vk::DescriptorSetLayoutCreateInfo descriptorLayout;
+//	descriptorLayout.bindingCount = 1;
+//	descriptorLayout.pBindings = &layoutBinding;
+//
+//	descriptorSetLayout = device.createDescriptorSetLayout(descriptorLayout, NULL);
+//
+//	// Create the pipeline layout that is used to generate the rendering pipelines that
+//	// are based on this descriptor set layout
+//	// In a more complex scenario you would have different pipeline layouts for different
+//	// descriptor set layouts that could be reused
+//	vk::PipelineLayoutCreateInfo pPipelineLayoutCreateInfo;
+//	pPipelineLayoutCreateInfo.setLayoutCount = 1;
+//	pPipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
+//
+//	pipelineLayout = device.createPipelineLayout(pPipelineLayoutCreateInfo);
+//	return true;
+//}
 
 bool RendererVulkan::CreateDescriptorPool()
 {
@@ -1098,14 +1096,16 @@ bool RendererVulkan::CreateDescriptorSet()
 	device.updateDescriptorSets(writeDescriptorSet, nullptr);
 	return true;
 }
-
-bool RendererVulkan::CreateCommandBuffers()
+bool RendererVulkan::CreateCommandPool()
 {
 	vk::CommandPoolCreateInfo cmdPoolInfo;
 	cmdPoolInfo.queueFamilyIndex = graphicsQueueIndex;
 	cmdPoolInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
 	cmdPool = device.createCommandPool(cmdPoolInfo);
-
+	return true;
+}
+bool RendererVulkan::CreateCommandBuffers()
+{
 	// Create one command buffer per image in the swap chain
 
 	// Command buffers store a reference to the
@@ -1174,7 +1174,34 @@ bool RendererVulkan::OnWindowSizeChanged()
 	{
 		return false;
 	}
+	/* Command Pool */
+	if (!CreateCommandPool())
+	{
+		return false;
+	}
+
+	/* Vertex && Uniform Buffer */
+	if (!CreateVertices())
+	{
+		return false;
+	}
+	if (!CreateUniformBuffers())
+	{
+		return false;
+	}
+	/* Pipeline */
 	if (!CreatePipeline())
+	{
+		return false;
+	}
+	/*
+	*	Descripter Set
+	*/
+	if (!CreateDescriptorPool())
+	{
+		return false;
+	}
+	if (!CreateDescriptorSet())
 	{
 		return false;
 	}
@@ -1215,7 +1242,7 @@ bool RendererVulkan::Draw()
 	submitInfo.pWaitSemaphores = &presentComplete;
 	// Submit the currently active command buffer
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &cmdBuffers[currentBuffer];
+	submitInfo.pCommandBuffers = &cmdBuffers[currentImage];
 	// The signal semaphore is used during queue presentation
 	// to ensure that the image is not rendered before all
 	// commands have been submitted
