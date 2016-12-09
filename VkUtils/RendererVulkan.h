@@ -1,5 +1,8 @@
 #include <vulkan/vulkan.hpp>
 #include "Matrix.h"
+
+#define DEFAULT_FENCE_TIMEOUT 100000000000
+
 class RendererVulkan
 {
 private:
@@ -45,6 +48,12 @@ public:
 	/* Draw Loop */
 	bool Draw();
 
+public:
+
+	vk::Device				getDevice() const;
+	vk::PhysicalDevice		getPhysicalDevice() const;
+	vk::CommandPool			getCommandPool() const;
+	vk::Queue				getQueue() const;
 private:
 	struct SwapChainImage {
 		vk::Image image;

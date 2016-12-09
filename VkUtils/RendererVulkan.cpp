@@ -4,7 +4,7 @@
 #include <iostream>
 
 #define VERTEX_BUFFER_BIND_ID 0
-#define DEFAULT_FENCE_TIMEOUT 100000000000
+
 /*
  * Utils
  */
@@ -982,7 +982,7 @@ bool RendererVulkan::CreateUniformBuffers()
 		0.0f, 0.0f, -1.22f, -2.22f,
 		0.0f, 0.0f, -1.0f, 0.0f
 	};
-	uboVS.projectionMatrix = M3D::Math::Matrix4x4::Perspective(120.0f, 1.0f, 0.1f, 256.0f);
+	uboVS.projectionMatrix = M3D::Math::Matrix4x4::Perspective(60.0f, 1.0f, 0.1f, 256.0f);
 	char buf[512];
 	uboVS.projectionMatrix.ToString(buf, 512);
 	printf("pmat = %s\n", buf);
@@ -1010,39 +1010,6 @@ bool RendererVulkan::CreateUniformBuffers()
 	device.unmapMemory(uniformDataVS.memory);
 	return true;
 }
-
-//bool RendererVulkan::CreateDescriptorSetLayout()
-//{
-//	// Setup layout of descriptors used in this example
-//	// Basically connects the different shader stages to descriptors
-//	// for binding uniform buffers, image samplers, etc.
-//	// So every shader binding should map to one descriptor set layout
-//	// binding
-//
-//	// Binding 0 : Uniform buffer (Vertex shader)
-//	vk::DescriptorSetLayoutBinding layoutBinding;
-//	layoutBinding.descriptorType = vk::DescriptorType::eUniformBuffer;
-//	layoutBinding.descriptorCount = 1;
-//	layoutBinding.stageFlags = vk::ShaderStageFlagBits::eVertex;
-//	layoutBinding.pImmutableSamplers = NULL;
-//
-//	vk::DescriptorSetLayoutCreateInfo descriptorLayout;
-//	descriptorLayout.bindingCount = 1;
-//	descriptorLayout.pBindings = &layoutBinding;
-//
-//	descriptorSetLayout = device.createDescriptorSetLayout(descriptorLayout, NULL);
-//
-//	// Create the pipeline layout that is used to generate the rendering pipelines that
-//	// are based on this descriptor set layout
-//	// In a more complex scenario you would have different pipeline layouts for different
-//	// descriptor set layouts that could be reused
-//	vk::PipelineLayoutCreateInfo pPipelineLayoutCreateInfo;
-//	pPipelineLayoutCreateInfo.setLayoutCount = 1;
-//	pPipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
-//
-//	pipelineLayout = device.createPipelineLayout(pPipelineLayoutCreateInfo);
-//	return true;
-//}
 
 bool RendererVulkan::CreateDescriptorPool()
 {
