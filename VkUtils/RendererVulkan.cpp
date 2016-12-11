@@ -1,5 +1,8 @@
+
 #include "RendererVulkan.h"
+#include "VulkanHelper.hpp"
 #include "Matrix.h"
+#include "vulkanTextureLoader.hpp"
 
 #include <iostream>
 
@@ -183,51 +186,6 @@ vk::SurfaceKHR RendererVulkan::createVulkanSurface()
 //	}
 }
 
-vk::Bool32 checkDeviceExtensionPresent(vk::PhysicalDevice physicalDevice, const char* extensionName) {
-	uint32_t extensionCount = 0;
-	std::vector<vk::ExtensionProperties> extensions = physicalDevice.enumerateDeviceExtensionProperties();
-	for (auto& ext : extensions) {
-		if (!strcmp(extensionName, ext.extensionName)) {
-			return true;
-		}
-	}
-	return false;
-}
-
-uint32_t findQueue(vk::PhysicalDevice& physicalDevice, const vk::QueueFlags& flags, const vk::SurfaceKHR& presentSurface = vk::SurfaceKHR()) {
-	std::vector<vk::QueueFamilyProperties> queueProps = physicalDevice.getQueueFamilyProperties();
-	size_t queueCount = queueProps.size();
-	for (uint32_t i = 0; i < queueCount; i++) {
-		if (queueProps[i].queueFlags & flags) {
-			if (presentSurface && !physicalDevice.getSurfaceSupportKHR(i, presentSurface)) {
-				continue;
-			}
-			return i;
-		}
-	}
-	throw std::runtime_error("No queue matches the flags " + vk::to_string(flags));
-}
-
-vk::Bool32 getMemoryType(vk::PhysicalDevice& device, uint32_t typeBits, const vk::MemoryPropertyFlags& properties, uint32_t * typeIndex) {
-	for (uint32_t i = 0; i < 32; i++) {
-		if ((typeBits & 1) == 1) {
-			if ((device.getMemoryProperties().memoryTypes[i].propertyFlags & properties) == properties) {
-				*typeIndex = i;
-				return true;
-			}
-		}
-		typeBits >>= 1;
-	}
-	return false;
-}
-
-uint32_t getMemoryType(vk::PhysicalDevice& device, uint32_t typeBits, const vk::MemoryPropertyFlags& properties) {
-	uint32_t result = 0;
-	if (!getMemoryType(device, typeBits, properties, &result)) {
-		// todo : throw error
-	}
-	return result;
-}
 /*
  * Setup Vulkan
  */
@@ -308,7 +266,7 @@ bool RendererVulkan::CreateDevice()
 	//physicalDevice.getSurfaceSupportKHR();
 
 	// Find a queue that supports graphics operations
-	graphicsQueueIndex = findQueue(physicalDevice, vk::QueueFlagBits::eGraphics);
+	graphicsQueueIndex = vkhelper::findQueue(physicalDevice, vk::QueueFlagBits::eGraphics);
 	std::array<float, 1> queuePriorities = { 0.0f };
 	vk::DeviceQueueCreateInfo queueCreateInfo;
 	queueCreateInfo.queueFamilyIndex = graphicsQueueIndex;
@@ -320,7 +278,7 @@ bool RendererVulkan::CreateDevice()
 	deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
 	deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
 	// enable the debug marker extension if it is present (likely meaning a debugging tool is present)
-	if (checkDeviceExtensionPresent(physicalDevice, VK_EXT_DEBUG_MARKER_EXTENSION_NAME)) {
+	if (vkhelper::checkDeviceExtensionPresent(physicalDevice, VK_EXT_DEBUG_MARKER_EXTENSION_NAME)) {
 		enabledExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
 	}
 	if (enabledExtensions.size() > 0) {
@@ -831,7 +789,7 @@ bool RendererVulkan::CreateVertices()
 	stagingBuffers.vertices.buffer = device.createBuffer(vertexBufferInfo);
 	memReqs = device.getBufferMemoryRequirements(stagingBuffers.vertices.buffer);
 	memAlloc.allocationSize = memReqs.size;
-	memAlloc.memoryTypeIndex = getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible);
+	memAlloc.memoryTypeIndex = vkhelper::getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible);
 	stagingBuffers.vertices.memory = device.allocateMemory(memAlloc);
 	// Map and copy
 	data = device.mapMemory(stagingBuffers.vertices.memory, 0, memAlloc.allocationSize, vk::MemoryMapFlags());
@@ -845,7 +803,7 @@ bool RendererVulkan::CreateVertices()
 	vertices.buffer = device.createBuffer(vertexBufferInfo);
 	memReqs = device.getBufferMemoryRequirements(vertices.buffer);
 	memAlloc.allocationSize = memReqs.size;
-	memAlloc.memoryTypeIndex = getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
+	memAlloc.memoryTypeIndex = vkhelper::getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
 	vertices.memory = device.allocateMemory(memAlloc);
 	device.bindBufferMemory(vertices.buffer, vertices.memory, 0);
 
@@ -857,7 +815,7 @@ bool RendererVulkan::CreateVertices()
 	stagingBuffers.indices.buffer = device.createBuffer(indexbufferInfo);
 	memReqs = device.getBufferMemoryRequirements(stagingBuffers.indices.buffer);
 	memAlloc.allocationSize = memReqs.size;
-	memAlloc.memoryTypeIndex = getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible);
+	memAlloc.memoryTypeIndex = vkhelper::getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible);
 	stagingBuffers.indices.memory = device.allocateMemory(memAlloc);
 	data = device.mapMemory(stagingBuffers.indices.memory, 0, indexBufferSize, vk::MemoryMapFlags());
 	memcpy(data, indexBuffer.data(), indexBufferSize);
@@ -869,7 +827,7 @@ bool RendererVulkan::CreateVertices()
 	indices.buffer = device.createBuffer(indexbufferInfo);
 	memReqs = device.getBufferMemoryRequirements(indices.buffer);
 	memAlloc.allocationSize = memReqs.size;
-	memAlloc.memoryTypeIndex = getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
+	memAlloc.memoryTypeIndex = vkhelper::getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
 	indices.memory = device.allocateMemory(memAlloc);
 	device.bindBufferMemory(indices.buffer, indices.memory, 0);
 
@@ -956,7 +914,7 @@ bool RendererVulkan::CreateUniformBuffers()
 	// Get the memory type index that supports host visibile memory access
 	// Most implementations offer multiple memory tpyes and selecting the 
 	// correct one to allocate memory from is important
-	allocInfo.memoryTypeIndex = getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible);
+	allocInfo.memoryTypeIndex = vkhelper::getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible);
 	// Allocate memory for the uniform buffer
 	(uniformDataVS.memory) = device.allocateMemory(allocInfo);
 	// Bind memory to buffer

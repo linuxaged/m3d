@@ -25,9 +25,9 @@ else()
     link_libraries(${XCB_LIBRARIES})
 endif()
 
-add_dependency_external_projects(glm)
-list(APPEND EXTERNALS glm)
-include_directories(${GLM_INCLUDE_DIRS})
+# add_dependency_external_projects(glm)
+# list(APPEND EXTERNALS glm)
+# include_directories(${GLM_INCLUDE_DIRS})
 
 add_dependency_external_projects(gli)
 list(APPEND EXTERNALS gli)
