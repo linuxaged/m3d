@@ -31,7 +31,7 @@ namespace vkTools
 		uint32_t				width, height;
 		uint32_t				mipLevels;
 		uint32_t				layerCount;
-		VkDescriptorImageInfo	descriptor;
+		vk::DescriptorImageInfo	descriptor;
 	};
 
 	/**
@@ -126,7 +126,8 @@ namespace vkTools
 			texture->mipLevels = static_cast<uint32_t>(tex2D.levels());
 
 			// Get device properites for the requested texture format
-			vk::ImageFormatProperties formatProperties = physicalDevice.getImageFormatProperties(format,
+			//vk::ImageFormatProperties formatProperties;
+			auto formatProperties = physicalDevice.getImageFormatProperties(format,
 				vk::ImageType::e2D, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageCreateFlags(), &formatProperties);
 			//VkFormatProperties formatProperties;
 			//vkGetPhysicalDeviceFormatProperties(vulkanDevice->physicalDevice, format, &formatProperties);
@@ -170,7 +171,7 @@ namespace vkTools
 				// Get memory type index for a host visible buffer
 				memAllocInfo.memoryTypeIndex = vkhelper::getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
 
-				stagingMemory = device.allocateMemory(&memAllocInfo);
+				stagingMemory = device.allocateMemory(memAllocInfo);
 				device.bindBufferMemory(stagingBuffer, stagingMemory, 0);
 
 				// Copy texture data into staging buffer
@@ -218,7 +219,7 @@ namespace vkTools
 				}
 				texture->image = device.createImage(imageCreateInfo);
 
-				device.getImageMemoryRequirements(texture->image, memReqs);
+				memReqs = device.getImageMemoryRequirements(texture->image);
 
 				memAllocInfo.allocationSize = memReqs.size;
 
@@ -284,7 +285,7 @@ namespace vkTools
 				// depending on implementation (e.g. no mip maps, only one layer, etc.)
 
 				// Check if this support is supported for linear tiling
-				assert(formatProperties.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
+				assert(formatProperties.linearTilingFeatures & vk::FormatFeatureFlagBits::eSampledImage);
 
 				vk::Image mappableImage;
 				vk::DeviceMemory mappableMemory;
@@ -318,7 +319,7 @@ namespace vkTools
 				mappableMemory = device.allocateMemory(memAllocInfo);
 
 				// Bind allocated image for use
-				device.bindImageMemory(mappableImage, mappableMemory);
+				device.bindImageMemory(mappableImage, mappableMemory, 0 );
 
 				// Get sub resource layout
 				// Mip map count, array layer, etc.
@@ -343,7 +344,7 @@ namespace vkTools
 				// and can be directly used as textures
 				texture->image = mappableImage;
 				texture->deviceMemory = mappableMemory;
-				texture->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				texture->imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 
 				// Setup image memory barrier
 
@@ -394,7 +395,6 @@ namespace vkTools
 			// information and sub resource ranges
 			vk::ImageViewCreateInfo view;
 			view.pNext = nullptr;
-			view.image = VK_NULL_HANDLE;
 			view.viewType = vk::ImageViewType::e2D;
 			view.format = format;
 			view.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
@@ -406,7 +406,7 @@ namespace vkTools
 			texture->view = device.createImageView(view);
 
 			// Fill descriptor image info that can be used for setting up descriptor sets
-			texture->descriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			texture->descriptor.imageLayout = vk::ImageLayout::eGeneral;
 			texture->descriptor.imageView = texture->view;
 			texture->descriptor.sampler = texture->sampler;
 		}
@@ -458,8 +458,8 @@ namespace vkTools
 			vk::BufferCreateInfo bufferCreateInfo;
 			bufferCreateInfo.size = texCube.size();
 			// This buffer is used as a transfer source for the buffer copy
-			bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-			bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+			bufferCreateInfo.usage = vk::BufferUsageFlagBits::eTransferSrc;
+			bufferCreateInfo.sharingMode = vk::SharingMode::eExclusive;
 
 			stagingBuffer = device.createBuffer(bufferCreateInfo);
 
@@ -521,7 +521,7 @@ namespace vkTools
 			// Cube faces count as array layers in Vulkan
 			imageCreateInfo.arrayLayers = 6;
 			// This flag is required for cube map images
-			imageCreateInfo.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+			imageCreateInfo.flags = vk::ImageCreateFlagBits::eCubeCompatible;
 
 			texture->image = device.createImage(imageCreateInfo);
 
@@ -538,8 +538,8 @@ namespace vkTools
 
 			// Image barrier for optimal image (target)
 			// Set initial layout for all array layers (faces) of the optimal (target) tiled texture
-			vk::ImageSubresourceRange subresourceRange = {};
-			subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			vk::ImageSubresourceRange subresourceRange;
+			subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
 			subresourceRange.baseMipLevel = 0;
 			subresourceRange.levelCount = texture->mipLevels;
 			subresourceRange.layerCount = 6;
@@ -612,7 +612,7 @@ namespace vkTools
 			device.destroyBuffer(stagingBuffer);
 
 			// Fill descriptor image info that can be used for setting up descriptor sets
-			texture->descriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			texture->descriptor.imageLayout = vk::ImageLayout::eGeneral;
 			texture->descriptor.imageView = texture->view;
 			texture->descriptor.sampler = texture->sampler;
 		}
@@ -678,7 +678,7 @@ namespace vkTools
 			memAllocInfo.memoryTypeIndex = vkhelper::getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
 			
 			stagingMemory = device.allocateMemory(memAllocInfo);
-			device.bindBufferMemory(stagingBuffer, stagingMemory);
+			device.bindBufferMemory(stagingBuffer, stagingMemory, 0);
 			// Copy texture data into staging buffer
 			void *data;
 			data = device.mapMemory(stagingMemory, 0, memReqs.size, vk::MemoryMapFlags());
@@ -694,7 +694,7 @@ namespace vkTools
 				for (uint32_t level = 0; level < texture->mipLevels; level++)
 				{
 					vk::BufferImageCopy bufferCopyRegion = {};
-					bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+					bufferCopyRegion.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
 					bufferCopyRegion.imageSubresource.mipLevel = level;
 					bufferCopyRegion.imageSubresource.baseArrayLayer = layer;
 					bufferCopyRegion.imageSubresource.layerCount = 1;
@@ -742,7 +742,7 @@ namespace vkTools
 			// Image barrier for optimal image (target)
 			// Set initial layout for all array layers (faces) of the optimal (target) tiled texture
 			vk::ImageSubresourceRange subresourceRange = {};
-			subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
 			subresourceRange.baseMipLevel = 0;
 			subresourceRange.levelCount = texture->mipLevels;
 			subresourceRange.layerCount = texture->layerCount;
@@ -798,7 +798,7 @@ namespace vkTools
 			texture->sampler = device.createSampler(sampler);
 			// Create image view
 			vk::ImageViewCreateInfo view;
-			view.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+			view.viewType = vk::ImageViewType::e2D;
 			view.format = format;
 			view.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
 			view.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
@@ -810,7 +810,7 @@ namespace vkTools
 			device.freeMemory(stagingMemory);
 			device.destroyBuffer(stagingBuffer);
 			// Fill descriptor image info that can be used for setting up descriptor sets
-			texture->descriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			texture->descriptor.imageLayout = vk::ImageLayout::eGeneral;
 			texture->descriptor.imageView = texture->view;
 			texture->descriptor.sampler = texture->sampler;
 		}
@@ -848,8 +848,8 @@ namespace vkTools
 			vk::BufferCreateInfo bufferCreateInfo;
 			bufferCreateInfo.size = bufferSize;
 			// This buffer is used as a transfer source for the buffer copy
-			bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-			bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+			bufferCreateInfo.usage = vk::BufferUsageFlagBits::eTransferSrc;
+			bufferCreateInfo.sharingMode = vk::SharingMode::eExclusive;
 
 			stagingBuffer=device.createBuffer(bufferCreateInfo);
 
@@ -904,7 +904,7 @@ namespace vkTools
 			device.bindImageMemory(texture->image, texture->deviceMemory, 0);
 
 			vk::ImageSubresourceRange subresourceRange = {};
-			subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
 			subresourceRange.baseMipLevel = 0;
 			subresourceRange.levelCount = texture->mipLevels;
 			subresourceRange.layerCount = 1;
@@ -952,8 +952,7 @@ namespace vkTools
 			device.destroyBuffer(stagingBuffer);
 
 			// Create sampler
-			vk::SamplerCreateInfo sampler = {};
-			sampler.sType = vk::StructureType::eSamplerCreateInfo;
+			vk::SamplerCreateInfo sampler;
 			sampler.magFilter = vk::Filter::eLinear;
 			sampler.minFilter = vk::Filter::eLinear;
 			sampler.mipmapMode = vk::SamplerMipmapMode::eLinear;
@@ -967,10 +966,8 @@ namespace vkTools
 			texture->sampler = device.createSampler(sampler);
 
 			// Create image view
-			vk::ImageViewCreateInfo view = {};
-			view.sType = vk::StructureType::eImageViewCreateInfo;
+			vk::ImageViewCreateInfo view;
 			view.pNext = nullptr;
-			view.image = VK_NULL_HANDLE;
 			view.viewType = vk::ImageViewType::e2D;
 			view.format = format;
 			view.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
@@ -980,7 +977,7 @@ namespace vkTools
 			texture->view = device.createImageView(view);
 
 			// Fill descriptor image info that can be used for setting up descriptor sets
-			texture->descriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			texture->descriptor.imageLayout = vk::ImageLayout::eGeneral;
 			texture->descriptor.imageView = texture->view;
 			texture->descriptor.sampler = texture->sampler;
 		}
