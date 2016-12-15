@@ -2,9 +2,9 @@
 
 #include <cmath>
 
-namespace M3D
+namespace m3d
 {
-	namespace Math
+	namespace math
 	{
 		static inline float InvSqrt(float f)
 		{

@@ -2,9 +2,9 @@
 
 #include <arm_neon.h>
 
-namespace M3D
+namespace m3d
 {
-	namespace Math
+	namespace math
 	{
 		using VectorSIMD = float32x4_t __attribute((aligned(16)));
 

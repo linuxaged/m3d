@@ -9,9 +9,9 @@
 #include "SIMD_SSE.h"
 #endif
 
-namespace M3D
+namespace m3d
 {
-	namespace Math
+	namespace math
 	{
 		struct Vector3;
 //		struct Matrix4x4;

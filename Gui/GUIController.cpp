@@ -53,13 +53,13 @@ bool GUIController::IsMouseOver(GUIScreen * sc, GUIElement * el, int x, int y)
 	const ElementProportions & p = el->GetProportions();
 
 	//NDC is in [-1,1] x [-1,1] x [according to used API]
-	M3D::Math::MapRange(1.0f - p.botRight.y / s.height, M3D::Math::Range{0, 1.0f}, M3D::Math::Range{ -1.0f, 1.0f });
+	m3d::math::MapRange(1.0f - p.botRight.y / s.height, m3d::math::Range{0, 1.0f}, m3d::math::Range{ -1.0f, 1.0f });
 
-	float startX = M3D::Math::MapRange(p.topLeft.x / s.width, M3D::Math::Range{ 0, 1.0f }, M3D::Math::Range{ -1.0f, 1.0f });
-	float startY = M3D::Math::MapRange(1.0f - p.topLeft.y / s.height, M3D::Math::Range{ 0, 1.0f }, M3D::Math::Range{ -1.0f, 1.0f });
+	float startX = m3d::math::MapRange(p.topLeft.x / s.width, m3d::math::Range{ 0, 1.0f }, m3d::math::Range{ -1.0f, 1.0f });
+	float startY = m3d::math::MapRange(1.0f - p.topLeft.y / s.height, m3d::math::Range{ 0, 1.0f }, m3d::math::Range{ -1.0f, 1.0f });
 
-	float endX = M3D::Math::MapRange(p.botRight.x / s.width, M3D::Math::Range{ 0, 1.0f }, M3D::Math::Range{ -1.0f, 1.0f });
-	float endY = M3D::Math::MapRange(1.0f - p.botRight.y / s.height, M3D::Math::Range{ 0, 1.0f }, M3D::Math::Range{ -1.0f, 1.0f });
+	float endX = m3d::math::MapRange(p.botRight.x / s.width, m3d::math::Range{ 0, 1.0f }, m3d::math::Range{ -1.0f, 1.0f });
+	float endY = m3d::math::MapRange(1.0f - p.botRight.y / s.height, m3d::math::Range{ 0, 1.0f }, m3d::math::Range{ -1.0f, 1.0f });
 
 
 

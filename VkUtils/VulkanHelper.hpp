@@ -167,4 +167,19 @@ namespace vkhelper
 		cmdbuffer.pipelineBarrier(srcStageFlags, destStageFlags, vk::DependencyFlags(), nullptr, nullptr, imageMemoryBarrier);
 	}
 
+	// Fixed sub resource on first mip level and layer
+	void setImageLayout(
+		vk::CommandBuffer cmdbuffer,
+		vk::Image image,
+		vk::ImageAspectFlags aspectMask,
+		vk::ImageLayout oldImageLayout,
+		vk::ImageLayout newImageLayout)
+	{
+		vk::ImageSubresourceRange subresourceRange;
+		subresourceRange.aspectMask = aspectMask;
+		subresourceRange.baseMipLevel = 0;
+		subresourceRange.levelCount = 1;
+		subresourceRange.layerCount = 1;
+		setImageLayout(cmdbuffer, image, aspectMask, oldImageLayout, newImageLayout, subresourceRange);
+	}
 }

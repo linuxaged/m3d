@@ -80,8 +80,8 @@ namespace GUISystem
 	//Real size of elements in current resolution and screen size
 	typedef struct ElementProportions
 	{
-		M3D::Math::Vector2 topLeft;
-		M3D::Math::Vector2 botRight;
+		m3d::math::Vector2 topLeft;
+		m3d::math::Vector2 botRight;
 
 		float width;
 		float height;

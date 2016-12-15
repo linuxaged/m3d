@@ -1,8 +1,8 @@
 #include "Matrix.h"
 
-namespace M3D
+namespace m3d
 {
-	namespace Math
+	namespace math
 	{
 		//-------------------------------------------------------------
 		// Vector3

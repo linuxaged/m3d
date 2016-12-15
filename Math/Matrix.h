@@ -16,8 +16,8 @@
 
 #define USE_SIMD 1
 
-namespace M3D {
-	namespace Math {
+namespace m3d {
+	namespace math {
 		
 		/*
 		Vector2
@@ -510,7 +510,7 @@ namespace M3D {
 		///////////////////////////////////////////////////////////////////////////////
 		Matrix4x4 Matrix4x4::Perspective(float fovY, float aspectRatio, float front, float back)
 		{
-			float tangent = tanf(fovY / 2 * 3.14f / 180.0f);   // tangent of half fovY
+			float tangent = tanf(fovY / 2 * 3.141593f / 180.0f);   // tangent of half fovY
 			float height = front * tangent;           // half height of near plane
 			float width = height * aspectRatio;       // half width of near plane
 
@@ -644,7 +644,7 @@ namespace M3D {
 			return result;
 		}
 		
-	} // namespace Math
-} // namespace M3D
+	} // namespace math
+} // namespace m3d
 
 //#endif // M3D_MATH_MATRIX_H

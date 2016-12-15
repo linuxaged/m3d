@@ -2,9 +2,9 @@
 
 #include <emmintrin.h> // SSE2
 
-namespace M3D
+namespace m3d
 {
-	namespace Math
+	namespace math
 	{
 		using VectorSIMD = __m128;
 		

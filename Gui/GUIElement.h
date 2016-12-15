@@ -50,7 +50,7 @@ namespace GUISystem
 
 			bool CanBeBaked() const;
 			virtual void SetCanBaBaked(bool val);
-			const M3D::Math::Vector4 & GetColor() const;
+			const m3d::math::Vector4 & GetColor() const;
 
 			void SetVisible(bool val);
 
@@ -81,7 +81,7 @@ namespace GUISystem
 			ElementProportions proportions;
 
 
-			M3D::Math::Vector4 color;
+			m3d::math::Vector4 color;
 
 			IUserData * userData;
 

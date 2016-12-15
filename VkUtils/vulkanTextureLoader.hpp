@@ -16,7 +16,7 @@
 #include <android/asset_manager.h>
 #endif
 
-namespace vkTools
+namespace vkext
 {
 	/**
 	* @brief Encapsulates a Vulkan texture object (including view, sampler, descriptor, etc.)
@@ -126,11 +126,7 @@ namespace vkTools
 			texture->mipLevels = static_cast<uint32_t>(tex2D.levels());
 
 			// Get device properites for the requested texture format
-			//vk::ImageFormatProperties formatProperties;
-			auto formatProperties = physicalDevice.getImageFormatProperties(format,
-				vk::ImageType::e2D, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment, vk::ImageCreateFlags(), &formatProperties);
-			//VkFormatProperties formatProperties;
-			//vkGetPhysicalDeviceFormatProperties(vulkanDevice->physicalDevice, format, &formatProperties);
+			vk::FormatProperties formatProperties = physicalDevice.getFormatProperties(format);
 
 			// Only use linear tiling if requested (and supported by the device)
 			// Support for linear tiling is mostly limited, so prefer to use
@@ -141,14 +137,10 @@ namespace vkTools
 
 			vk::MemoryAllocateInfo memAllocInfo;
 			vk::MemoryRequirements memReqs;
-			//VkMemoryAllocateInfo memAllocInfo = vkTools::initializers::memoryAllocateInfo();
-			//VkMemoryRequirements memReqs;
 
 			// Use a separate command buffer for texture loading
 			vk::CommandBufferBeginInfo cmdBufInfo;
 			cmdBuffer.begin(cmdBufInfo);
-			//VkCommandBufferBeginInfo cmdBufInfo = vkTools::initializers::commandBufferBeginInfo();
-			//VK_CHECK_RESULT(vkBeginCommandBuffer(cmdBuffer, &cmdBufInfo));
 
 			if (useStaging)
 			{
@@ -267,9 +259,6 @@ namespace vkTools
 				vk::SubmitInfo submitInfo;
 				submitInfo.commandBufferCount = 1;
 				submitInfo.pCommandBuffers = &cmdBuffer;
-				//VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, copyFence));
-
-				//VK_CHECK_RESULT(vkWaitForFences(vulkanDevice->logicalDevice, 1, &copyFence, VK_TRUE, DEFAULT_FENCE_TIMEOUT));
 
 				queue.submit(submitInfo, copyFence);
 				device.waitForFences(copyFence, VK_TRUE, DEFAULT_FENCE_TIMEOUT);
@@ -348,11 +337,11 @@ namespace vkTools
 
 				// Setup image memory barrier
 
-				setImageLayout(
+				vkhelper::setImageLayout(
 					cmdBuffer,
 					texture->image,
-					VK_IMAGE_ASPECT_COLOR_BIT,
-					VK_IMAGE_LAYOUT_PREINITIALIZED,
+					vk::ImageAspectFlagBits::eColor,
+					vk::ImageLayout::ePreinitialized,
 					texture->imageLayout);
 
 				// Submit command buffer containing copy and image layout commands

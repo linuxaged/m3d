@@ -21,7 +21,7 @@ GUIElement::GUIElement(const std::string & name)
 	this->max.pixelW = 0;
 	this->max.pixelH = 0;
 
-	this->color = M3D::Math::Vector4{ 0.0f, 0.0f, 0.0f, 0.0f };
+	this->color = m3d::math::Vector4{ 0.0f, 0.0f, 0.0f, 0.0f };
 
 	this->parent = NULL;
 
@@ -125,7 +125,7 @@ const ElementProportions & GUIElement::GetProportions() const
 	return this->proportions;
 }
 
-const M3D::Math::Vector4 & GUIElement::GetColor() const
+const m3d::math::Vector4 & GUIElement::GetColor() const
 {
 	return this->color;
 }
@@ -353,8 +353,8 @@ void GUIElement::CalculateProportions(const ElementProportions & parentProportio
 		}
 
 		//this will overflow from parent element
-		this->proportions.topLeft = M3D::Math::Vector2(x, y);
-		this->proportions.botRight = M3D::Math::Vector2(x + w, y + h);
+		this->proportions.topLeft = m3d::math::Vector2(x, y);
+		this->proportions.botRight = m3d::math::Vector2(x + w, y + h);
 		this->proportions.width = w;
 		this->proportions.height = h;
 		this->proportions.depth = parentProportions.depth + 0.01f;

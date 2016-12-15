@@ -57,9 +57,9 @@ public:
         glm::mat4 modelMatrix;
         glm::mat4 viewMatrix;
 	#else
-		M3D::Math::Matrix4x4 projectionMatrix;
-		M3D::Math::Matrix4x4 modelMatrix;
-		M3D::Math::Matrix4x4 viewMatrix;
+		m3d::math::Matrix4x4 projectionMatrix;
+		m3d::math::Matrix4x4 modelMatrix;
+		m3d::math::Matrix4x4 viewMatrix;
 		#endif
 	} uboVS;
 
@@ -441,7 +441,7 @@ public:
 			0.0f, 0.0f, -1.22f, -2.22f,
 			0.0f, 0.0f, -1.0f, 0.0f
 		};
-		uboVS.projectionMatrix = M3D::Math::Matrix4x4::Perspective(120.0f, 1.0f, 0.1f, 256.0f);
+		uboVS.projectionMatrix = m3d::math::Matrix4x4::Perspective(120.0f, 1.0f, 0.1f, 256.0f);
 		char buf[512];
 		uboVS.projectionMatrix.ToString(buf, 512);
 		printf("pmat = %s\n", buf);
@@ -451,10 +451,10 @@ public:
 			0.0f, 0.0f, 1.0f, -10.0f,
 			0.0f, 0.0f, 0.0f, 1.0f
 		};
-		uboVS.viewMatrix = M3D::Math::Matrix4x4::Translation(M3D::Math::Vector3(0.0f, 0.0f, zoom));
+		uboVS.viewMatrix = m3d::math::Matrix4x4::Translation(m3d::math::Vector3(0.0f, 0.0f, zoom));
 		uboVS.viewMatrix.ToString(buf, 512);
 		printf("vmat = %s\n", buf);
-		uboVS.modelMatrix = M3D::Math::Matrix4x4();
+		uboVS.modelMatrix = m3d::math::Matrix4x4();
 #endif
 		
 

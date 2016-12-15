@@ -128,9 +128,9 @@ private:
 		glm::mat4 modelMatrix;
 		glm::mat4 viewMatrix;
 #else
-		M3D::Math::Matrix4x4 projectionMatrix;
-		M3D::Math::Matrix4x4 modelMatrix;
-		M3D::Math::Matrix4x4 viewMatrix;
+		m3d::math::Matrix4x4 projectionMatrix;
+		m3d::math::Matrix4x4 modelMatrix;
+		m3d::math::Matrix4x4 viewMatrix;
 #endif
 	} uboVS;
 

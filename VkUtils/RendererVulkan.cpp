@@ -749,8 +749,6 @@ bool RendererVulkan::CreateVertices()
 	vk::MemoryAllocateInfo memAlloc;
 	vk::MemoryRequirements memReqs;
 
-	void *data;
-
 	// Static data like vertex and index buffer should be stored on the device memory 
 	// for optimal (and fastest) access by the GPU
 	//
@@ -792,7 +790,7 @@ bool RendererVulkan::CreateVertices()
 	memAlloc.memoryTypeIndex = vkhelper::getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible);
 	stagingBuffers.vertices.memory = device.allocateMemory(memAlloc);
 	// Map and copy
-	data = device.mapMemory(stagingBuffers.vertices.memory, 0, memAlloc.allocationSize, vk::MemoryMapFlags());
+	void* data = device.mapMemory(stagingBuffers.vertices.memory, 0, memAlloc.allocationSize, vk::MemoryMapFlags());
 	memcpy(data, vertexBuffer.data(), vertexBufferSize);
 	device.unmapMemory(stagingBuffers.vertices.memory);
 	device.bindBufferMemory(stagingBuffers.vertices.buffer, stagingBuffers.vertices.memory, 0);
@@ -940,7 +938,7 @@ bool RendererVulkan::CreateUniformBuffers()
 		0.0f, 0.0f, -1.22f, -2.22f,
 		0.0f, 0.0f, -1.0f, 0.0f
 	};
-	uboVS.projectionMatrix = M3D::Math::Matrix4x4::Perspective(60.0f, 1.0f, 0.1f, 256.0f);
+	uboVS.projectionMatrix = m3d::math::Matrix4x4::Perspective(60.0f, 1.0f, 0.1f, 256.0f);
 	char buf[512];
 	uboVS.projectionMatrix.ToString(buf, 512);
 	printf("pmat = %s\n", buf);
@@ -950,10 +948,10 @@ bool RendererVulkan::CreateUniformBuffers()
 		0.0f, 0.0f, 1.0f, -10.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
 	};
-	uboVS.viewMatrix = M3D::Math::Matrix4x4::Translation(M3D::Math::Vector3(0.0f, 0.0f, -10.0f));
+	uboVS.viewMatrix = m3d::math::Matrix4x4::Translation(m3d::math::Vector3(0.0f, 0.0f, -10.0f));
 	uboVS.viewMatrix.ToString(buf, 512);
 	printf("vmat = %s\n", buf);
-	uboVS.modelMatrix = M3D::Math::Matrix4x4();
+	uboVS.modelMatrix = m3d::math::Matrix4x4();
 #endif
 
 
