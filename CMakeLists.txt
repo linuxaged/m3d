@@ -17,6 +17,10 @@ find_package(Vulkan REQUIRED)
 link_libraries(${VULKAN_LIBRARY})
 include_directories(${VULKAN_INCLUDE_DIR})
 
+find_package(FBX REQUIRED)
+link_libraries(${FBX_LIBRARY})
+include_directories(${FBX_INCLUDE_DIR})
+
 if(WIN32)
     add_definitions(-DVK_USE_PLATFORM_WIN32_KHR)
 else()

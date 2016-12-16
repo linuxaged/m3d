@@ -1,6 +1,7 @@
 #include "Scene.h"
 #include "tiny_obj_loader.h"
-
+#include <fbxsdk.h>
+ 
 void Scene::Init()
 {
 	diffuseMaps = packed_freelist<DiffuseMap>(512);

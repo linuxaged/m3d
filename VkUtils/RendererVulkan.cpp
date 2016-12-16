@@ -3,6 +3,7 @@
 #include "VulkanHelper.hpp"
 #include "Matrix.h"
 #include "vulkanTextureLoader.hpp"
+#include "Scene.h"
 
 #include <iostream>
 
@@ -308,7 +309,7 @@ bool RendererVulkan::CreateSemaphores()
 	return true;
 }
 
-bool RendererVulkan::SetupVulkan()
+bool RendererVulkan::Init(Scene* scene)
 {
 	if (!CreateInstance())
 	{
@@ -334,6 +335,8 @@ bool RendererVulkan::SetupVulkan()
 	{
 		return false;
 	}
+
+	this->scene = scene;
 	// TODO:
 	OnWindowSizeChanged();
 }

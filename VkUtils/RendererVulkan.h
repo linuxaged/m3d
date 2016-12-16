@@ -3,6 +3,8 @@
 
 #define DEFAULT_FENCE_TIMEOUT 100000000000
 
+class Scene;
+
 class RendererVulkan
 {
 private:
@@ -17,7 +19,7 @@ private:
 	bool CreateSemaphores();
 
 public:
-	bool SetupVulkan();
+	bool Init(Scene* scene);
 
 private:
 	/* Render Pass */
@@ -146,4 +148,7 @@ private:
 	std::vector<vk::Framebuffer>		framebuffers;
 	vk::Pipeline						pipeline;
 	vk::PipelineLayout					pipelineLayout;
+
+private:
+	Scene* scene;
 };
