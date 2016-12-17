@@ -8,12 +8,12 @@ if (WIN32)
 else()
 
     find_path(
-	VULKAN_INCLUDE_DIR NAMES vulkan/vulkan.h 
-	HINTS 
+	VULKAN_INCLUDE_DIR NAMES vulkan/vulkan.h
+	HINTS
 		"$ENV{VULKAN_SDK}/include"
 		"$ENV{VULKAN_SDK}/x86_64/include")
     find_library(
-	VULKAN_LIBRARY NAMES vulkan 
+	VULKAN_LIBRARY NAMES vulkan
 	HINTS
 		"$ENV{VULKAN_SDK}/lib"
 		"$ENV{VULKAN_SDK}/x86_64/lib")
