@@ -1,7 +1,79 @@
-#include "Scene.h"
+#include "Scene.hpp"
 #include "tiny_obj_loader.h"
+
 #include <fbxsdk.h>
- 
+
+Scene::Scene()
+{
+	FbxManager* fbxManager = FbxManager::Create();
+
+	FbxIOSettings * pFbxIOSettings = FbxIOSettings::Create(fbxManager, IOSROOT);
+	fbxManager->SetIOSettings(pFbxIOSettings);
+
+	(*(fbxManager->GetIOSettings())).SetBoolProp(IMP_FBX_MATERIAL, true);
+	(*(fbxManager->GetIOSettings())).SetBoolProp(IMP_FBX_TEXTURE, true);
+	(*(fbxManager->GetIOSettings())).SetBoolProp(IMP_FBX_LINK, false);
+	(*(fbxManager->GetIOSettings())).SetBoolProp(IMP_FBX_SHAPE, false);
+	(*(fbxManager->GetIOSettings())).SetBoolProp(IMP_FBX_GOBO, false);
+	(*(fbxManager->GetIOSettings())).SetBoolProp(IMP_FBX_ANIMATION, true);
+	(*(fbxManager->GetIOSettings())).SetBoolProp(IMP_FBX_GLOBAL_SETTINGS, true);
+
+
+	bool bEmbedMedia = true;
+	(*(fbxManager->GetIOSettings())).SetBoolProp(EXP_FBX_MATERIAL, true);
+	(*(fbxManager->GetIOSettings())).SetBoolProp(EXP_FBX_TEXTURE, true);
+	(*(fbxManager->GetIOSettings())).SetBoolProp(EXP_FBX_EMBEDDED, bEmbedMedia);
+	(*(fbxManager->GetIOSettings())).SetBoolProp(EXP_FBX_SHAPE, true);
+	(*(fbxManager->GetIOSettings())).SetBoolProp(EXP_FBX_GOBO, true);
+	(*(fbxManager->GetIOSettings())).SetBoolProp(EXP_FBX_ANIMATION, true);
+	(*(fbxManager->GetIOSettings())).SetBoolProp(EXP_FBX_GLOBAL_SETTINGS, true);
+
+	FbxImporter* pFbxImporter = FbxImporter::Create(fbxManager, "");
+
+	const char* fileName = "file.fbx";
+
+	// Initialize the importer.
+	bool result = pFbxImporter->Initialize(fileName, -1, fbxManager->GetIOSettings());
+	if (!result)
+	{
+		printf("Get error when init FBX Importer: %s\n\n", pFbxImporter->GetStatus().GetErrorString());
+		exit(-1);
+	}
+
+	// fbx version number
+	int major, minor, revision;
+	pFbxImporter->GetFileVersion(major, minor, revision);
+
+	// import pFbxScene
+	FbxScene* pFbxScene = FbxScene::Create(fbxManager, "myScene");
+	pFbxImporter->Import(pFbxScene);
+	pFbxImporter->Destroy();
+	pFbxImporter = nullptr;
+
+	// check axis system
+	FbxAxisSystem axisSystem = pFbxScene->GetGlobalSettings().GetAxisSystem();
+	FbxAxisSystem vulkanAxisSystem(FbxAxisSystem::eYAxis, FbxAxisSystem::eParityOdd, FbxAxisSystem::eRightHanded);
+	if (axisSystem != vulkanAxisSystem)
+	{
+		axisSystem.ConvertScene(pFbxScene);
+	}
+
+	// check unit system
+	FbxSystemUnit systemUnit = pFbxScene->GetGlobalSettings().GetSystemUnit();
+	if (systemUnit.GetScaleFactor() != 1.0)
+	{
+		FbxSystemUnit::cm.ConvertScene(pFbxScene);
+	}
+
+	// Triangulate Mesh
+	FbxGeometryConverter fbxGeometryConverter(fbxManager);
+	fbxGeometryConverter.Triangulate(pFbxScene, true);
+
+	// TODO:
+	std::vector<uint32_t> loadedMeshIds = {0};
+	LoadMeshes(pFbxScene, fileName, &loadedMeshIds);
+}
+
 void Scene::Init()
 {
 	diffuseMaps = packed_freelist<DiffuseMap>(512);
@@ -12,192 +84,86 @@ void Scene::Init()
 	cameras = packed_freelist<Camera>(32);
 }
 
-void LoadMeshes(
-	Scene& scene,
-	const std::string& filename,
-	std::vector<uint32_t>* loadedMeshIDs)
+void LoadMeshes(FbxNode *pFbxNode)
 {
-	// assume mtl is in the same folder as the obj
-	std::string mtl_basepath = filename;
-	size_t last_slash = mtl_basepath.find_last_of("/");
-	if (last_slash == std::string::npos)
-		mtl_basepath = "./";
-	else
-		mtl_basepath = mtl_basepath.substr(0, last_slash + 1);
-
-	std::vector<tinyobj::shape_t> shapes;
-	std::vector<tinyobj::material_t> materials;
-	std::string err;
-	if (!tinyobj::LoadObj(
-		shapes, materials, err,
-		filename.c_str(), mtl_basepath.c_str(),
-		tinyobj::triangulation | tinyobj::calculate_normals))
+	// Material
+	const int materialCount = pFbxNode->GetMaterialCount();
+	for (int i = 0; i < materialCount; ++i)
 	{
-		fprintf(stderr, "tinyobj::LoadObj(%s) error: %s\n", filename.c_str(), err.c_str());
-		return;
-	}
-
-	if (!err.empty())
-	{
-		fprintf(stderr, "tinyobj::LoadObj(%s) warning: %s\n", filename.c_str(), err.c_str());
-	}
-
-	// Add materials to the scene
-	std::map<std::string, uint32_t> diffuseMapCache;
-	std::vector<uint32_t> newMaterialIDs;
-	for (const tinyobj::material_t& materialToAdd : materials)
-	{
-		Material newMaterial;
-
-		newMaterial.name = materialToAdd.name;
-
-		newMaterial.ambient[0] = materialToAdd.ambient[0];
-		newMaterial.ambient[1] = materialToAdd.ambient[1];
-		newMaterial.ambient[2] = materialToAdd.ambient[2];
-		newMaterial.diffuse[0] = materialToAdd.diffuse[0];
-		newMaterial.diffuse[1] = materialToAdd.diffuse[1];
-		newMaterial.diffuse[2] = materialToAdd.diffuse[2];
-		newMaterial.specular[0] = materialToAdd.specular[0];
-		newMaterial.specular[1] = materialToAdd.specular[1];
-		newMaterial.specular[2] = materialToAdd.specular[2];
-		newMaterial.shininess = materialToAdd.shininess;
-
-		newMaterial.diffuseMapId = -1;
-
-		if (!materialToAdd.diffuse_texname.empty())
+		FbxSurfaceMaterial *pFbxMaterial = pFbxNode->GetMaterial(i);
+		if (pFbxMaterial && !pFbxMaterial->GetUserDataPtr())
 		{
-			auto cachedTexture = diffuseMapCache.find(materialToAdd.diffuse_texname);
-
-			if (cachedTexture != end(diffuseMapCache))
+			FbxAutoPtr<Material> pMaterial(new Material);
+			if (pMaterial->init(pFbxMaterial))
 			{
-				newMaterial.diffuseMapId = cachedTexture->second;
+				pFbxMaterial->SetUserDataPtr(pMaterial.Release());
 			}
-			else
+		}
+	}
+
+	FbxNodeAttribute *nodeAttribute = pFbxNode->GetNodeAttribute();
+	if (nodeAttribute)
+	{
+		// Mesh
+		if (nodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh)
+		{
+			FbxMesh *pFbxMesh = pFbxNode->GetMesh();
+			if (pFbxMesh && !pFbxMesh->GetUserDataPtr())
 			{
-				std::string diffuse_texname_full = mtl_basepath + materialToAdd.diffuse_texname;
-				int x, y, comp;
-
+				FbxAutoPtr<Mesh> pMesh(new Mesh);
+				if (pMesh->init(pFbxMesh))
 				{
-					float maxAnisotropy;
-
-					vkext::VulkanTexture newDiffuseMapTO;
-					vkext::VulkanTextureLoader vulkanTextureLoader();
-					// TODO: load texture
-
-					DiffuseMap newDiffuseMap;
-					newDiffuseMap.texture = newDiffuseMapTO;
-
-					uint32_t newDiffuseMapID = scene.diffuseMaps.insert(newDiffuseMap);
-
-					diffuseMapCache.emplace(materialToAdd.diffuse_texname, newDiffuseMapID);
-
-					newMaterial.diffuseMapId = newDiffuseMapID;
-					// TODO: release texture data
+					pFbxMesh->SetUserDataPtr(pMesh.Release());
 				}
 			}
 		}
-
-		uint32_t newMaterialID = scene.materials.insert(newMaterial);
-
-		newMaterialIDs.push_back(newMaterialID);
-	}
-
-	// Add meshes (and prototypes) to the scene
-	for (const tinyobj::shape_t& shapeToAdd : shapes)
-	{
-		const tinyobj::mesh_t& meshToAdd = shapeToAdd.mesh;
-
-		Mesh newMesh;
-
-		newMesh.name = shapeToAdd.name;
-
-		if (meshToAdd.positions.empty())
+		// Light
+		else if (nodeAttribute->GetAttributeType() == FbxNodeAttribute::eLight)
 		{
-			// should never happen
-			assert("there is no vertices in .obj");
-		}
-		else
-		{
-			/* TODO: Bind Vertex Buffer */
-		}
-
-		if (meshToAdd.texcoords.empty())
-		{
-			assert("there is no uv in .obj");
-		}
-		else
-		{
-			/* TODO: Bind UV */
-		}
-
-		if (meshToAdd.normals.empty())
-		{
-			assert("there is no normal in .obj");
-		}
-		else
-		{
-			/* TODO: Bind Normal */
-		}
-
-		if (meshToAdd.indices.empty())
-		{
-			// should never happen
-			assert("there is no indies in .obj");
-		}
-		else
-		{
-			/* TODO: Bind Indices */
-		}
-
-		// split mesh into draw calls with different materials
-		int numFaces = (int)meshToAdd.indices.size() / 3;
-		int currMaterialFirstFaceIndex = 0;
-		for (int faceIdx = 0; faceIdx < numFaces; faceIdx++)
-		{
-			bool isLastFace = faceIdx + 1 == numFaces;
-			bool isNextFaceDifferent = isLastFace || meshToAdd.material_ids[faceIdx + 1] != meshToAdd.material_ids[faceIdx];
-			if (isNextFaceDifferent)
+			FbxLight *pFbxLight = pFbxNode->GetLight();
+			if (pFbxLight && !pFbxLight->GetUserDataPtr())
 			{
-				DrawElementsIndirectCommand currDrawCommand;
-				currDrawCommand.count = ((faceIdx + 1) - currMaterialFirstFaceIndex) * 3;
-				currDrawCommand.primCount = 1;
-				currDrawCommand.firstIndex = currMaterialFirstFaceIndex * 3;
-				currDrawCommand.baseVertex = 0;
-				currDrawCommand.baseInstance = 0;
-
-				uint32_t currMaterialID = newMaterialIDs[meshToAdd.material_ids[faceIdx]];
-
-				newMesh.drawCommands.push_back(currDrawCommand);
-				newMesh.materialIds.push_back(currMaterialID);
-
-				currMaterialFirstFaceIndex = faceIdx + 1;
+				FbxAutoPtr<Light> pLight(new Light);
+				if (pLight->init(pFbxLight))
+				{
+					pFbxLight->SetUserDataPtr(pLight.Release());
+				}
 			}
 		}
+	}
 
-		uint32_t newMeshID = scene.meshes.insert(newMesh);
-
-		if (loadedMeshIDs)
-		{
-			loadedMeshIDs->push_back(newMeshID);
-		}
+	const int childCount = pFbxNode->GetChildCount();
+	for (int i = 0; i < childCount; ++i)
+	{
+		LoadMeshes(pFbxNode->GetChild(i));
 	}
 }
 
+void LoadMeshes(
+	FbxScene* pFbxScene,
+	const char* filename,
+	std::vector<uint32_t>* loadedMeshIDs)
+{
+	// TODO: load texture
+
+	LoadMeshes(pFbxScene->GetRootNode());
+}
+
 void AddInstance(
-	Scene& scene,
+	Scene& pFbxScene,
 	uint32_t meshID,
 	uint32_t* newInstanceID)
 {
 	Transform newTransform;
 	newTransform.scale = m3d::math::Vector3(1.0f, 1.0f, 1.0f);
 
-	uint32_t newTransformID = scene.transforms.insert(newTransform);
+	uint32_t newTransformID = pFbxScene.transforms.insert(newTransform);
 
 	Instance newInstance;
 	newInstance.meshId = meshID;
 	newInstance.transformId = newTransformID;
 
-	uint32_t tmpNewInstanceID = scene.instances.insert(newInstance);
+	uint32_t tmpNewInstanceID = pFbxScene.instances.insert(newInstance);
 	if (newInstanceID)
 	{
 		*newInstanceID = tmpNewInstanceID;

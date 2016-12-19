@@ -16,6 +16,10 @@
 #include <android/asset_manager.h>
 #endif
 
+#include "VulkanHelper.hpp"
+
+#define DEFAULT_FENCE_TIMEOUT 100000000000
+
 namespace vkext
 {
 	/**

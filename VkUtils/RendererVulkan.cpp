@@ -1,9 +1,9 @@
 
-#include "RendererVulkan.h"
+#include "RendererVulkan.hpp"
 #include "VulkanHelper.hpp"
 #include "Matrix.h"
 #include "vulkanTextureLoader.hpp"
-#include "Scene.h"
+#include "Scene.hpp"
 
 #include <iostream>
 
@@ -339,6 +339,8 @@ bool RendererVulkan::Init(Scene* scene)
 	this->scene = scene;
 	// TODO:
 	OnWindowSizeChanged();
+
+	return true;
 }
 
 /* Render Pass */

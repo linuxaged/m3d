@@ -18,6 +18,7 @@
     * choose a config file format
     * 
 * GUI
+* [Code Style](http://clang.llvm.org/docs/ClangFormat.html)
 
 
 

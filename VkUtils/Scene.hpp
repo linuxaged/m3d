@@ -9,13 +9,34 @@
 #include "packed_freelist.h"
 #include "vulkanTextureLoader.hpp"
 
+namespace fbxsdk
+{
+	class FbxScene;
+	class FbxLight;
+	class FbxSurfaceMaterial;
+	class FbxMesh;
+}
+
 struct DiffuseMap
 {
 	vkext::VulkanTexture texture;
 };
 
+struct Light
+{
+	bool init(fbxsdk::FbxLight* fbxLight)
+	{
+		return true;
+	}
+};
+
 struct Material
 {
+	bool init(fbxsdk::FbxSurfaceMaterial *fbxMaterial)
+	{
+		// TODO
+		return true;
+	}
 	std::string name;
 	float ambient[3];
 	float diffuse[3];
@@ -26,6 +47,11 @@ struct Material
 
 struct Mesh
 {
+	bool init(fbxsdk::FbxMesh *fbxMesh)
+	{
+		// TODO
+		return true;
+	}
 	std::string name;
 
 	std::vector<float> vertices;
@@ -74,12 +100,13 @@ public:
 
 	uint32_t mainCameraID;
 
+	Scene();
 	void Init();
 };
 
 void LoadMeshes(
-	Scene& scene,
-	const std::string& filename,
+	fbxsdk::FbxScene* scene,
+	const char* filename,
 	std::vector<uint32_t>* loadedMeshIDs);
 
 void AddInstance(
