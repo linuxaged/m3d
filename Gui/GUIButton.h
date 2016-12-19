@@ -1,88 +1,82 @@
 #ifndef GUI_SYSTEM_BUTTON_H
 #define GUI_SYSTEM_BUTTON_H
 
-#include <string>
 #include "GUIEvents.h"
+#include <string>
 
-#include "./GUIStructures.h"
 #include "./GUIElement.h"
+#include "./GUIStructures.h"
 
-namespace GUISystem
-{
-	typedef struct GUIButtonTextures
-	{
-		std::string textureName;
-		std::string textureNameClicked;
-		std::string textureNameHover;
+namespace GUISystem {
+typedef struct GUIButtonTextures {
+    std::string textureName;
+    std::string textureNameClicked;
+    std::string textureNameHover;
 
-		const std::string & Get(int i) const
-		{
-			if (i == 0) return this->textureName;
-			else if (i == 1) return this->textureNameClicked;
-			else return this->textureNameHover;
-		};
+    const std::string& Get(int i) const
+    {
+        if (i == 0)
+            return this->textureName;
+        else if (i == 1)
+            return this->textureNameClicked;
+        else
+            return this->textureNameHover;
+    };
 
+} GUIButtonTextures;
 
-	} GUIButtonTextures;
+typedef struct GUIButtonDelegates {
+    OnClickDelegate onClick;
+    OnDownDelegate onDown;
+    OnUpDelegate onUp;
+    OnOverDelegate onOver;
+    OnStateChangeDelegate onStateChange;
 
-	typedef struct GUIButtonDelegates
-	{
-		OnClickDelegate onClick;
-		OnDownDelegate onDown;
-		OnUpDelegate onUp;
-		OnOverDelegate onOver;
-		OnStateChangeDelegate onStateChange;
+    WhileDownDelegate whileDown;
+    WhileHoverDelegate whileHover;
 
-		WhileDownDelegate whileDown;
-		WhileHoverDelegate whileHover;
+} GUIButtonDelegates;
 
-    } GUIButtonDelegates;
+class GUIButton : public GUIElement {
+public:
+    GUIButton(const std::string& name);
+    ~GUIButton();
 
+    virtual GUIButton* GetButton();
 
-	class GUIButton : public GUIElement
-	{
-		public:
-			GUIButton(const std::string & name);
-			~GUIButton();
+    ButtonElementState GetState() const;
 
-			virtual GUIButton * GetButton();
+    const std::string& GetActiveTextureName() const;
+    const GUIButtonTextures& GetTextures() const;
 
-			ButtonElementState GetState() const;
+    void SetTextures(GUIButtonTextures& textures);
 
-			const std::string & GetActiveTextureName() const;
-			const GUIButtonTextures & GetTextures() const;
+    void SetOnClickCallback(OnClickDelegate onClickDelegate);
+    void SetOnDownCallback(OnDownDelegate onDownDelegate);
+    void SetOnUpCallback(OnUpDelegate onUpDelegate);
+    void SetOnOverCallback(OnOverDelegate onOverDelegate);
+    void SetOnStateChangeCallback(OnStateChangeDelegate onStateChange);
 
-			void SetTextures(GUIButtonTextures & textures);
+    void SetWhileDownCallback(WhileDownDelegate whileDownDelegate);
+    void SetWhileHoverCallback(WhileHoverDelegate whileHoverDelegate);
 
-			void SetOnClickCallback(OnClickDelegate onClickDelegate);
-			void SetOnDownCallback(OnDownDelegate onDownDelegate);
-			void SetOnUpCallback(OnUpDelegate onUpDelegate);
-			void SetOnOverCallback(OnOverDelegate onOverDelegate);
-			void SetOnStateChangeCallback(OnStateChangeDelegate onStateChange);
+    void SetState(ButtonElementState state);
 
-			void SetWhileDownCallback(WhileDownDelegate whileDownDelegate);
-			void SetWhileHoverCallback(WhileHoverDelegate whileHoverDelegate);
+    void AddJoinedButton(GUIButton* btn);
 
-			void SetState(ButtonElementState state);
+protected:
+    GUIButtonTextures textures;
 
-			void AddJoinedButton(GUIButton * btn);
+    GUIButtonDelegates delegates;
 
-		protected:
-			GUIButtonTextures textures;
+    ButtonElementState actState;
 
-			GUIButtonDelegates delegates;
+private:
+    bool hasBeenDown;
+    std::vector<GUIButton*> joined;
 
-			ButtonElementState actState;
-
-		private:
-			bool hasBeenDown;
-			std::vector<GUIButton *> joined;
-
-			void SetStateJoined(ButtonElementState state);
-
-	};
-
+    void SetStateJoined(ButtonElementState state);
+};
 }
-
 
 #endif

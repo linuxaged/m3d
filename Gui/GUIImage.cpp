@@ -1,8 +1,6 @@
 #include "GUIImage.h"
 
-
 using namespace GUISystem;
-
 
 /*-----------------------------------------------------------
 Function:	ctor
@@ -12,31 +10,31 @@ Parametrs:
 Create GUI image
 Image is never baked and uses dynamic image
 -------------------------------------------------------------*/
-GUIImage::GUIImage(const std::string & name) : GUIElement(name)
+GUIImage::GUIImage(const std::string& name)
+    : GUIElement(name)
 {
-	this->canBeBaked = false;
+    this->canBeBaked = false;
 }
 
 GUIImage::~GUIImage()
 {
 }
 
-GUIImage * GUIImage::GetImage()
+GUIImage* GUIImage::GetImage()
 {
-	return this;
+    return this;
 }
 
 void GUIImage::SetCanBaBaked(bool val)
 {
-	if (val)
-	{
-		printf("GUI Image can not be baked. Settings will be ignored.\n");
-	}
+    if (val) {
+        printf("GUI Image can not be baked. Settings will be ignored.\n");
+    }
 }
 
-const std::string & GUIImage::GetActiveTextureName() const
+const std::string& GUIImage::GetActiveTextureName() const
 {
-	return this->textureName;
+    return this->textureName;
 }
 
 /*-----------------------------------------------------------
@@ -47,7 +45,7 @@ Paramaters:
 Set name of texture that is displayed on image
 Texture must be loaded manually elsewhere into texture pool
 -------------------------------------------------------------*/
-void GUIImage::SetTextureName(const std::string & name)
+void GUIImage::SetTextureName(const std::string& name)
 {
-	this->textureName = name;
+    this->textureName = name;
 }

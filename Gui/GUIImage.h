@@ -3,35 +3,29 @@
 
 #include <string>
 
-#include "GUIStructures.h"
 #include "GUIElement.h"
+#include "GUIStructures.h"
 
-namespace GUISystem
-{
+namespace GUISystem {
 
-	class GUIImage : public GUIElement
-	{
-		public:
-			GUIImage(const std::string & name);
-			~GUIImage();
+class GUIImage : public GUIElement {
+public:
+    GUIImage(const std::string& name);
+    ~GUIImage();
 
-			virtual GUIImage * GetImage();
+    virtual GUIImage* GetImage();
 
-			virtual void SetCanBaBaked(bool val);
+    virtual void SetCanBaBaked(bool val);
 
-			const std::string & GetActiveTextureName() const;
+    const std::string& GetActiveTextureName() const;
 
-			void SetTextureName(const std::string & name);
+    void SetTextureName(const std::string& name);
 
+protected:
+    std::string textureName;
 
-		protected:
-			std::string textureName;
-
-		private:
-
-	};
-
+private:
+};
 }
-
 
 #endif

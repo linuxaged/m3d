@@ -1,60 +1,58 @@
 #ifndef GUI_SYSTEM_CHECK_BOX_H
 #define GUI_SYSTEM_CHECK_BOX_H
 
-#include <string>
-#include "GUIStructures.h"
 #include "GUIElement.h"
+#include "GUIStructures.h"
+#include <string>
 
-namespace GUISystem
-{
+namespace GUISystem {
 
-	typedef struct GUICheckBoxTextures
-	{
-		std::string textureName;
-		std::string textureNameHover;
-		std::string textureNameClicked;
-		std::string textureNameChecked;
-		std::string textureNameCheckedHover;
+typedef struct GUICheckBoxTextures {
+    std::string textureName;
+    std::string textureNameHover;
+    std::string textureNameClicked;
+    std::string textureNameChecked;
+    std::string textureNameCheckedHover;
 
-		const std::string & Get(int i) const
-		{
-			if (i == 0) return this->textureName;
-			else if (i == 1) return this->textureNameHover;
-			else if (i == 2) return this->textureNameClicked;
-			else if (i == 3) return this->textureNameChecked;
-			else return this->textureNameCheckedHover;
-		};
+    const std::string& Get(int i) const
+    {
+        if (i == 0)
+            return this->textureName;
+        else if (i == 1)
+            return this->textureNameHover;
+        else if (i == 2)
+            return this->textureNameClicked;
+        else if (i == 3)
+            return this->textureNameChecked;
+        else
+            return this->textureNameCheckedHover;
+    };
 
-	} GUICheckBoxTextures;
+} GUICheckBoxTextures;
 
-	class GUICheckBox : public GUIElement
-	{
-		public:
-			GUICheckBox(const std::string & name);
-			~GUICheckBox();
+class GUICheckBox : public GUIElement {
+public:
+    GUICheckBox(const std::string& name);
+    ~GUICheckBox();
 
-			virtual GUICheckBox * GetCheckBox();
+    virtual GUICheckBox* GetCheckBox();
 
-			CheckBoxElementState GetState() const;
+    CheckBoxElementState GetState() const;
 
-			const std::string & GetActiveTextureName() const;
-			const GUICheckBoxTextures & GetTextures() const;
+    const std::string& GetActiveTextureName() const;
+    const GUICheckBoxTextures& GetTextures() const;
 
-			void SetTextures(GUICheckBoxTextures & textures);
+    void SetTextures(GUICheckBoxTextures& textures);
 
-			void SetState(CheckBoxElementState state);
+    void SetState(CheckBoxElementState state);
 
-		protected:
+protected:
+    GUICheckBoxTextures textures;
 
-			GUICheckBoxTextures textures;
+    CheckBoxElementState state;
 
-			CheckBoxElementState state;
-
-		private:
-
-	};
-
+private:
+};
 }
-
 
 #endif
