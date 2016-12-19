@@ -42,7 +42,7 @@ Create and destroy a Vulkan surface on an SDL window.
 #include <iostream>
 #include <vector>
 
-#include "RendererVulkan.h"
+#include "RendererVulkan.hpp"
 /*
  * Vulkan
  */

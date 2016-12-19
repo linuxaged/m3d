@@ -1,7 +1,9 @@
-#pragma once
+/*
+* Copyright (C) 2016 Tracy Ma
+* This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
+*/
 
-//#ifndef M3D_MATH_MATRIX_H
-//#define M3D_MATH_MATRIX_H
+#pragma once
 
 #include <cstring>
 #include <cstdio>
@@ -646,5 +648,3 @@ namespace m3d {
 		
 	} // namespace math
 } // namespace m3d
-
-//#endif // M3D_MATH_MATRIX_H

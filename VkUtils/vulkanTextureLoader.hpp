@@ -1,6 +1,7 @@
 /*
 * Texture loader for Vulkan
 *
+* Copyright (C) 2016 Tracy Ma
 * Copyright (C) 2016 by Sascha Willems - www.saschawillems.de
 *
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)

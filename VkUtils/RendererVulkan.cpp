@@ -1,3 +1,7 @@
+/*
+* Copyright (C) 2016 Tracy Ma
+* This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
+*/
 
 #include "RendererVulkan.hpp"
 #include "VulkanHelper.hpp"
