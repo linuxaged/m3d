@@ -9,6 +9,27 @@
 
 #include <fbxsdk.h>
 
+#define TRIANGLE_VERTEX_COUNT 3
+#define VERTEX_STRIDE 4
+
+bool Mesh::init(FbxMesh* pFbxMesh)
+{
+    FbxGeometryElement::EMappingMode normalMappingMode = pFbxMesh->GetElementNormal(0)->GetMappingMode();
+    FbxGeometryElement::EMappingMode uvMappingModel = pFbxMesh->GetElementUV(0)->GetMappingMode();
+
+    bool hasNormal = (pFbxMesh->GetElementNormalCount() > 0) && (normalMappingMode != FbxGeometryElement::eNone);
+    bool hasUV = (pFbxMesh->GetElementUVCount() > 0) && (uvMappingModel != FbxGeometryElement::eNone);
+
+    bool byControlPoint = hasNormal && normalMappingMode == FbxGeometryElement::eByControlPoint
+        && hasUV && uvMappingModel == FbxGeometryElement::eByControlPoint;
+
+	uint32_t polygonCount = pFbxMesh->GetPolygonCount();
+	uint32_t controlPointCount = byControlPoint ? pFbxMesh->GetControlPointsCount() : polygonCount * TRIANGLE_VERTEX_COUNT;
+	
+	float *pVertices = new float[controlPointCount * VERTEX_STRIDE];
+	uint32_t *pIndices = new uint32_t[polygonCount * TRIANGLE_VERTEX_COUNT];
+}
+
 Scene::Scene()
 {
     FbxManager* fbxManager = FbxManager::Create();

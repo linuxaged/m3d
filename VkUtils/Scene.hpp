@@ -45,11 +45,8 @@ struct Material {
 };
 
 struct Mesh {
-    bool init(fbxsdk::FbxMesh* fbxMesh)
-    {
-        // TODO
-        return true;
-    }
+	bool init(fbxsdk::FbxMesh* fbxMesh);
+
     std::string name;
 
     std::vector<float> vertices;
