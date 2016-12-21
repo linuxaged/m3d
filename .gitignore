@@ -331,3 +331,4 @@ paket-files/
 # Debug files
 *.dSYM/
 *.su
+*.spv

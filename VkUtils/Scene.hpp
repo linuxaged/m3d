@@ -47,7 +47,16 @@ struct Material {
 struct Mesh {
 	bool init(fbxsdk::FbxMesh* fbxMesh);
 
+	struct Slice
+	{
+		Slice(int offset, int count) : indexOffset(offset), triangleCount(count) {}
+		int indexOffset;
+		int triangleCount;
+	};
+
     std::string name;
+
+	std::vector<Slice> slices;
 
     std::vector<float> vertices;
     std::vector<float> uvs;
