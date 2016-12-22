@@ -858,7 +858,7 @@ namespace vkext
 			// Copy texture data into staging buffer
 			void *data;
 			data = device.mapMemory(stagingMemory, 0, memReqs.size, vk::MemoryMapFlags());
-			memcpy(data, buffer, bufferSize);
+			memcpy(data, buffer, static_cast<size_t>(bufferSize));
 			device.unmapMemory(stagingMemory);
 
 			vk::BufferImageCopy bufferCopyRegion = {};

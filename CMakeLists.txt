@@ -18,7 +18,7 @@ link_libraries(${VULKAN_LIBRARY})
 include_directories(${VULKAN_INCLUDE_DIR})
 
 find_package(FBX REQUIRED)
-link_libraries(${FBX_LIBRARY})
+link_libraries(${FBX_LIBRARY_DEBUG})
 include_directories(${FBX_INCLUDE_DIR})
 
 if(WIN32)

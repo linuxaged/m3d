@@ -522,11 +522,11 @@ namespace math {
         return Perspective(-width, width, -height, height, front, back);
     }
 
-    Matrix4x4 Matrix4x4::Perspective(const float fov, const float width, const float height, const const float zNear, const float zFar)
+    Matrix4x4 Matrix4x4::Perspective(const float fov, const float width, const float height, const float zNear, const float zFar)
     {
         Matrix4x4 result;
         // set the basic projection matrix
-        float scale = 1.0f / tanf(fov * 0.5f * M_PI / 180.0f);
+        float scale = 1.0f / tanf(fov * 0.5f * PI_F / 180.0f);
         result.m[0][0] = scale; // scale the x coordinates of the projected point
         result.m[1][1] = scale; // scale the y coordinates of the projected point
         result.m[2][2] = -zFar / (zFar - zNear); // used to remap z to [0,1]

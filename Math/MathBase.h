@@ -9,6 +9,8 @@
 
 namespace m3d {
 namespace math {
+	const float  PI_F = 3.14159265358979f;
+
     static inline float InvSqrt(float f)
     {
         // TODO: quake 3, neon

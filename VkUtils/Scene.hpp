@@ -104,7 +104,7 @@ public:
     void Init();
 };
 
-void LoadMeshes(fbxsdk::FbxScene* scene, const char* filename,
+void LoadMeshes(Scene* scene, const char* filename,
     std::vector<uint32_t>* loadedMeshIDs);
 
 void AddInstance(Scene& scene, uint32_t meshID, uint32_t* newInstanceID);
