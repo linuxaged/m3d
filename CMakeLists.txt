@@ -29,9 +29,14 @@ else()
     link_libraries(${XCB_LIBRARIES})
 endif()
 
- add_dependency_external_projects(glm)
- list(APPEND EXTERNALS glm)
- include_directories(${GLM_INCLUDE_DIRS})
+add_dependency_external_projects(flatbuffer)
+list(APPEND EXTERNALS flatbuffer)
+include_directories(${FLATBUFFER_INCLUDE_DIRS})
+link_libraries(${FLATBUFFER_LIBRARIES})
+
+add_dependency_external_projects(glm)
+list(APPEND EXTERNALS glm)
+include_directories(${GLM_INCLUDE_DIRS})
 
 add_dependency_external_projects(gli)
 list(APPEND EXTERNALS gli)

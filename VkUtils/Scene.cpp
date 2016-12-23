@@ -7,7 +7,14 @@
 #include "Scene.hpp"
 #include "tiny_obj_loader.h"
 
+#include "flatbuffers/idl.h"
+#include "flatbuffers/util.h"
+#include "../data/schema/scene_generated.h"
+
+
 #include <fbxsdk.h>
+
+using namespace m3d::schema;
 
 #define TRIANGLE_VERTEX_COUNT 3
 #define VERTEX_STRIDE 4
@@ -68,11 +75,11 @@ bool Mesh::init(FbxMesh* pFbxMesh)
             pVertices[i * VERTEX_STRIDE + 1] = static_cast<float>(currentVertex[1]);
             pVertices[i * VERTEX_STRIDE + 2] = static_cast<float>(currentVertex[2]);
             pVertices[i * VERTEX_STRIDE + 3] = 1.0f;
-			// TODO
-			this->vertices.emplace_back(static_cast<float>(currentVertex[0]));
-			this->vertices.emplace_back(static_cast<float>(currentVertex[1]));
-			this->vertices.emplace_back(static_cast<float>(currentVertex[2]));
-			this->vertices.emplace_back(static_cast<float>(currentVertex[3]));
+            // TODO
+            this->vertices.emplace_back(static_cast<float>(currentVertex[0]));
+            this->vertices.emplace_back(static_cast<float>(currentVertex[1]));
+            this->vertices.emplace_back(static_cast<float>(currentVertex[2]));
+            this->vertices.emplace_back(static_cast<float>(currentVertex[3]));
 
             if (hasNormal) {
                 int normalIndex = i;
@@ -125,11 +132,10 @@ bool Mesh::init(FbxMesh* pFbxMesh)
         }
     }
 
-	// There is only one material.
-	if (slices.size() == 0)
-	{
-		slices.emplace_back(0,0);
-	}
+    // There is only one material.
+    if (slices.size() == 0) {
+        slices.emplace_back(0, 0);
+    }
 
     /* Indices */
     for (uint32_t vertexCount = 0, i = 0; i < polygonCount; ++i) {
@@ -151,11 +157,11 @@ bool Mesh::init(FbxMesh* pFbxMesh)
                 pVertices[vertexCount * VERTEX_STRIDE + 1] = static_cast<float>(currentVertex[1]);
                 pVertices[vertexCount * VERTEX_STRIDE + 2] = static_cast<float>(currentVertex[2]);
                 pVertices[vertexCount * VERTEX_STRIDE + 3] = 1.0f;
-				// TODO
-				this->vertices.emplace_back(static_cast<float>(currentVertex[0]));
-				this->vertices.emplace_back(static_cast<float>(currentVertex[1]));
-				this->vertices.emplace_back(static_cast<float>(currentVertex[2]));
-				this->vertices.emplace_back(static_cast<float>(currentVertex[3]));
+                // TODO
+                this->vertices.emplace_back(static_cast<float>(currentVertex[0]));
+                this->vertices.emplace_back(static_cast<float>(currentVertex[1]));
+                this->vertices.emplace_back(static_cast<float>(currentVertex[2]));
+                this->vertices.emplace_back(static_cast<float>(currentVertex[3]));
 
                 if (hasNormal) {
                     pFbxMesh->GetPolygonVertexNormal(i, v, currentNormal);
@@ -183,6 +189,26 @@ Scene::Scene() {}
 
 void Scene::Init()
 {
+    std::string schemafile;
+    std::string jsonfile;
+    bool ok = flatbuffers::LoadFile("G:\\workspace\\m3d\\data\\schema\\scene.fbs", false, &schemafile) && flatbuffers::LoadFile("G:\\workspace\\m3d\\data\\schema\\scenedata.json", false, &jsonfile);
+    if (!ok) {
+        printf("couldn't load files!\n");
+    }
+
+    flatbuffers::Parser parser;
+    const char* include_directories[] = { "G:\\workspace\\m3d\\data\\schema", nullptr };
+    ok = parser.Parse(schemafile.c_str(), include_directories) && parser.Parse(jsonfile.c_str(), include_directories);
+    assert(ok);
+
+    std::string jsongen;
+
+	ok = GenerateText(parser, parser.builder_.GetBufferPointer(), &jsongen);
+
+    if (jsongen != jsonfile) {
+        printf("%s----------------\n%s", jsongen.c_str(), jsonfile.c_str());
+    }
+
 
     diffuseMaps = packed_freelist<DiffuseMap>(512);
     materials = packed_freelist<Material>(512);

@@ -6,9 +6,6 @@
 
 #include "Scene.hpp"
 #include "RendererVulkan.hpp"
-/*
- * Vulkan
- */
 
 int main()
 {

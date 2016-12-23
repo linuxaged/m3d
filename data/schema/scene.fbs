@@ -1,0 +1,24 @@
+namespace m3d.schema;
+
+struct SVector3 {
+	x: float;
+	y: float;
+	z: float;
+}
+
+struct STransform {
+	position: SVector3;
+	rotation: SVector3;
+	scale: SVector3;
+}
+
+table SScene {
+	models: [SModel];
+}
+
+table SModel {
+	name: string;
+	transform: STransform;
+}
+
+root_type SScene;
