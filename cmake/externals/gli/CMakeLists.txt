@@ -4,8 +4,8 @@ string(TOUPPER ${EXTERNAL_NAME} EXTERNAL_NAME_UPPER)
 include(ExternalProject)
 ExternalProject_Add(
     ${EXTERNAL_NAME}
-    URL "https://github.com/g-truc/gli/releases/download/0.7.0.0/gli-0.7.0.0.zip"
-    URL_MD5 662a00f7e85dcb7bf33f8214e80b850a
+    URL https://github.com/g-truc/gli/archive/0.8.2.0.zip
+    URL_MD5 32c415cf201ad7db4dd9e8ff606b5689
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""

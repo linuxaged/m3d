@@ -203,7 +203,7 @@ void Scene::Init()
 
     std::string jsongen;
 
-	ok = GenerateText(parser, parser.builder_.GetBufferPointer(), &jsongen);
+	GenerateText(parser, parser.builder_.GetBufferPointer(), &jsongen);
 
     if (jsongen != jsonfile) {
         printf("%s----------------\n%s", jsongen.c_str(), jsonfile.c_str());

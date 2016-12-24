@@ -3,8 +3,8 @@ set(EXTERNAL_NAME glm)
 include(ExternalProject)
 ExternalProject_Add(
   ${EXTERNAL_NAME}
-  URL https://github.com/g-truc/glm/releases/download/0.9.7.5/glm-0.9.7.5.zip
-  URL_MD5 8d8da9c561e43c975946be9c6d37935d
+  URL https://github.com/g-truc/glm/archive/0.9.8.3.zip
+  URL_MD5 8ea56d6174342293ef76910ece8c444a
   BINARY_DIR ${EXTERNAL_PROJECT_PREFIX}/build
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
   LOG_DOWNLOAD 1
