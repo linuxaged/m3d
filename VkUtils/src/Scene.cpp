@@ -5,11 +5,10 @@
 */
 
 #include "Scene.hpp"
-#include "tiny_obj_loader.h"
 
 #include "flatbuffers/idl.h"
 #include "flatbuffers/util.h"
-#include "../data/schema/scene_generated.h"
+#include "../../data/schema/scene_generated.h"
 
 
 #include <fbxsdk.h>
@@ -191,13 +190,14 @@ void Scene::Init()
 {
     std::string schemafile;
     std::string jsonfile;
-    bool ok = flatbuffers::LoadFile("G:\\workspace\\m3d\\data\\schema\\scene.fbs", false, &schemafile) && flatbuffers::LoadFile("G:\\workspace\\m3d\\data\\schema\\scenedata.json", false, &jsonfile);
+	bool ok = flatbuffers::LoadFile("D:\\workspace\\m3d\\data\\schema\\scene.fbs", false, &schemafile);
+		//&& flatbuffers::LoadFile("G:\\workspace\\m3d\\data\\schema\\scenedata.json", false, &jsonfile);
     if (!ok) {
         printf("couldn't load files!\n");
     }
 
     flatbuffers::Parser parser;
-    const char* include_directories[] = { "G:\\workspace\\m3d\\data\\schema", nullptr };
+    const char* include_directories[] = { "D:\\workspace\\m3d\\data\\schema", nullptr };
     ok = parser.Parse(schemafile.c_str(), include_directories) && parser.Parse(jsonfile.c_str(), include_directories);
     assert(ok);
 

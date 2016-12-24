@@ -712,8 +712,8 @@ bool RendererVulkan::CreatePipeline()
 	// Load shaders
 	// Shaders are loaded from the SPIR-V format, which can be generated from glsl
 	std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
-	shaderStages[0] = loadShader("G:\\workspace\\m3d\\data\\shaders\\triangle\\triangle_vertex.spv", vk::ShaderStageFlagBits::eVertex);
-	shaderStages[1] = loadShader("G:\\workspace\\m3d\\data\\shaders\\triangle\\triangle_fragment.spv", vk::ShaderStageFlagBits::eFragment);
+	shaderStages[0] = loadShader("D:\\workspace\\m3d\\data\\shaders\\triangle\\triangle_vertex.spv", vk::ShaderStageFlagBits::eVertex);
+	shaderStages[1] = loadShader("D:\\workspace\\m3d\\data\\shaders\\triangle\\triangle_fragment.spv", vk::ShaderStageFlagBits::eFragment);
 
 	// Assign states
 	// Assign pipeline state create information

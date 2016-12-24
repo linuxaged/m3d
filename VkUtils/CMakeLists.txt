@@ -1,8 +1,15 @@
-file(GLOB COMMON_SOURCE *.cpp *.cc *.h *.hpp)
-add_library(VkUtils ${COMMON_SOURCE})
+add_library(VkUtils SHARED
+	src/idl_gen_text.cpp
+	src/idl_parser.cpp
+	src/RendererVulkan.cpp
+	src/Scene.cpp
+	src/stb_image.c
+	src/vulkanDebug.cpp
+	src/vulkanShaders.cpp)
+
 set_target_properties(VkUtils PROPERTIES FOLDER "common")
 
-# TODO: we alreay add deps in root CMakeLists.txt
-add_dependencies( VkUtils Math gli glm flatbuffer)
-link_libraries(Math gli glm flatbuffer)
-include_directories(Math, gli, glm, flatbuffer)
+target_include_directories(VkUtils PUBLIC ./include)
+target_include_directories(VkUtils PRIVATE ./src)
+
+target_link_libraries(VkUtils Math)

@@ -8,7 +8,7 @@
 #include <cstdio>
 #include <cstring>
 
-#include "MathBase.h"
+#include "MathUtils.h"
 // SIMD
 #if defined __arm__
 #include "SIMD_NEON.h"
