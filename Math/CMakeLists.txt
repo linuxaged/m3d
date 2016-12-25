@@ -1,4 +1,4 @@
-add_library(Math SHARED
+add_library(Math
 	src/Matrix.cpp
 	src/SIMD_NEON.cpp
 	src/SIMD_SSE.cpp

@@ -1,4 +1,4 @@
-add_library(VkUtils SHARED
+add_library(VkUtils
 	src/idl_gen_text.cpp
 	src/idl_parser.cpp
 	src/RendererVulkan.cpp

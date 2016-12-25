@@ -1,4 +1,4 @@
-add_library(Gui SHARED
+add_library(Gui
 	src/GUIButton.cpp
 	src/GUICheckBox.cpp
 	src/GUIController.cpp
