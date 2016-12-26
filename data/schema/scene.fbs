@@ -12,13 +12,13 @@ struct STransform {
 	scale: SVector3;
 }
 
-table SScene {
-	models: [SModel];
-}
-
-table SModel {
+struct SModel {
 	name: string;
 	transform: STransform;
+}
+
+table SScene {
+	models: [SModel];
 }
 
 root_type SScene;

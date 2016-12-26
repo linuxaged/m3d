@@ -188,16 +188,35 @@ Scene::Scene() {}
 
 void Scene::Init()
 {
-    std::string schemafile;
-    std::string jsonfile;
-	bool ok = flatbuffers::LoadFile("D:\\workspace\\m3d\\data\\schema\\scene.fbs", false, &schemafile);
-		//&& flatbuffers::LoadFile("G:\\workspace\\m3d\\data\\schema\\scenedata.json", false, &jsonfile);
-    if (!ok) {
-        printf("couldn't load files!\n");
-    }
+	std::string schemafile;
+	std::string jsonfile;
+	bool ok = flatbuffers::LoadFile("G:\\workspace\\m3d\\data\\schema\\monster.fbs", false, &schemafile)
+	&& flatbuffers::LoadFile("G:\\workspace\\m3d\\data\\schema\\monsterdata.json", false, &jsonfile);
+	if (!ok) {
+		printf("couldn't load files!\n");
+	}
+	/////
+	//flatbuffers::FlatBufferBuilder fbb;
+	//auto scene_name = fbb.CreateString("G:\\workspace\\m3d\\data\\schema\\scenedata.json");
+	//SVector3 positon = { 0,0,0 };
+	//SVector3 rotation = { 0,0,0 };
+	//SVector3 scale = { 0,0,0 };
+	//STransform transform = {positon, rotation, scale};
 
+	//flatbuffers::Offset<SModel> model = CreateSModel(fbb, scene_name, &transform);
+	//flatbuffers::Offset<SModel> model_array[] = {model};
+	//auto models = fbb.CreateVector(model_array,1);
+	//auto sloc = CreateSScene(fbb, models);
+
+	//FinishSSceneBuffer(fbb, sloc);
+	//auto bufferPtr = reinterpret_cast<const char*>(fbb.GetBufferPointer());
+	//std::string outstr;
+	//outstr.assign(bufferPtr, bufferPtr + fbb.GetSize());
+	//printf("%s", outstr.c_str());
+	//fbb.ReleaseBufferPointer();
+	/////
     flatbuffers::Parser parser;
-    const char* include_directories[] = { "D:\\workspace\\m3d\\data\\schema", nullptr };
+    const char* include_directories[] = { "G:\\workspace\\m3d\\data\\schema", nullptr };
     ok = parser.Parse(schemafile.c_str(), include_directories) && parser.Parse(jsonfile.c_str(), include_directories);
     assert(ok);
 
