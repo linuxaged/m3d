@@ -12,7 +12,7 @@ struct STransform {
 	scale: SVector3;
 }
 
-struct SModel {
+table SModel {
 	name: string;
 	transform: STransform;
 }
