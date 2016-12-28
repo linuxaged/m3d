@@ -14,7 +14,7 @@ int main()
 
 	// fill the Scene
 	std::vector<uint32_t> loadedMeshIds;
-	LoadMeshes(&scene, "D:\\app\\FBX_SDK_2017.1\\samples\\ViewScene\\humanoid.fbx", &loadedMeshIds);
+	LoadMeshes(&scene, &loadedMeshIds);
 	for (auto &meshId : loadedMeshIds)
 	{
 		uint32_t instanceId;

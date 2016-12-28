@@ -548,22 +548,6 @@ void setupDescriptorSetLayout() {
 	
 }
 
-//std::vector<uint8_t> readBinaryFile(const std::string& filename)
-//{
-//	std::FILE* fp = std::fopen(filename.c_str(), "rb");
-//	if (fp)
-//	{
-//		std::vector<uint8_t> contents;
-//		std::fseek(fp, 0, SEEK_END);
-//		contents.resize(std::ftell(fp));
-//		std::rewind(fp);
-//		std::fread(&contents[0], 1, contents.size(), fp);
-//		std::fclose(fp);
-//		return (contents);
-//	}
-//	throw(errno);
-//}
-
 vk::ShaderModule _loadShader(const std::string& filename, vk::Device device, vk::ShaderStageFlagBits stage) {
 	std::vector<uint8_t> binaryData;// = readBinaryFile(filename);
 	m3d::file::readBinary(filename.c_str(), binaryData);
@@ -713,8 +697,8 @@ bool RendererVulkan::CreatePipeline()
 	// Load shaders
 	// Shaders are loaded from the SPIR-V format, which can be generated from glsl
 	std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
-	shaderStages[0] = loadShader("D:\\workspace\\m3d\\data\\shaders\\triangle\\triangle_vertex.spv", vk::ShaderStageFlagBits::eVertex);
-	shaderStages[1] = loadShader("D:\\workspace\\m3d\\data\\shaders\\triangle\\triangle_fragment.spv", vk::ShaderStageFlagBits::eFragment);
+	shaderStages[0] = loadShader("G:\\workspace\\m3d\\data\\shaders\\triangle\\triangle_vertex.spv", vk::ShaderStageFlagBits::eVertex);
+	shaderStages[1] = loadShader("G:\\workspace\\m3d\\data\\shaders\\triangle\\triangle_fragment.spv", vk::ShaderStageFlagBits::eFragment);
 
 	// Assign states
 	// Assign pipeline state create information
@@ -738,23 +722,25 @@ bool RendererVulkan::CreatePipeline()
 
 bool RendererVulkan::CreateVertices()
 {
-	struct Vertex {
-		float pos[3];
-		float col[3];
-	};
+	size_t vertexBufferSize = scene->meshes[0].vertices.size() * sizeof(float);
+	size_t indexBufferSize = scene->meshes[0].indices.size() * sizeof(uint32_t);
+	//struct Vertex {
+	//	float pos[3];
+	//	float col[3];
+	//};
 
 	// Setup vertices
-	std::vector<Vertex> vertexBuffer = {
-		{ { 1.0f,  1.0f, 0.0f },{ 1.0f, 0.0f, 0.0f } },
-		{ { -1.0f,  1.0f, 0.0f },{ 0.0f, 1.0f, 0.0f } },
-		{ { 0.0f, -1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f } }
-	};
-	uint32_t vertexBufferSize = (uint32_t)(vertexBuffer.size() * sizeof(Vertex));
+	//std::vector<Vertex> vertexBuffer = {
+	//	{ { 1.0f,  1.0f, 0.0f },{ 1.0f, 0.0f, 0.0f } },
+	//	{ { -1.0f,  1.0f, 0.0f },{ 0.0f, 1.0f, 0.0f } },
+	//	{ { 0.0f, -1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f } }
+	//};
+	//uint32_t vertexBufferSize = (uint32_t)(vertexBuffer.size() * sizeof(Vertex));
 
 	// Setup indices
-	std::vector<uint32_t> indexBuffer = { 0, 1, 2 };
-	uint32_t indexBufferSize = (uint32_t)(indexBuffer.size() * sizeof(uint32_t));
-	indexCount = (uint32_t)indexBuffer.size();
+	//std::vector<uint32_t> indexBuffer = { 0, 1, 2 };
+	//uint32_t indexBufferSize = (uint32_t)(indexBuffer.size() * sizeof(uint32_t));
+	//indexCount = (uint32_t)indexBuffer.size();
 
 	vk::MemoryAllocateInfo memAlloc;
 	vk::MemoryRequirements memReqs;
@@ -801,7 +787,9 @@ bool RendererVulkan::CreateVertices()
 	stagingBuffers.vertices.memory = device.allocateMemory(memAlloc);
 	// Map and copy
 	void* data = device.mapMemory(stagingBuffers.vertices.memory, 0, memAlloc.allocationSize, vk::MemoryMapFlags());
-	memcpy(data, vertexBuffer.data(), vertexBufferSize);
+	//memcpy(data, vertexBuffer.data(), vertexBufferSize);
+	memcpy(data, scene->meshes[0].vertices.data(), vertexBufferSize);
+
 	device.unmapMemory(stagingBuffers.vertices.memory);
 	device.bindBufferMemory(stagingBuffers.vertices.buffer, stagingBuffers.vertices.memory, 0);
 
@@ -825,8 +813,9 @@ bool RendererVulkan::CreateVertices()
 	memAlloc.allocationSize = memReqs.size;
 	memAlloc.memoryTypeIndex = vkhelper::getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible);
 	stagingBuffers.indices.memory = device.allocateMemory(memAlloc);
-	data = device.mapMemory(stagingBuffers.indices.memory, 0, indexBufferSize, vk::MemoryMapFlags());
-	memcpy(data, indexBuffer.data(), indexBufferSize);
+	data = device.mapMemory(stagingBuffers.indices.memory, 0, indexbufferInfo.size, vk::MemoryMapFlags());
+	//memcpy(data, indexBuffer.data(), indexBufferSize);
+	memcpy(data, scene->meshes[0].indices.data(), indexBufferSize);
 	device.unmapMemory(stagingBuffers.indices.memory);
 	device.bindBufferMemory(stagingBuffers.indices.buffer, stagingBuffers.indices.memory, 0);
 
@@ -874,7 +863,7 @@ bool RendererVulkan::CreateVertices()
 	// Binding description
 	bindingDescriptions.resize(1);
 	bindingDescriptions[0].binding = VERTEX_BUFFER_BIND_ID;
-	bindingDescriptions[0].stride = sizeof(Vertex);
+	bindingDescriptions[0].stride = sizeof(float) * 4;
 	bindingDescriptions[0].inputRate = vk::VertexInputRate::eVertex;
 
 	// Attribute descriptions

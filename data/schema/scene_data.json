@@ -1,7 +1,7 @@
 {
     models:[
         {
-            name: "test",
+            name: "D:\\app\\FBX_SDK_2017.1\\samples\\ViewScene\\humanoid.fbx",
             transform: {
                 position: {
                     x: 0,

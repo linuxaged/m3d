@@ -91,6 +91,8 @@ struct Camera {
 
 class Scene {
 public:
+    std::string loadPath;
+
     packed_freelist<DiffuseMap> diffuseMaps;
     packed_freelist<Material> materials;
     packed_freelist<Mesh> meshes;
@@ -104,7 +106,6 @@ public:
     void Init();
 };
 
-void LoadMeshes(Scene* scene, const char* filename,
-    std::vector<uint32_t>* loadedMeshIDs);
+void LoadMeshes(Scene* scene, std::vector<uint32_t>* loadedMeshIDs);
 
 void AddInstance(Scene& scene, uint32_t meshID, uint32_t* newInstanceID);

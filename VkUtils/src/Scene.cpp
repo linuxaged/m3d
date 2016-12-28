@@ -40,19 +40,16 @@ bool Mesh::init(FbxMesh* pFbxMesh)
         ? pFbxMesh->GetControlPointsCount()
         : polygonCount * TRIANGLE_VERTEX_COUNT;
 
-    float* pVertices = new float[controlPointCount * VERTEX_STRIDE];
-    uint32_t* pIndices = new uint32_t[polygonCount * TRIANGLE_VERTEX_COUNT];
+	this->vertices.resize(controlPointCount * VERTEX_STRIDE);
+	this->indices.resize(polygonCount * TRIANGLE_VERTEX_COUNT);
+	if (hasNormal)
+		this->normals.resize(controlPointCount * NORMAL_STRIDE);
 
-    float* pNormals = nullptr;
-    if (hasNormal)
-        pNormals = new float[controlPointCount * NORMAL_STRIDE];
-
-    float* pUVs = nullptr;
     FbxStringList uvNames;
     pFbxMesh->GetUVSetNames(uvNames);
     const char* pUVName = nullptr;
     if (hasUV) {
-        pUVs = new float[controlPointCount * UV_STRIDE];
+		this->uvs.resize(controlPointCount * UV_STRIDE);
         pUVName = uvNames[0];
     }
 
@@ -71,15 +68,10 @@ bool Mesh::init(FbxMesh* pFbxMesh)
 
         for (uint32_t i = 0; i < controlPointCount; ++i) {
             currentVertex = pControlPoints[i];
-            pVertices[i * VERTEX_STRIDE] = static_cast<float>(currentVertex[0]);
-            pVertices[i * VERTEX_STRIDE + 1] = static_cast<float>(currentVertex[1]);
-            pVertices[i * VERTEX_STRIDE + 2] = static_cast<float>(currentVertex[2]);
-            pVertices[i * VERTEX_STRIDE + 3] = 1.0f;
-            // TODO
-            this->vertices.emplace_back(static_cast<float>(currentVertex[0]));
-            this->vertices.emplace_back(static_cast<float>(currentVertex[1]));
-            this->vertices.emplace_back(static_cast<float>(currentVertex[2]));
-            this->vertices.emplace_back(static_cast<float>(currentVertex[3]));
+            this->vertices[i * VERTEX_STRIDE] = static_cast<float>(currentVertex[0]);
+            this->vertices[i * VERTEX_STRIDE + 1] = static_cast<float>(currentVertex[1]);
+            this->vertices[i * VERTEX_STRIDE + 2] = static_cast<float>(currentVertex[2]);
+            this->vertices[i * VERTEX_STRIDE + 3] = 1.0f;
 
             if (hasNormal) {
                 int normalIndex = i;
@@ -87,9 +79,9 @@ bool Mesh::init(FbxMesh* pFbxMesh)
                     normalIndex = pNormalElement->GetIndexArray().GetAt(i);
                 }
                 currentNormal = pNormalElement->GetDirectArray().GetAt(normalIndex);
-                pNormals[i * NORMAL_STRIDE] = static_cast<float>(currentNormal[0]);
-                pNormals[i * NORMAL_STRIDE + 1] = static_cast<float>(currentNormal[1]);
-                pNormals[i * NORMAL_STRIDE + 2] = static_cast<float>(currentNormal[2]);
+                this->normals[i * NORMAL_STRIDE] = static_cast<float>(currentNormal[0]);
+                this->normals[i * NORMAL_STRIDE + 1] = static_cast<float>(currentNormal[1]);
+                this->normals[i * NORMAL_STRIDE + 2] = static_cast<float>(currentNormal[2]);
             }
 
             if (hasUV) {
@@ -98,8 +90,8 @@ bool Mesh::init(FbxMesh* pFbxMesh)
                     uvIndex = pUVElement->GetIndexArray().GetAt(i);
                 }
                 currentUV = pUVElement->GetDirectArray().GetAt(uvIndex);
-                pUVs[i * UV_STRIDE] = static_cast<float>(currentUV[0]);
-                pUVs[i * UV_STRIDE + 1] = static_cast<float>(currentUV[1]);
+                this->uvs[i * UV_STRIDE] = static_cast<float>(currentUV[0]);
+                this->uvs[i * UV_STRIDE + 1] = static_cast<float>(currentUV[1]);
             }
         }
     } // end of byControlPoint
@@ -148,33 +140,28 @@ bool Mesh::init(FbxMesh* pFbxMesh)
             const int controlPointIndex = pFbxMesh->GetPolygonVertex(i, v);
 
             if (byControlPoint) {
-                pIndices[indexOffset + v] = static_cast<unsigned int>(controlPointIndex);
+				this->indices[indexOffset + v] = static_cast<unsigned int>(controlPointIndex);
             } else {
-                pIndices[indexOffset + v] = static_cast<unsigned int>(vertexCount);
+				this->indices[indexOffset + v] = static_cast<unsigned int>(vertexCount);
 
                 currentVertex = pControlPoints[controlPointIndex];
-                pVertices[vertexCount * VERTEX_STRIDE] = static_cast<float>(currentVertex[0]);
-                pVertices[vertexCount * VERTEX_STRIDE + 1] = static_cast<float>(currentVertex[1]);
-                pVertices[vertexCount * VERTEX_STRIDE + 2] = static_cast<float>(currentVertex[2]);
-                pVertices[vertexCount * VERTEX_STRIDE + 3] = 1.0f;
-                // TODO
-                this->vertices.emplace_back(static_cast<float>(currentVertex[0]));
-                this->vertices.emplace_back(static_cast<float>(currentVertex[1]));
-                this->vertices.emplace_back(static_cast<float>(currentVertex[2]));
-                this->vertices.emplace_back(static_cast<float>(currentVertex[3]));
+                this->vertices[vertexCount * VERTEX_STRIDE] = static_cast<float>(currentVertex[0]);
+                this->vertices[vertexCount * VERTEX_STRIDE + 1] = static_cast<float>(currentVertex[1]);
+                this->vertices[vertexCount * VERTEX_STRIDE + 2] = static_cast<float>(currentVertex[2]);
+                this->vertices[vertexCount * VERTEX_STRIDE + 3] = 1.0f;
 
                 if (hasNormal) {
                     pFbxMesh->GetPolygonVertexNormal(i, v, currentNormal);
-                    pNormals[vertexCount * NORMAL_STRIDE] = static_cast<float>(currentNormal[0]);
-                    pNormals[vertexCount * NORMAL_STRIDE + 1] = static_cast<float>(currentNormal[1]);
-                    pNormals[vertexCount * NORMAL_STRIDE + 2] = static_cast<float>(currentNormal[2]);
+                    this->normals[vertexCount * NORMAL_STRIDE] = static_cast<float>(currentNormal[0]);
+                    this->normals[vertexCount * NORMAL_STRIDE + 1] = static_cast<float>(currentNormal[1]);
+                    this->normals[vertexCount * NORMAL_STRIDE + 2] = static_cast<float>(currentNormal[2]);
                 }
 
                 if (hasUV) {
                     bool bUnmappedUV;
                     pFbxMesh->GetPolygonVertexUV(i, v, pUVName, currentUV, bUnmappedUV);
-                    pUVs[vertexCount * UV_STRIDE] = static_cast<float>(currentUV[0]);
-                    pUVs[vertexCount * UV_STRIDE] = static_cast<float>(currentUV[1]);
+                    this->uvs[vertexCount * UV_STRIDE] = static_cast<float>(currentUV[0]);
+                    this->uvs[vertexCount * UV_STRIDE] = static_cast<float>(currentUV[1]);
                 }
             }
             ++vertexCount;
@@ -189,51 +176,32 @@ Scene::Scene() {}
 
 void Scene::Init()
 {
-	std::string schemafile;
-	std::string jsonfile;
-	bool ok = flatbuffers::LoadFile("D:\\workspace\\m3d\\data\\schema\\scene.fbs", false, &schemafile)
-	&& flatbuffers::LoadFile("D:\\workspace\\m3d\\data\\schema\\scene_data.json", false, &jsonfile);
-	if (!ok) {
-		printf("couldn't load files!\n");
-	}
-	/////
-	//flatbuffers::FlatBufferBuilder fbb;
-	//auto scene_name = fbb.CreateString("G:\\workspace\\m3d\\data\\schema\\scenedata.json");
-	//SVector3 positon = { 0,0,0 };
-	//SVector3 rotation = { 0,0,0 };
-	//SVector3 scale = { 0,0,0 };
-	//STransform transform = {positon, rotation, scale};
+	//std::string schemafile;
+	//std::string jsonfile;
+	//bool ok = flatbuffers::LoadFile("G:\\workspace\\m3d\\data\\schema\\scene.fbs", false, &schemafile)
+	//&& flatbuffers::LoadFile("G:\\workspace\\m3d\\data\\schema\\scene_data.json", false, &jsonfile);
+	//if (!ok) {
+	//	printf("couldn't load files!\n");
+	//}
 
-	//flatbuffers::Offset<SModel> model = CreateSModel(fbb, scene_name, &transform);
-	//flatbuffers::Offset<SModel> model_array[] = {model};
-	//auto models = fbb.CreateVector(model_array,1);
-	//auto sloc = CreateSScene(fbb, models);
+ //   flatbuffers::Parser parser;
+ //   const char* include_directories[] = { "G:\\workspace\\m3d\\data\\schema", nullptr };
+	//printf("%s\n", schemafile.c_str());
+ //   ok = parser.Parse(schemafile.c_str(), include_directories) && parser.Parse(jsonfile.c_str(), include_directories);
+ //   assert(ok);
 
-	//FinishSSceneBuffer(fbb, sloc);
-	//auto bufferPtr = reinterpret_cast<const char*>(fbb.GetBufferPointer());
-	//std::string outstr;
-	//outstr.assign(bufferPtr, bufferPtr + fbb.GetSize());
-	//printf("%s", outstr.c_str());
-	//fbb.ReleaseBufferPointer();
-	/////
-    flatbuffers::Parser parser;
-    const char* include_directories[] = { "D:\\workspace\\m3d\\data\\schema", nullptr };
-	printf("%s\n", schemafile.c_str());
-    ok = parser.Parse(schemafile.c_str(), include_directories) && parser.Parse(jsonfile.c_str(), include_directories);
-    assert(ok);
+ //   std::string jsongen;
+	//GenerateText(parser, parser.builder_.GetBufferPointer(), &jsongen);
 
-    std::string jsongen;
-	GenerateText(parser, parser.builder_.GetBufferPointer(), &jsongen);
-
-    if (jsongen != jsonfile) {
-        printf("%s----------------\n%s", jsongen.c_str(), jsonfile.c_str());
-    }
+ //   if (jsongen != jsonfile) {
+ //       printf("%s----------------\n%s", jsongen.c_str(), jsonfile.c_str());
+ //   }
 
 	std::vector<uint8_t> sceneData;
-	m3d::file::readBinary("D:\\workspace\\m3d\\data\\schema\\scene_data.bin", sceneData);
+	m3d::file::readBinary("G:\\workspace\\m3d\\data\\schema\\scene_data.bin", sceneData);
 	auto mainScene = GetSScene(sceneData.data());
-	std::string fbx_path = mainScene->models()->Get(0)->name()->str();
-	printf("fbx path: %s", fbx_path.c_str());
+	loadPath = mainScene->models()->Get(0)->name()->str();
+	printf("fbx path: %s", loadPath.c_str());
 
     diffuseMaps = packed_freelist<DiffuseMap>(512);
     materials = packed_freelist<Material>(512);
@@ -292,8 +260,7 @@ void LoadMeshes(FbxNode* pFbxNode, packed_freelist<Mesh>& sceneMeshes)
     }
 }
 
-void LoadMeshes(Scene* pScene, const char* sceneFileName,
-    std::vector<uint32_t>* loadedMeshIDs)
+void LoadMeshes(Scene* pScene, std::vector<uint32_t>* loadedMeshIDs)
 {
     // TODO: load texture
     FbxManager* fbxManager = FbxManager::Create();
@@ -319,9 +286,9 @@ void LoadMeshes(Scene* pScene, const char* sceneFileName,
     (*(fbxManager->GetIOSettings())).SetBoolProp(EXP_FBX_GLOBAL_SETTINGS, true);
 
     FbxImporter* pFbxImporter = FbxImporter::Create(fbxManager, "");
-
+ 
     // Initialize the importer.
-    bool result = pFbxImporter->Initialize(sceneFileName, -1, fbxManager->GetIOSettings());
+    bool result = pFbxImporter->Initialize(pScene->loadPath.c_str(), -1, fbxManager->GetIOSettings());
     if (!result) {
         printf("Get error when init FBX Importer: %s\n\n",
             pFbxImporter->GetStatus().GetErrorString());
