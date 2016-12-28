@@ -1,4 +1,5 @@
 add_library(VkUtils
+	src/File.cpp
 	src/idl_gen_text.cpp
 	src/idl_parser.cpp
 	src/RendererVulkan.cpp

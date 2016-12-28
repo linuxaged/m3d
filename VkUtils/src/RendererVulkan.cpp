@@ -8,7 +8,7 @@
 #include "Matrix.h"
 #include "vulkanTextureLoader.hpp"
 #include "Scene.hpp"
-
+#include "File.hpp"
 #include <iostream>
 
 #define VERTEX_BUFFER_BIND_ID 0
@@ -548,24 +548,25 @@ void setupDescriptorSetLayout() {
 	
 }
 
-std::vector<uint8_t> readBinaryFile(const std::string& filename)
-{
-	std::FILE* fp = std::fopen(filename.c_str(), "rb");
-	if (fp)
-	{
-		std::vector<uint8_t> contents;
-		std::fseek(fp, 0, SEEK_END);
-		contents.resize(std::ftell(fp));
-		std::rewind(fp);
-		std::fread(&contents[0], 1, contents.size(), fp);
-		std::fclose(fp);
-		return (contents);
-	}
-	throw(errno);
-}
+//std::vector<uint8_t> readBinaryFile(const std::string& filename)
+//{
+//	std::FILE* fp = std::fopen(filename.c_str(), "rb");
+//	if (fp)
+//	{
+//		std::vector<uint8_t> contents;
+//		std::fseek(fp, 0, SEEK_END);
+//		contents.resize(std::ftell(fp));
+//		std::rewind(fp);
+//		std::fread(&contents[0], 1, contents.size(), fp);
+//		std::fclose(fp);
+//		return (contents);
+//	}
+//	throw(errno);
+//}
 
 vk::ShaderModule _loadShader(const std::string& filename, vk::Device device, vk::ShaderStageFlagBits stage) {
-	std::vector<uint8_t> binaryData = readBinaryFile(filename);
+	std::vector<uint8_t> binaryData;// = readBinaryFile(filename);
+	m3d::file::readBinary(filename.c_str(), binaryData);
 	vk::ShaderModuleCreateInfo moduleCreateInfo;
 	moduleCreateInfo.codeSize = binaryData.size();
 	moduleCreateInfo.pCode = (uint32_t*)binaryData.data();

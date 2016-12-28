@@ -5,6 +5,7 @@
 */
 
 #include "Scene.hpp"
+#include "File.hpp"
 
 #include "flatbuffers/idl.h"
 #include "flatbuffers/util.h"
@@ -186,28 +187,12 @@ bool Mesh::init(FbxMesh* pFbxMesh)
 
 Scene::Scene() {}
 
-std::vector<uint8_t> readBinaryFile(const std::string& filename)
-{
-	std::FILE* fp = std::fopen(filename.c_str(), "rb");
-	if (fp)
-	{
-		std::vector<uint8_t> contents;
-		std::fseek(fp, 0, SEEK_END);
-		contents.resize(std::ftell(fp));
-		std::rewind(fp);
-		std::fread(&contents[0], 1, contents.size(), fp);
-		std::fclose(fp);
-		return (contents);
-	}
-	throw(errno);
-}
-
 void Scene::Init()
 {
 	std::string schemafile;
 	std::string jsonfile;
-	bool ok = flatbuffers::LoadFile("G:\\workspace\\m3d\\data\\schema\\scene.fbs", false, &schemafile)
-	&& flatbuffers::LoadFile("G:\\workspace\\m3d\\data\\schema\\scene_data.json", false, &jsonfile);
+	bool ok = flatbuffers::LoadFile("D:\\workspace\\m3d\\data\\schema\\scene.fbs", false, &schemafile)
+	&& flatbuffers::LoadFile("D:\\workspace\\m3d\\data\\schema\\scene_data.json", false, &jsonfile);
 	if (!ok) {
 		printf("couldn't load files!\n");
 	}
@@ -232,7 +217,7 @@ void Scene::Init()
 	//fbb.ReleaseBufferPointer();
 	/////
     flatbuffers::Parser parser;
-    const char* include_directories[] = { "G:\\workspace\\m3d\\data\\schema", nullptr };
+    const char* include_directories[] = { "D:\\workspace\\m3d\\data\\schema", nullptr };
 	printf("%s\n", schemafile.c_str());
     ok = parser.Parse(schemafile.c_str(), include_directories) && parser.Parse(jsonfile.c_str(), include_directories);
     assert(ok);
@@ -244,7 +229,8 @@ void Scene::Init()
         printf("%s----------------\n%s", jsongen.c_str(), jsonfile.c_str());
     }
 
-	std::vector<uint8_t> sceneData = readBinaryFile("G:\\workspace\\m3d\\data\\schema\\scene_data.bin");
+	std::vector<uint8_t> sceneData;
+	m3d::file::readBinary("D:\\workspace\\m3d\\data\\schema\\scene_data.bin", sceneData);
 	auto mainScene = GetSScene(sceneData.data());
 	std::string fbx_path = mainScene->models()->Get(0)->name()->str();
 	printf("fbx path: %s", fbx_path.c_str());
