@@ -56,6 +56,9 @@ public:
 public:
 	/* Draw Loop */
 	bool Draw();
+	void DrawLoop();
+	uint32_t frameCounter;
+	float frameTimer;
 
 public:
 
@@ -82,9 +85,9 @@ private:
 
 		// called from constructor, CreateWindowEx specifically.  But why?
 		if (!renderer)
-			return DefWindowProc(hwnd, uMsg, wParam, lParam);
+			renderer->handle_message(uMsg, wParam, lParam);
 
-		return renderer->handle_message(uMsg, wParam, lParam);
+		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 	LRESULT handle_message(UINT msg, WPARAM wparam, LPARAM lparam);
 	

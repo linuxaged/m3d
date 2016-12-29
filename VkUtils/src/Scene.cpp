@@ -262,7 +262,6 @@ void LoadMeshes(FbxNode* pFbxNode, packed_freelist<Mesh>& sceneMeshes)
 
 void LoadMeshes(Scene* pScene, std::vector<uint32_t>* loadedMeshIDs)
 {
-    // TODO: load texture
     FbxManager* fbxManager = FbxManager::Create();
 
     FbxIOSettings* pFbxIOSettings = FbxIOSettings::Create(fbxManager, IOSROOT);
@@ -324,6 +323,17 @@ void LoadMeshes(Scene* pScene, std::vector<uint32_t>* loadedMeshIDs)
     FbxGeometryConverter fbxGeometryConverter(fbxManager);
     fbxGeometryConverter.Triangulate(pFbxScene, true);
 
+	// Load Texture
+	int textureCount = pFbxScene->GetTextureCount();
+	for (int i = 0; i < textureCount; ++i)
+	{
+		FbxTexture *pFbxTexture = pFbxScene->GetTexture(i);
+		FbxFileTexture *pFbxFileTexture = FbxCast<FbxFileTexture>(pFbxTexture);
+		if (pFbxTexture && pFbxFileTexture->GetUserDataPtr())
+		{
+
+		}
+	}
     LoadMeshes(pFbxScene->GetRootNode(), pScene->meshes);
 }
 

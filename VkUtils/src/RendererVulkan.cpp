@@ -10,6 +10,7 @@
 #include "Scene.hpp"
 #include "File.hpp"
 #include <iostream>
+#include <chrono>
 
 #define VERTEX_BUFFER_BIND_ID 0
 
@@ -47,8 +48,12 @@ void RendererVulkan::createWin32Window()
 	win_class.style = CS_HREDRAW | CS_VREDRAW;
 	win_class.lpfnWndProc = window_proc;
 	win_class.hInstance = hinstance_;
+	win_class.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
 	win_class.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	win_class.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	win_class.lpszMenuName = nullptr;
 	win_class.lpszClassName = class_name.c_str();
+	//win_class.hIconSm = LoadIcon(win_class.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
 	RegisterClassEx(&win_class);
 
 	const DWORD win_style =
@@ -70,58 +75,52 @@ void RendererVulkan::createWin32Window()
 		hinstance_,
 		nullptr);
 
+	ShowWindow(hwnd_, SW_SHOW);
 	SetForegroundWindow(hwnd_);
+	SetFocus(hwnd_);
+
+	// TODO:
 	SetWindowLongPtr(hwnd_, GWLP_USERDATA, (LONG_PTR) this);
 }
 
 LRESULT RendererVulkan::handle_message(UINT msg, WPARAM wparam, LPARAM lparam)
 {
-	switch (msg) {
-	case WM_SIZE:
+	switch (msg)
 	{
-		UINT w = LOWORD(lparam);
-		UINT h = HIWORD(lparam);
-		// TODO:
-		//resize_swapchain(w, h);
-		OnWindowSizeChanged();
-	}
-	break;
-	case WM_KEYDOWN:
-	{
-		//Game::Key key;
-
-		switch (wparam) {
-		case VK_ESCAPE:
-			//key = Game::KEY_ESC;
-			break;
-		case VK_UP:
-			//key = Game::KEY_UP;
-			break;
-		case VK_DOWN:
-			//key = Game::KEY_DOWN;
-			break;
-		case VK_SPACE:
-			//key = Game::KEY_SPACE;
-			break;
-		default:
-			//key = Game::KEY_UNKNOWN;
-			break;
-		}
-
-		//game_.on_key(key);
-	}
-	break;
 	case WM_CLOSE:
-		//game_.on_key(Game::KEY_SHUTDOWN);
+		DestroyWindow(hwnd_);
+		PostQuitMessage(0);
 		break;
-	case WM_DESTROY:
-		//quit();
+	case WM_PAINT:
+		ValidateRect(hwnd_, NULL);
 		break;
-	default:
-		return DefWindowProc(hwnd_, msg, wparam, lparam);
+	case WM_KEYDOWN:
+		
+		break;
+	case WM_KEYUP:
+		
+		break;
+	case WM_RBUTTONDOWN:
+	case WM_LBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+		break;
+	case WM_MOUSEWHEEL:
+	{
+
 		break;
 	}
+	case WM_MOUSEMOVE:
+		
+		break;
+	case WM_SIZE:
 
+		break;
+	case WM_ENTERSIZEMOVE:
+
+		break;
+	case WM_EXITSIZEMOVE:
+		break;
+	}
 	return 0;
 }
 
@@ -724,23 +723,6 @@ bool RendererVulkan::CreateVertices()
 {
 	size_t vertexBufferSize = scene->meshes[0].vertices.size() * sizeof(float);
 	size_t indexBufferSize = scene->meshes[0].indices.size() * sizeof(uint32_t);
-	//struct Vertex {
-	//	float pos[3];
-	//	float col[3];
-	//};
-
-	// Setup vertices
-	//std::vector<Vertex> vertexBuffer = {
-	//	{ { 1.0f,  1.0f, 0.0f },{ 1.0f, 0.0f, 0.0f } },
-	//	{ { -1.0f,  1.0f, 0.0f },{ 0.0f, 1.0f, 0.0f } },
-	//	{ { 0.0f, -1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f } }
-	//};
-	//uint32_t vertexBufferSize = (uint32_t)(vertexBuffer.size() * sizeof(Vertex));
-
-	// Setup indices
-	//std::vector<uint32_t> indexBuffer = { 0, 1, 2 };
-	//uint32_t indexBufferSize = (uint32_t)(indexBuffer.size() * sizeof(uint32_t));
-	//indexCount = (uint32_t)indexBuffer.size();
 
 	vk::MemoryAllocateInfo memAlloc;
 	vk::MemoryRequirements memReqs;
@@ -947,12 +929,11 @@ bool RendererVulkan::CreateUniformBuffers()
 		0.0f, 0.0f, 1.0f, -10.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
 	};
-	uboVS.viewMatrix = m3d::math::Matrix4x4::Translation(m3d::math::Vector3(0.0f, 0.0f, -10.0f));
+	uboVS.viewMatrix = m3d::math::Matrix4x4::Translation(m3d::math::Vector3(0.0f, 0.0f, -100.0f));
 	uboVS.viewMatrix.ToString(buf, 512);
 	printf("vmat = %s\n", buf);
 	uboVS.modelMatrix = m3d::math::Matrix4x4();
 #endif
-
 
 	// Map uniform buffer and update it
 	// If you want to keep a handle to the memory and not unmap it afer updating, 
@@ -1197,5 +1178,24 @@ bool RendererVulkan::Draw()
 	presentInfo.waitSemaphoreCount = renderComplete ? 1 : 0;
 	presentInfo.pWaitSemaphores = &renderComplete;
 	queue.presentKHR(presentInfo);
+
+	queue.waitIdle();
+
 	return false;
+}
+
+void RendererVulkan::DrawLoop()
+{
+	while (1)
+	{
+		auto tStart = std::chrono::high_resolution_clock::now();
+		Draw();
+		frameCounter++;
+
+		auto tEnd = std::chrono::high_resolution_clock::now();
+		auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
+		frameTimer = (float)tDiff / 1000.0f;
+		printf("%f\n", frameTimer);
+	}
+	device.waitIdle();
 }

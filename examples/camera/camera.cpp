@@ -24,11 +24,11 @@ int main()
 
 	RendererVulkan renderer;
 	renderer.Init(&scene);
-
-	while (1)
-	{
-		renderer.Draw();
-	}
+	renderer.DrawLoop();
+	//while (1)
+	//{
+	//	renderer.Draw();
+	//}
 
     return 0;
 }
