@@ -34,6 +34,8 @@ private:
 
 	bool CreateSwapChain();
 
+	bool CreateDepthStencil();
+
 	bool CreateFramebuffers();
 
 	bool CreateCommandPool();
@@ -151,6 +153,14 @@ private:
 	std::vector<vk::VertexInputBindingDescription> bindingDescriptions;
 	std::vector<vk::VertexInputAttributeDescription> attributeDescriptions;
 	/* Render Pass */
+	struct
+	{
+		vk::Image image;
+		vk::DeviceMemory mem;
+		vk::ImageView view;
+	} depthStencil;
+	vk::Format							depthFormat;
+
 	uint32_t							currentImage;
 	vk::PresentInfoKHR					presentInfo;
 	std::vector<vk::ShaderModule>		shaderModules;

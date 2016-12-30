@@ -363,8 +363,7 @@ bool RendererVulkan::CreateRenderPass()
 	attachments[0].initialLayout = vk::ImageLayout::eUndefined;
 	attachments[0].finalLayout = vk::ImageLayout::ePresentSrcKHR;
 
-	// Only one depth attachment, so put it first in the references
-	vk::AttachmentReference& colorReference = attachmentReferences[0];
+	vk::AttachmentReference colorReference = {};
 	colorReference.attachment = 0;
 	colorReference.layout = vk::ImageLayout::eColorAttachmentOptimal;
 
@@ -373,7 +372,7 @@ bool RendererVulkan::CreateRenderPass()
 		vk::SubpassDescription& subpass = subpasses[0];
 		subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
 		subpass.colorAttachmentCount = 1;
-		subpass.pColorAttachments = attachmentReferences.data();
+		subpass.pColorAttachments = &colorReference;
 	}
 
 	std::array<vk::SubpassDependency, 1> subpassDependencies;
@@ -467,7 +466,7 @@ bool RendererVulkan::CreateSwapChain()
 	swapchainCI.pQueueFamilyIndices = NULL;
 	swapchainCI.presentMode = swapchainPresentMode;
 	// TODO:
-	//swapchainCI.oldSwapchain = oldSwapchain;
+	swapchainCI.oldSwapchain = oldSwapChain;
 	swapchainCI.clipped = true;
 	swapchainCI.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
 
@@ -510,9 +509,56 @@ bool RendererVulkan::CreateSwapChain()
 	return true;
 }
 
+bool RendererVulkan::CreateDepthStencil()
+{
+	assert(vkhelper::getSupportedDepthFormat(physicalDevice, depthFormat));
+
+	vk::ImageCreateInfo image = {};
+	image.setSType(vk::StructureType::eImageCreateInfo);
+	image.setPNext(nullptr);
+	image.imageType = vk::ImageType::e2D;
+	image.format = depthFormat;
+	image.extent = {1280, 720, 1};
+	image.mipLevels = 1;
+	image.arrayLayers = 1;
+	image.samples = vk::SampleCountFlagBits::e1;
+	image.tiling = vk::ImageTiling::eOptimal;
+	image.usage = vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eTransferSrc;
+
+	vk::MemoryAllocateInfo memAlloc = {};
+	memAlloc.setSType(vk::StructureType::eMemoryAllocateInfo);
+	memAlloc.pNext = nullptr;
+	memAlloc.setAllocationSize(0);
+	memAlloc.memoryTypeIndex = 0;
+
+	vk::ImageViewCreateInfo depthStencilView = {};
+	depthStencilView.setSType(vk::StructureType::eImageViewCreateInfo);
+	depthStencilView.setViewType(vk::ImageViewType::e2D);
+	depthStencilView.format = depthFormat;
+	depthStencilView.subresourceRange = vk::ImageSubresourceRange{
+		vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil,
+		0,
+		1,
+		0,
+		1
+	};
+
+	vk::MemoryRequirements memReqs;
+	depthStencil.image = device.createImage(image, nullptr);
+	memReqs = device.getImageMemoryRequirements(depthStencil.image);
+	memAlloc.allocationSize = memReqs.size;
+	// TODO:
+	//memAlloc.memoryTypeIndex = device
+	depthStencil.mem = device.allocateMemory(memAlloc, nullptr);
+	device.bindImageMemory(depthStencil.image, depthStencil.mem, 0);
+
+	depthStencilView.image = depthStencil.image;
+	depthStencil.view = device.createImageView(depthStencilView, nullptr);
+}
+
 bool RendererVulkan::CreateFramebuffers()
 {
-	std::array<vk::ImageView, 1> attachments;
+	std::array<vk::ImageView, 2> attachments;
 
 	vk::FramebufferCreateInfo framebufferCreateInfo;
 
@@ -696,8 +742,8 @@ bool RendererVulkan::CreatePipeline()
 	// Load shaders
 	// Shaders are loaded from the SPIR-V format, which can be generated from glsl
 	std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
-	shaderStages[0] = loadShader("D:\\workspace\\m3d\\data\\shaders\\camera\\triangle.vert.spv", vk::ShaderStageFlagBits::eVertex);
-	shaderStages[1] = loadShader("D:\\workspace\\m3d\\data\\shaders\\camera\\triangle.frag.spv", vk::ShaderStageFlagBits::eFragment);
+	shaderStages[0] = loadShader("G:\\workspace\\m3d\\data\\shaders\\camera\\triangle.vert.spv", vk::ShaderStageFlagBits::eVertex);
+	shaderStages[1] = loadShader("G:\\workspace\\m3d\\data\\shaders\\camera\\triangle.frag.spv", vk::ShaderStageFlagBits::eFragment);
 
 	// Assign states
 	// Assign pipeline state create information
