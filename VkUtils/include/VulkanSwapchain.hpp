@@ -170,7 +170,7 @@ public:
 		uint32_t presentQueueNodeIndex = UINT32_MAX;
 		for (uint32_t i = 0; i < queueProps.size(); i++)
 		{
-			if (queueProps[i].queueFlags == vk::QueueFlagBits::eGraphics) 
+			if (queueProps[i].queueFlags & vk::QueueFlagBits::eGraphics) 
 			{
 				if (graphicsQueueNodeIndex == UINT32_MAX) 
 				{
