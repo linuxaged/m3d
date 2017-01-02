@@ -10,7 +10,7 @@
 
 namespace vkhelper
 {
-	static vk::Bool32 checkDeviceExtensionPresent(vk::PhysicalDevice physicalDevice, const char* extensionName) {
+	static vk::Bool32 checkDeviceExtensionPresent(vk::PhysicalDevice &physicalDevice, const char* extensionName) {
 		uint32_t extensionCount = 0;
 		std::vector<vk::ExtensionProperties> extensions = physicalDevice.enumerateDeviceExtensionProperties();
 		for (auto& ext : extensions) {

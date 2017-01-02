@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2016 Tracy Ma
+* Copyright (C) 2017 Tracy Ma
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
 
@@ -8,12 +8,16 @@
 #include <vulkan/vulkan.hpp>
 #include <Matrix.h>
 
+#include "VulkanSwapchain.hpp"
+
 #define DEFAULT_FENCE_TIMEOUT 100000000000
 
 class Scene;
 
 class RendererVulkan
 {
+public:
+	~RendererVulkan();
 private:
 	bool CreateInstance();
 
@@ -25,6 +29,13 @@ private:
 
 	bool CreateSemaphores();
 
+	void CreateSwapChain();
+	void CreatePipelineCache();
+	void InitCommon();
+
+	bool CreateBuffer(vk::BufferUsageFlags usageFlags, vk::MemoryPropertyFlags memoryPropertyFlags, vk::DeviceSize size, void * data, vk::Buffer & buffer, vk::DeviceMemory & memory);
+	vk::CommandBuffer CreateCommandBuffer(vk::CommandBufferLevel level, bool begin);
+	void FlushCommandBuffer(vk::CommandBuffer commandBuffer, vk::Queue queue, bool free);
 public:
 	bool Init(Scene* scene);
 
@@ -32,32 +43,40 @@ private:
 	/* Render Pass */
 	bool CreateRenderPass();
 
-	bool CreateSwapChain();
-
 	bool CreateDepthStencil();
+
+
 
 	bool CreateFramebuffers();
 
 	bool CreateCommandPool();
 
+	void SetupVertexInputs();
+
+	// pipeline
+	bool CreateDescriptorPool();
+	bool CreateDescriptorSet();
 	bool CreatePipeline();
 
 	bool CreateVertices();
 	bool CreateUniformBuffers();
-	bool CreateDescriptorPool();
-	bool CreateDescriptorSet();
 
-	bool CreateCommandBuffers();
+
+	void DestroyCommandBuffers();
+	void BuildCommandBuffers();
+	void CreateCommandBuffers();
 
 	bool RecordCommandBuffers();
 
+	void PrepareFrame();
+	void SubmitFrame();
 public:
 	/* Window Event */
 	bool OnWindowSizeChanged();
 
 public:
 	/* Draw Loop */
-	bool Draw();
+	void Draw();
 	void DrawLoop();
 	uint32_t frameCounter;
 	float frameTimer;
@@ -76,23 +95,15 @@ private:
 	};
 	/* Utils */
 	std::vector<const char*> RendererVulkan::getAvailableWSIExtensions();
-	void createWin32Window();
+	
 	vk::SurfaceKHR createVulkanSurface();
 	vk::PipelineShaderStageCreateInfo loadShader(const std::string& fileName, vk::ShaderStageFlagBits stage);
 
 	/* Windows window */
-	static LRESULT CALLBACK window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-	{
-		RendererVulkan *renderer = reinterpret_cast<RendererVulkan *>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
-
-		// called from constructor, CreateWindowEx specifically.  But why?
-		if (!renderer)
-			renderer->handle_message(uMsg, wParam, lParam);
-
-		return DefWindowProc(hwnd, uMsg, wParam, lParam);
-	}
+public:
+	void createWin32Window(HINSTANCE hinstance, WNDPROC wndproc);
 	LRESULT handle_message(UINT msg, WPARAM wparam, LPARAM lparam);
-	
+private:
 	HINSTANCE hinstance_;
 	HWND hwnd_;
 	HMODULE hmodule_;
@@ -108,8 +119,12 @@ private:
 	vk::Semaphore						presentComplete;
 	vk::Semaphore						renderComplete;
 
-	vk::SwapchainKHR					swapChain;
-	vk::SwapchainKHR					oldSwapChain;
+	bool								inited;
+	uint32_t							width, height;
+	VulkanSwapChain						swapChain;
+
+	//vk::SwapchainKHR					swapChain;
+	//vk::SwapchainKHR					oldSwapChain;
 	std::vector<SwapChainImage>			images;
 	uint32_t							imageCount;
 	/* Descriptor Set */
@@ -120,15 +135,31 @@ private:
 	vk::CommandPool						cmdPool;
 	std::vector<vk::CommandBuffer>		cmdBuffers;
 	/* Vertex Data */
-	struct {
-		vk::Buffer buffer;
-		vk::DeviceMemory memory;
-	} vertices;
+	struct StagingBuffer {
+		vk::DeviceMemory mem;
+		vk::Buffer buf;
+	};
 
 	struct {
-		vk::Buffer buffer;
-		vk::DeviceMemory memory;
-	} indices;
+		StagingBuffer vertices;
+		StagingBuffer indices;
+		uint32_t	indexCount;
+	} meshBuffer;
+
+	struct {
+		vk::PipelineVertexInputStateCreateInfo inputState;
+		std::vector<vk::VertexInputBindingDescription> bindingDescriptions;
+		std::vector<vk::VertexInputAttributeDescription> attributeDescriptions;
+	} vertexInputs;
+	//struct {
+	//	vk::Buffer buffer;
+	//	vk::DeviceMemory memory;
+	//} vertices;
+
+	//struct {
+	//	vk::Buffer buffer;
+	//	vk::DeviceMemory memory;
+	//} indices;
 
 	struct {
 		vk::Buffer buffer;

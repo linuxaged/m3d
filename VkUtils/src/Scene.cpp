@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2016 Tracy Ma
+* Copyright (C) 2017 Tracy Ma
 * This code is licensed under the MIT license (MIT)
 * (http://opensource.org/licenses/MIT)
 */
@@ -176,29 +176,8 @@ Scene::Scene() {}
 
 void Scene::Init()
 {
-	//std::string schemafile;
-	//std::string jsonfile;
-	//bool ok = flatbuffers::LoadFile("G:\\workspace\\m3d\\data\\schema\\scene.fbs", false, &schemafile)
-	//&& flatbuffers::LoadFile("G:\\workspace\\m3d\\data\\schema\\scene_data.json", false, &jsonfile);
-	//if (!ok) {
-	//	printf("couldn't load files!\n");
-	//}
-
- //   flatbuffers::Parser parser;
- //   const char* include_directories[] = { "G:\\workspace\\m3d\\data\\schema", nullptr };
-	//printf("%s\n", schemafile.c_str());
- //   ok = parser.Parse(schemafile.c_str(), include_directories) && parser.Parse(jsonfile.c_str(), include_directories);
- //   assert(ok);
-
- //   std::string jsongen;
-	//GenerateText(parser, parser.builder_.GetBufferPointer(), &jsongen);
-
- //   if (jsongen != jsonfile) {
- //       printf("%s----------------\n%s", jsongen.c_str(), jsonfile.c_str());
- //   }
-
 	std::vector<uint8_t> sceneData;
-	m3d::file::readBinary("G:\\workspace\\m3d\\data\\schema\\scene_data.bin", sceneData);
+	m3d::file::readBinary("D:\\workspace\\m3d\\data\\schema\\scene_data.bin", sceneData);
 	auto mainScene = GetSScene(sceneData.data());
 	loadPath = mainScene->models()->Get(0)->name()->str();
 	printf("fbx path: %s", loadPath.c_str());
