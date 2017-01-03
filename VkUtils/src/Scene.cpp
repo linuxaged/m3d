@@ -7,10 +7,9 @@
 #include "Scene.hpp"
 #include "File.hpp"
 
+#include "../../data/schema/scene_generated.h"
 #include "flatbuffers/idl.h"
 #include "flatbuffers/util.h"
-#include "../../data/schema/scene_generated.h"
-
 
 #include <fbxsdk.h>
 
@@ -40,16 +39,16 @@ bool Mesh::init(FbxMesh* pFbxMesh)
         ? pFbxMesh->GetControlPointsCount()
         : polygonCount * TRIANGLE_VERTEX_COUNT;
 
-	this->vertices.resize(controlPointCount * VERTEX_STRIDE);
-	this->indices.resize(polygonCount * TRIANGLE_VERTEX_COUNT);
-	if (hasNormal)
-		this->normals.resize(controlPointCount * NORMAL_STRIDE);
+    this->vertices.resize(controlPointCount * VERTEX_STRIDE);
+    this->indices.resize(polygonCount * TRIANGLE_VERTEX_COUNT);
+    if (hasNormal)
+        this->normals.resize(controlPointCount * NORMAL_STRIDE);
 
     FbxStringList uvNames;
     pFbxMesh->GetUVSetNames(uvNames);
     const char* pUVName = nullptr;
     if (hasUV) {
-		this->uvs.resize(controlPointCount * UV_STRIDE);
+        this->uvs.resize(controlPointCount * UV_STRIDE);
         pUVName = uvNames[0];
     }
 
@@ -140,9 +139,9 @@ bool Mesh::init(FbxMesh* pFbxMesh)
             const int controlPointIndex = pFbxMesh->GetPolygonVertex(i, v);
 
             if (byControlPoint) {
-				this->indices[indexOffset + v] = static_cast<unsigned int>(controlPointIndex);
+                this->indices[indexOffset + v] = static_cast<unsigned int>(controlPointIndex);
             } else {
-				this->indices[indexOffset + v] = static_cast<unsigned int>(vertexCount);
+                this->indices[indexOffset + v] = static_cast<unsigned int>(vertexCount);
 
                 currentVertex = pControlPoints[controlPointIndex];
                 this->vertices[vertexCount * VERTEX_STRIDE] = static_cast<float>(currentVertex[0]);
@@ -176,11 +175,11 @@ Scene::Scene() {}
 
 void Scene::Init()
 {
-	std::vector<uint8_t> sceneData;
-	m3d::file::readBinary("G:\\workspace\\m3d\\data\\schema\\scene_data.bin", sceneData);
-	auto mainScene = GetSScene(sceneData.data());
-	loadPath = mainScene->models()->Get(0)->name()->str();
-	printf("fbx path: %s", loadPath.c_str());
+    std::vector<uint8_t> sceneData;
+    m3d::file::readBinary("D:\\workspace\\m3d\\data\\schema\\scene_data.bin", sceneData);
+    auto mainScene = GetSScene(sceneData.data());
+    loadPath = mainScene->models()->Get(0)->name()->str();
+    printf("fbx path: %s", loadPath.c_str());
 
     diffuseMaps = packed_freelist<DiffuseMap>(512);
     materials = packed_freelist<Material>(512);
@@ -264,7 +263,7 @@ void LoadMeshes(Scene* pScene, std::vector<uint32_t>* loadedMeshIDs)
     (*(fbxManager->GetIOSettings())).SetBoolProp(EXP_FBX_GLOBAL_SETTINGS, true);
 
     FbxImporter* pFbxImporter = FbxImporter::Create(fbxManager, "");
- 
+
     // Initialize the importer.
     bool result = pFbxImporter->Initialize(pScene->loadPath.c_str(), -1, fbxManager->GetIOSettings());
     if (!result) {
@@ -302,17 +301,14 @@ void LoadMeshes(Scene* pScene, std::vector<uint32_t>* loadedMeshIDs)
     FbxGeometryConverter fbxGeometryConverter(fbxManager);
     fbxGeometryConverter.Triangulate(pFbxScene, true);
 
-	// Load Texture
-	int textureCount = pFbxScene->GetTextureCount();
-	for (int i = 0; i < textureCount; ++i)
-	{
-		FbxTexture *pFbxTexture = pFbxScene->GetTexture(i);
-		FbxFileTexture *pFbxFileTexture = FbxCast<FbxFileTexture>(pFbxTexture);
-		if (pFbxTexture && pFbxFileTexture->GetUserDataPtr())
-		{
-
-		}
-	}
+    // Load Texture
+    int textureCount = pFbxScene->GetTextureCount();
+    for (int i = 0; i < textureCount; ++i) {
+        FbxTexture* pFbxTexture = pFbxScene->GetTexture(i);
+        FbxFileTexture* pFbxFileTexture = FbxCast<FbxFileTexture>(pFbxTexture);
+        if (pFbxTexture && pFbxFileTexture->GetUserDataPtr()) {
+        }
+    }
     LoadMeshes(pFbxScene->GetRootNode(), pScene->meshes);
 }
 

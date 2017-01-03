@@ -27,11 +27,11 @@
 #include "Scene.hpp"
 
 //VulkanExample *vulkanExample;
-RendererVulkan *renderer;
+RendererVulkan* renderer;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     if (renderer != NULL) {
-		renderer->handle_message(uMsg, wParam, lParam);
+        renderer->handle_message(uMsg, wParam, lParam);
     }
     return (DefWindowProc(hWnd, uMsg, wParam, lParam));
 }
@@ -60,11 +60,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLin
     }
 
     renderer = new RendererVulkan();
-	renderer->createWin32Window(hInstance, WndProc);
+    renderer->createWin32Window(hInstance, WndProc);
     renderer->Init(&scene);
     renderer->DrawLoop();
 
-	delete (renderer);
+    delete (renderer);
 
     return 0;
 }

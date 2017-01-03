@@ -223,15 +223,19 @@ bool RendererVulkan::CreateDevice()
     swapChain.connect(instance, physicalDevice, device);
 
     queue = device.getQueue(graphicsQueueIndex, 0);
-    return true;
-}
 
-bool RendererVulkan::CreateSemaphores()
-{
-    // Create semaphores
+    // SubmitInfo
     vk::SemaphoreCreateInfo semaphoreCreateInfo;
     presentComplete = device.createSemaphore(semaphoreCreateInfo);
     renderComplete = device.createSemaphore(semaphoreCreateInfo);
+
+    //submitInfo = vkTools::initializers::submitInfo();
+    submitInfo.pWaitDstStageMask = &submitPipelineStages;
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = &presentComplete;
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = &renderComplete;
+
     return true;
 }
 
@@ -303,10 +307,6 @@ bool RendererVulkan::Init(Scene* scene)
     }
 
     if (!CreateDevice()) {
-        return false;
-    }
-
-    if (!CreateSemaphores()) {
         return false;
     }
 
@@ -629,8 +629,8 @@ bool RendererVulkan::CreatePipeline()
     // Load shaders
     // Shaders are loaded from the SPIR-V format, which can be generated from glsl
     std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
-    shaderStages[0] = loadShader("G:\\workspace\\m3d\\data\\shaders\\camera\\triangle.vert.spv", vk::ShaderStageFlagBits::eVertex);
-    shaderStages[1] = loadShader("G:\\workspace\\m3d\\data\\shaders\\camera\\triangle.frag.spv", vk::ShaderStageFlagBits::eFragment);
+    shaderStages[0] = loadShader("D:\\workspace\\m3d\\data\\shaders\\camera\\triangle.vert.spv", vk::ShaderStageFlagBits::eVertex);
+    shaderStages[1] = loadShader("D:\\workspace\\m3d\\data\\shaders\\camera\\triangle.frag.spv", vk::ShaderStageFlagBits::eFragment);
 
     // Assign states
     // Assign pipeline state create information
@@ -712,13 +712,13 @@ void RendererVulkan::FlushCommandBuffer(vk::CommandBuffer commandBuffer, vk::Que
     //VK_CHECK_RESULT(vkEndCommandBuffer(commandBuffer));
     commandBuffer.end();
 
-    vk::SubmitInfo submitInfo = {};
+    vk::SubmitInfo _submitInfo = {};
     //submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
+    _submitInfo.commandBufferCount = 1;
+    _submitInfo.pCommandBuffers = &commandBuffer;
 
     //VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
-    queue.submit(submitInfo, vk::Fence());
+    queue.submit(_submitInfo, vk::Fence());
     //VK_CHECK_RESULT(vkQueueWaitIdle(queue));
     queue.waitIdle();
 
@@ -977,7 +977,8 @@ void RendererVulkan::BuildCommandBuffers()
     vk::CommandBufferBeginInfo cmdBufInfo = {};
 
     vk::ClearValue clearValues[2];
-    //clearValues[0].color = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 0.0f);
+	std::array<float, 4> tmpColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+    clearValues[0].color = vk::ClearColorValue(tmpColor);
     clearValues[1].depthStencil = { 1.0f, 0 };
 
     vk::RenderPassBeginInfo renderPassBeginInfo = {};
@@ -1074,7 +1075,9 @@ void RendererVulkan::SubmitFrame()
 void RendererVulkan::Draw()
 {
     PrepareFrame();
-
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &cmdBuffers[currentImage];
+    queue.submit(submitInfo, vk::Fence());
     SubmitFrame();
 }
 
