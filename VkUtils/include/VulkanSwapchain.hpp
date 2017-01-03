@@ -64,15 +64,15 @@ private:
 	vk::PhysicalDevice physicalDevice;
 	vk::SurfaceKHR surface;
 	// Function pointers
-	PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
-	PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR fpGetPhysicalDeviceSurfaceCapabilitiesKHR; 
-	PFN_vkGetPhysicalDeviceSurfaceFormatsKHR fpGetPhysicalDeviceSurfaceFormatsKHR;
-	PFN_vkGetPhysicalDeviceSurfacePresentModesKHR fpGetPhysicalDeviceSurfacePresentModesKHR;
-	PFN_vkCreateSwapchainKHR fpCreateSwapchainKHR;
-	PFN_vkDestroySwapchainKHR fpDestroySwapchainKHR;
-	PFN_vkGetSwapchainImagesKHR fpGetSwapchainImagesKHR;
-	PFN_vkAcquireNextImageKHR fpAcquireNextImageKHR;
-	PFN_vkQueuePresentKHR fpQueuePresentKHR;
+	//PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
+	//PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR fpGetPhysicalDeviceSurfaceCapabilitiesKHR; 
+	//PFN_vkGetPhysicalDeviceSurfaceFormatsKHR fpGetPhysicalDeviceSurfaceFormatsKHR;
+	//PFN_vkGetPhysicalDeviceSurfacePresentModesKHR fpGetPhysicalDeviceSurfacePresentModesKHR;
+	//PFN_vkCreateSwapchainKHR fpCreateSwapchainKHR;
+	//PFN_vkDestroySwapchainKHR fpDestroySwapchainKHR;
+	//PFN_vkGetSwapchainImagesKHR fpGetSwapchainImagesKHR;
+	//PFN_vkAcquireNextImageKHR fpAcquireNextImageKHR;
+	//PFN_vkQueuePresentKHR fpQueuePresentKHR;
 public:
 	vk::Format colorFormat;
 	vk::ColorSpaceKHR colorSpace;
