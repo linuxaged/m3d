@@ -320,6 +320,7 @@ bool RendererVulkan::Init(Scene* scene)
         CreateVertices();
         SetupVertexInputs();
         CreateUniformBuffers();
+		CreatePipelineLayout();
         CreatePipeline();
         CreateDescriptorPool();
         CreateDescriptorSet();
@@ -505,39 +506,43 @@ vk::PipelineShaderStageCreateInfo RendererVulkan::loadShader(const std::string& 
     return shaderStage;
 }
 
+void RendererVulkan::CreatePipelineLayout()
+{
+	/* Pipeline Layout */
+
+	// Setup layout of descriptors used in this example
+	// Basically connects the different shader stages to descriptors
+	// for binding uniform buffers, image samplers, etc.
+	// So every shader binding should map to one descriptor set layout
+	// binding
+
+	// Binding 0 : Uniform buffer (Vertex shader)
+	vk::DescriptorSetLayoutBinding layoutBinding = {};
+	layoutBinding.descriptorType = vk::DescriptorType::eUniformBuffer;
+	layoutBinding.descriptorCount = 1;
+	layoutBinding.stageFlags = vk::ShaderStageFlagBits::eVertex;
+	layoutBinding.pImmutableSamplers = nullptr;
+
+	vk::DescriptorSetLayoutCreateInfo descriptorLayout = {};
+	descriptorLayout.bindingCount = 1;
+	descriptorLayout.pBindings = &layoutBinding;
+
+	descriptorSetLayout = device.createDescriptorSetLayout(descriptorLayout);
+
+	// Create the pipeline layout that is used to generate the rendering pipelines that
+	// are based on this descriptor set layout
+	// In a more complex scenario you would have different pipeline layouts for different
+	// descriptor set layouts that could be reused
+	vk::PipelineLayoutCreateInfo pPipelineLayoutCreateInfo = {};
+	pPipelineLayoutCreateInfo.setLayoutCount = 1;
+	pPipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
+
+	pipelineLayout = device.createPipelineLayout(pPipelineLayoutCreateInfo);
+}
+
 bool RendererVulkan::CreatePipeline()
 {
-    /* Pipeline Layout */
-
-    // Setup layout of descriptors used in this example
-    // Basically connects the different shader stages to descriptors
-    // for binding uniform buffers, image samplers, etc.
-    // So every shader binding should map to one descriptor set layout
-    // binding
-
-    // Binding 0 : Uniform buffer (Vertex shader)
-    vk::DescriptorSetLayoutBinding layoutBinding;
-    layoutBinding.descriptorType = vk::DescriptorType::eUniformBuffer;
-    layoutBinding.descriptorCount = 1;
-    layoutBinding.stageFlags = vk::ShaderStageFlagBits::eVertex;
-    layoutBinding.pImmutableSamplers = NULL;
-
-    vk::DescriptorSetLayoutCreateInfo descriptorLayout;
-    descriptorLayout.bindingCount = 1;
-    descriptorLayout.pBindings = &layoutBinding;
-
-    descriptorSetLayout = device.createDescriptorSetLayout(descriptorLayout, NULL);
-
-    // Create the pipeline layout that is used to generate the rendering pipelines that
-    // are based on this descriptor set layout
-    // In a more complex scenario you would have different pipeline layouts for different
-    // descriptor set layouts that could be reused
-    vk::PipelineLayoutCreateInfo pPipelineLayoutCreateInfo;
-    pPipelineLayoutCreateInfo.setLayoutCount = 1;
-    pPipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
-
-    pipelineLayout = device.createPipelineLayout(pPipelineLayoutCreateInfo);
-
+    
     // Create our rendering pipeline used in this example
     // Vulkan uses the concept of rendering pipelines to encapsulate
     // fixed states
@@ -552,7 +557,7 @@ bool RendererVulkan::CreatePipeline()
     // pipeline only stores that they are used with this pipeline,
     // but not their states
 
-    vk::GraphicsPipelineCreateInfo pipelineCreateInfo;
+	vk::GraphicsPipelineCreateInfo pipelineCreateInfo = {};
     // The layout used for this pipeline
     pipelineCreateInfo.layout = pipelineLayout;
     // Renderpass this pipeline is attached to
@@ -560,11 +565,11 @@ bool RendererVulkan::CreatePipeline()
 
     // Vertex input state
     // Describes the topoloy used with this pipeline
-    vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState;
+	vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState = {};
     inputAssemblyState.topology = vk::PrimitiveTopology::eTriangleList;
 
     // Rasterization state
-    vk::PipelineRasterizationStateCreateInfo rasterizationState;
+	vk::PipelineRasterizationStateCreateInfo rasterizationState = {};
     rasterizationState.polygonMode = vk::PolygonMode::eFill;
     rasterizationState.cullMode = vk::CullModeFlagBits::eNone;
     rasterizationState.frontFace = vk::FrontFace::eCounterClockwise;
@@ -575,7 +580,7 @@ bool RendererVulkan::CreatePipeline()
 
     // Color blend state
     // Describes blend modes and color masks
-    vk::PipelineColorBlendStateCreateInfo colorBlendState;
+	vk::PipelineColorBlendStateCreateInfo colorBlendState = {};
     // One blend attachment state
     // Blending is not used in this example
     vk::PipelineColorBlendAttachmentState blendAttachmentState[1] = {};
@@ -585,7 +590,7 @@ bool RendererVulkan::CreatePipeline()
     colorBlendState.pAttachments = blendAttachmentState;
 
     // vk::Viewport state
-    vk::PipelineViewportStateCreateInfo viewportState;
+	vk::PipelineViewportStateCreateInfo viewportState = {};
     // One viewport
     viewportState.viewportCount = 1;
     // One scissor rectangle
@@ -596,7 +601,7 @@ bool RendererVulkan::CreatePipeline()
     // Dynamic states can be set even after the pipeline has been created
     // So there is no need to create new pipelines just for changing
     // a viewport's dimensions or a scissor box
-    vk::PipelineDynamicStateCreateInfo dynamicState;
+	vk::PipelineDynamicStateCreateInfo dynamicState = {};
     // The dynamic state properties themselves are stored in the command buffer
     std::vector<vk::DynamicState> dynamicStateEnables;
     dynamicStateEnables.push_back(vk::DynamicState::eViewport);
@@ -606,7 +611,7 @@ bool RendererVulkan::CreatePipeline()
 
     // Depth and stencil state
     // Describes depth and stenctil test and compare ops
-    vk::PipelineDepthStencilStateCreateInfo depthStencilState;
+	vk::PipelineDepthStencilStateCreateInfo depthStencilState = {};
     // Basic depth compare setup with depth writes and depth test enabled
     // No stencil used
     depthStencilState.depthTestEnable = VK_TRUE;
@@ -620,15 +625,15 @@ bool RendererVulkan::CreatePipeline()
     depthStencilState.front = depthStencilState.back;
 
     // Multi sampling state
-    vk::PipelineMultisampleStateCreateInfo multisampleState;
+	vk::PipelineMultisampleStateCreateInfo multisampleState = {};
     multisampleState.pSampleMask = nullptr;
     multisampleState.rasterizationSamples = vk::SampleCountFlagBits::e1;
 
     // Load shaders
     // Shaders are loaded from the SPIR-V format, which can be generated from glsl
     std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
-    shaderStages[0] = loadShader("G:\\workspace\\m3d\\data\\shaders\\camera\\triangle.vert.spv", vk::ShaderStageFlagBits::eVertex);
-    shaderStages[1] = loadShader("G:\\workspace\\m3d\\data\\shaders\\camera\\triangle.frag.spv", vk::ShaderStageFlagBits::eFragment);
+    shaderStages[0] = loadShader("D:\\workspace\\m3d\\data\\shaders\\camera\\triangle.vert.spv", vk::ShaderStageFlagBits::eVertex);
+    shaderStages[1] = loadShader("D:\\workspace\\m3d\\data\\shaders\\camera\\triangle.frag.spv", vk::ShaderStageFlagBits::eFragment);
 
     // Assign states
     // Assign pipeline state create information
@@ -653,8 +658,8 @@ bool RendererVulkan::CreatePipeline()
 
 bool RendererVulkan::CreateBuffer(vk::BufferUsageFlags usageFlags, vk::MemoryPropertyFlags memoryPropertyFlags, vk::DeviceSize size, void* data, vk::Buffer& buffer, vk::DeviceMemory& memory)
 {
-    vk::MemoryRequirements memReqs;
-    vk::MemoryAllocateInfo memAlloc;
+	vk::MemoryRequirements memReqs = {};
+	vk::MemoryAllocateInfo memAlloc = {};
     vk::BufferCreateInfo bufferCreateInfo = {};
     bufferCreateInfo.setUsage(usageFlags);
     bufferCreateInfo.setSize(size);
@@ -922,7 +927,7 @@ bool RendererVulkan::CreateDescriptorPool()
 bool RendererVulkan::CreateDescriptorSet()
 {
     // Allocate a new descriptor set from the global descriptor pool
-    vk::DescriptorSetAllocateInfo allocInfo;
+	vk::DescriptorSetAllocateInfo allocInfo = {};
     allocInfo.descriptorPool = descriptorPool;
     allocInfo.descriptorSetCount = 1;
     allocInfo.pSetLayouts = &descriptorSetLayout;

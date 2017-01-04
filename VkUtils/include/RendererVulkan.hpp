@@ -55,6 +55,7 @@ private:
     // pipeline
     bool CreateDescriptorPool();
     bool CreateDescriptorSet();
+	void CreatePipelineLayout();
     bool CreatePipeline();
 
     bool CreateVertices();
