@@ -21,11 +21,7 @@
  */
 std::vector<const char*> RendererVulkan::getAvailableWSIExtensions()
 {
-    std::vector<const char*> extensions;
-    extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
-#if defined(_DEBUG)
-    extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-#endif
+	std::vector<const char*> extensions = { VK_KHR_SURFACE_EXTENSION_NAME };
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
@@ -38,6 +34,10 @@ std::vector<const char*> RendererVulkan::getAvailableWSIExtensions()
 #elif defined(VK_USE_PLATFORM_XLIB_KHR)
     extensions.push_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
 #endif
+
+//#if defined(_DEBUG)
+//	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+//#endif
 
     return extensions;
 }
@@ -140,10 +140,11 @@ bool RendererVulkan::CreateInstance()
 {
     // Use validation layers if this is a debug build, and use WSI extensions regardless
     std::vector<const char*> extensions = getAvailableWSIExtensions();
-    std::vector<const char*> layers;
-#if defined(_DEBUG)
-    layers.push_back("VK_LAYER_LUNARG_standard_validation");
-#endif
+    
+//#if defined(_DEBUG)
+//	std::vector<const char*> layers;
+//    layers.push_back("VK_LAYER_LUNARG_standard_validation");
+//#endif
 
     // vk::ApplicationInfo allows the programmer to specifiy some basic information about the
     // program, which can be useful for layers and tools to provide more debug information.
@@ -161,8 +162,11 @@ bool RendererVulkan::CreateInstance()
                                           .setPApplicationInfo(&appInfo)
                                           .setEnabledExtensionCount(static_cast<uint32_t>(extensions.size()))
                                           .setPpEnabledExtensionNames(extensions.data())
-                                          .setEnabledLayerCount(static_cast<uint32_t>(layers.size()))
-                                          .setPpEnabledLayerNames(layers.data());
+//#if defined(_DEBUG)
+//                                          .setEnabledLayerCount(static_cast<uint32_t>(layers.size()))
+//                                          .setPpEnabledLayerNames(layers.data())
+//#endif
+		;
 
     // Create the Vulkan instance.
     try {
