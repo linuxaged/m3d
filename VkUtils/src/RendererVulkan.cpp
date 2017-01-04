@@ -42,7 +42,7 @@ std::vector<const char*> RendererVulkan::getAvailableWSIExtensions()
     return extensions;
 }
 
-void RendererVulkan::createWin32Window(HINSTANCE hinstance, WNDPROC wndproc)
+void RendererVulkan::createWin32Window(HINSTANCE hinstance, WNDPROC wndproc, uint32_t w, uint32_t h)
 {
     const std::string class_name("RendererVulkanWindowClass");
 
@@ -63,7 +63,7 @@ void RendererVulkan::createWin32Window(HINSTANCE hinstance, WNDPROC wndproc)
 
     const DWORD win_style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VISIBLE | WS_OVERLAPPEDWINDOW;
 
-    RECT win_rect = { 0, 0, 1280, 720 };
+    RECT win_rect = { 0, 0, w, h };
     AdjustWindowRect(&win_rect, win_style, false);
 
     hwnd_ = CreateWindowEx(WS_EX_APPWINDOW,
@@ -122,7 +122,7 @@ LRESULT RendererVulkan::handle_message(UINT msg, WPARAM wparam, LPARAM lparam)
 
         break;
     case WM_SIZE:
-
+        OnWindowSizeChanged();
         break;
     case WM_ENTERSIZEMOVE:
 
@@ -148,9 +148,9 @@ bool RendererVulkan::CreateInstance()
     // vk::ApplicationInfo allows the programmer to specifiy some basic information about the
     // program, which can be useful for layers and tools to provide more debug information.
     vk::ApplicationInfo appInfo = vk::ApplicationInfo()
-                                      .setPApplicationName("Vulkan C++ Windowed Program Template")
+                                      .setPApplicationName("m3d example")
                                       .setApplicationVersion(1)
-                                      .setPEngineName("LunarG SDK")
+                                      .setPEngineName("m3d")
                                       .setEngineVersion(1)
                                       .setApiVersion(VK_API_VERSION_1_0);
 
@@ -242,9 +242,6 @@ bool RendererVulkan::CreateDevice()
 /*************** Swapchain ****************/
 void RendererVulkan::CreateSwapChain()
 {
-    uint32_t width = 1280;
-    uint32_t height = 720;
-
     swapChain.initSurface(hinstance_, hwnd_);
     swapChain.create(&width, &height, false);
 }
@@ -326,7 +323,7 @@ bool RendererVulkan::Init(Scene* scene)
     }
 
     // TODO:
-    OnWindowSizeChanged();
+    //OnWindowSizeChanged();
 
     return true;
 }
@@ -413,7 +410,7 @@ bool RendererVulkan::CreateDepthStencil()
     image.setPNext(nullptr);
     image.imageType = vk::ImageType::e2D;
     image.format = depthFormat;
-    image.extent = { 1280, 720, 1 };
+    image.extent = { width, height, 1 };
     image.mipLevels = 1;
     image.arrayLayers = 1;
     image.samples = vk::SampleCountFlagBits::e1;
@@ -430,6 +427,7 @@ bool RendererVulkan::CreateDepthStencil()
     depthStencilView.setSType(vk::StructureType::eImageViewCreateInfo);
     depthStencilView.setViewType(vk::ImageViewType::e2D);
     depthStencilView.format = depthFormat;
+
     depthStencilView.subresourceRange = vk::ImageSubresourceRange{
         vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil,
         0,
@@ -464,8 +462,8 @@ bool RendererVulkan::CreateFramebuffers()
     framebufferCreateInfo.renderPass = renderPass;
     framebufferCreateInfo.attachmentCount = attachments.size();
     framebufferCreateInfo.pAttachments = attachments.data();
-    framebufferCreateInfo.width = 1280; //size.width;
-    framebufferCreateInfo.height = 720; // size.height;
+    framebufferCreateInfo.width = width;
+    framebufferCreateInfo.height = height;
     framebufferCreateInfo.layers = 1;
 
     // Create frame buffers for every swap chain image
@@ -559,14 +557,11 @@ bool RendererVulkan::CreatePipeline()
     // Vertex input state
     // Describes the topoloy used with this pipeline
     vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState;
-    // This pipeline renders vertex data as triangle lists
     inputAssemblyState.topology = vk::PrimitiveTopology::eTriangleList;
 
     // Rasterization state
     vk::PipelineRasterizationStateCreateInfo rasterizationState;
-    // Solid polygon mode
     rasterizationState.polygonMode = vk::PolygonMode::eFill;
-    // No culling
     rasterizationState.cullMode = vk::CullModeFlagBits::eNone;
     rasterizationState.frontFace = vk::FrontFace::eCounterClockwise;
     rasterizationState.depthClampEnable = VK_FALSE;
@@ -622,15 +617,14 @@ bool RendererVulkan::CreatePipeline()
 
     // Multi sampling state
     vk::PipelineMultisampleStateCreateInfo multisampleState;
-    multisampleState.pSampleMask = NULL;
-    // No multi sampling used in this example
+    multisampleState.pSampleMask = nullptr;
     multisampleState.rasterizationSamples = vk::SampleCountFlagBits::e1;
 
     // Load shaders
     // Shaders are loaded from the SPIR-V format, which can be generated from glsl
     std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
-    shaderStages[0] = loadShader("D:\\workspace\\m3d\\data\\shaders\\camera\\triangle.vert.spv", vk::ShaderStageFlagBits::eVertex);
-    shaderStages[1] = loadShader("D:\\workspace\\m3d\\data\\shaders\\camera\\triangle.frag.spv", vk::ShaderStageFlagBits::eFragment);
+    shaderStages[0] = loadShader("G:\\workspace\\m3d\\data\\shaders\\camera\\triangle.vert.spv", vk::ShaderStageFlagBits::eVertex);
+    shaderStages[1] = loadShader("G:\\workspace\\m3d\\data\\shaders\\camera\\triangle.frag.spv", vk::ShaderStageFlagBits::eFragment);
 
     // Assign states
     // Assign pipeline state create information
@@ -647,6 +641,7 @@ bool RendererVulkan::CreatePipeline()
     pipelineCreateInfo.pDynamicState = &dynamicState;
 
     // Create rendering pipeline
+    // TODO: release
     vk::PipelineCache pipelineCache = device.createPipelineCache(vk::PipelineCacheCreateInfo());
     pipeline = device.createGraphicsPipelines(pipelineCache, pipelineCreateInfo, nullptr)[0];
     return true;
@@ -709,21 +704,23 @@ void RendererVulkan::FlushCommandBuffer(vk::CommandBuffer commandBuffer, vk::Que
         return;
     }
 
-    //VK_CHECK_RESULT(vkEndCommandBuffer(commandBuffer));
     commandBuffer.end();
 
     vk::SubmitInfo _submitInfo = {};
-    //submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     _submitInfo.commandBufferCount = 1;
     _submitInfo.pCommandBuffers = &commandBuffer;
 
-    //VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
-    queue.submit(_submitInfo, vk::Fence());
-    //VK_CHECK_RESULT(vkQueueWaitIdle(queue));
+	vk::FenceCreateInfo fenceCreateInfo = {};
+	vk::Fence fence;
+	fence = device.createFence(fenceCreateInfo);
+	//VK_CHECK_RESULT(vkCreateFence(device, &fenceCreateInfo, nullptr, &vk::Fence()));
+
+
+    queue.submit(_submitInfo, fence);
     queue.waitIdle();
 
+	device.destroyFence(fence);
     if (free) {
-        //vkFreeCommandBuffers(device, cmdPool, 1, &commandBuffer);
         device.freeCommandBuffers(cmdPool, 1, &commandBuffer);
     }
 }
@@ -960,6 +957,7 @@ void RendererVulkan::DestroyCommandBuffers()
     device.freeCommandBuffers(cmdPool, cmdBuffers);
 }
 
+// depend on swapchain
 void RendererVulkan::CreateCommandBuffers()
 {
     cmdBuffers.resize(swapChain.images.size());
@@ -970,6 +968,14 @@ void RendererVulkan::CreateCommandBuffers()
     cmdBufAllocateInfo.commandBufferCount = cmdBuffers.size();
 
     cmdBuffers = device.allocateCommandBuffers(cmdBufAllocateInfo);
+
+    vk::FenceCreateInfo fenceCreateInfo = {};
+    fenceCreateInfo.flags = vk::FenceCreateFlagBits::eSignaled;
+
+    waitFences.resize(cmdBuffers.size());
+    for (auto& fence : waitFences) {
+        fence = device.createFence(fenceCreateInfo);
+    }
 }
 
 void RendererVulkan::BuildCommandBuffers()
@@ -977,7 +983,7 @@ void RendererVulkan::BuildCommandBuffers()
     vk::CommandBufferBeginInfo cmdBufInfo = {};
 
     vk::ClearValue clearValues[2];
-	std::array<float, 4> tmpColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+    std::array<float, 4> tmpColor = { 0.0f, 0.0f, 0.0f, 1.0f };
     clearValues[0].color = vk::ClearColorValue(tmpColor);
     clearValues[1].depthStencil = { 1.0f, 0 };
 
@@ -985,8 +991,8 @@ void RendererVulkan::BuildCommandBuffers()
     renderPassBeginInfo.renderPass = renderPass;
     renderPassBeginInfo.renderArea.offset.x = 0;
     renderPassBeginInfo.renderArea.offset.y = 0;
-    renderPassBeginInfo.renderArea.extent.width = 1280;
-    renderPassBeginInfo.renderArea.extent.height = 720;
+    renderPassBeginInfo.renderArea.extent.width = width;
+    renderPassBeginInfo.renderArea.extent.height = height;
     renderPassBeginInfo.clearValueCount = 2;
     renderPassBeginInfo.pClearValues = clearValues;
 
@@ -999,13 +1005,15 @@ void RendererVulkan::BuildCommandBuffers()
         //vkCmdBeginRenderPass(drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
         cmdBuffers[i].beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
 
-        std::array<vk::Viewport, 1> viewports = { vk::Viewport{ (float)1280, (float)720, 0.0f, 1.0f } };
+        //std::array<vk::Viewport, 1> viewports = { vk::Viewport{ 1280.0f, 720.0f, 0.0f, 1.0f } };
         //vkCmdSetViewport(drawCmdBuffers[i], 0, 1, viewports);
-        cmdBuffers[i].setViewport(0, viewports);
+        //cmdBuffers[i].setViewport(0, 1, &viewports[0]);
+        cmdBuffers[i].setViewport(0, vk::Viewport{ (float)width, (float)height, 0.0f, 1.0f });
+        //cmdBuffers[i].setViewport(0, viewports);
 
-        std::array<vk::Rect2D, 1> scissors = { vk::Rect2D{ (0, 0), ((uint32_t)1280, (uint32_t)720) } };
+        //std::array<vk::Rect2D, 1> scissors = { vk::Rect2D{ (0, 0), ((uint32_t)1280, (uint32_t)720) } };
         //vkCmdSetScissor(drawCmdBuffers[i], 0, 1, &scissor);
-        cmdBuffers[i].setScissor(0, scissors);
+        cmdBuffers[i].setScissor(0, { vk::Rect2D{ (0, 0), (width, height) } });
 
         vk::DeviceSize offsets[1] = { 0 };
 
@@ -1068,16 +1076,21 @@ void RendererVulkan::PrepareFrame()
 void RendererVulkan::SubmitFrame()
 {
     swapChain.queuePresent(queue, currentImage, renderComplete);
-    queue.waitIdle();
+    //queue.waitIdle();
 }
 
 /* Draw Loop */
 void RendererVulkan::Draw()
 {
     PrepareFrame();
+
+    device.waitForFences(1, &waitFences[currentImage], true, UINT64_MAX);
+    device.resetFences(1, &waitFences[currentImage]);
+
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &cmdBuffers[currentImage];
-    queue.submit(submitInfo, vk::Fence());
+    queue.submit(submitInfo, waitFences[currentImage]);
+
     SubmitFrame();
 }
 

@@ -60,7 +60,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLin
     }
 
     renderer = new RendererVulkan();
-    renderer->createWin32Window(hInstance, WndProc);
+    renderer->createWin32Window(hInstance, WndProc, 1280, 720);
     renderer->Init(&scene);
     renderer->DrawLoop();
 

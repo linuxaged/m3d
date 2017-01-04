@@ -100,7 +100,7 @@ private:
 
     /* Windows window */
 public:
-    void createWin32Window(HINSTANCE hinstance, WNDPROC wndproc);
+    void createWin32Window(HINSTANCE hinstance, WNDPROC wndproc, uint32_t width, uint32_t height);
     LRESULT handle_message(UINT msg, WPARAM wparam, LPARAM lparam);
 
 private:
@@ -118,6 +118,7 @@ private:
 
     vk::Semaphore presentComplete;
     vk::Semaphore renderComplete;
+	std::vector<vk::Fence> waitFences;
 
     bool inited;
     uint32_t width, height;

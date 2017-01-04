@@ -33,25 +33,23 @@
 
 // Macro to get a procedure address based on a vulkan instance
 #define GET_INSTANCE_PROC_ADDR(inst, entrypoint)                                                              \
-    \
-{                                                                                                      \
+                                                                                                              \
+    {                                                                                                         \
         fp##entrypoint = reinterpret_cast<PFN_vk##entrypoint>(vkGetInstanceProcAddr(inst, "vk" #entrypoint)); \
         if (fp##entrypoint == NULL) {                                                                         \
             exit(1);                                                                                          \
         }                                                                                                     \
-    \
-}
+    }
 
 // Macro to get a procedure address based on a vulkan device
 #define GET_DEVICE_PROC_ADDR(dev, entrypoint)                                                              \
-    \
-{                                                                                                   \
+                                                                                                           \
+    {                                                                                                      \
         fp##entrypoint = reinterpret_cast<PFN_vk##entrypoint>(vkGetDeviceProcAddr(dev, "vk" #entrypoint)); \
         if (fp##entrypoint == NULL) {                                                                      \
             exit(1);                                                                                       \
         }                                                                                                  \
-    \
-}
+    }
 
 typedef struct _SwapChainBuffers {
     vk::Image image;
@@ -260,16 +258,16 @@ public:
         vk::SwapchainKHR oldSwapchain = swapChain;
 
         // Get physical device surface properties and formats
-        vk::SurfaceCapabilitiesKHR surfCaps;
+        vk::SurfaceCapabilitiesKHR surfCaps = {};
         surfCaps = physicalDevice.getSurfaceCapabilitiesKHR(surface);
 
         // Get available present modes
-        std::vector<vk::PresentModeKHR> presentModes;
+        std::vector<vk::PresentModeKHR> presentModes = {};
         presentModes = physicalDevice.getSurfacePresentModesKHR(surface);
 
         vk::Extent2D swapchainExtent = {};
         // If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
-        if (surfCaps.currentExtent.width == (uint32_t)-1) {
+        if (surfCaps.currentExtent.width == (uint32_t)-1 || surfCaps.currentExtent.height == (uint32_t)-1) {
             // If the surface size is undefined, the size is set to
             // the size of the images requested.
             swapchainExtent.width = *width;
