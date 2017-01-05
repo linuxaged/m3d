@@ -56,7 +56,7 @@ namespace vkhelper
 		return result;
 	}
 
-	static bool getSupportedDepthFormat(vk::PhysicalDevice physicalDevice, vk::Format& depthFormat)
+	static bool getSupportedDepthFormat(vk::PhysicalDevice &physicalDevice, vk::Format& depthFormat)
 	{
 		// Since all depth formats may be optional, we need to find a suitable depth format to use
 		// Start with the highest precision packed format

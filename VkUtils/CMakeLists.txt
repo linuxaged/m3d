@@ -2,6 +2,8 @@ add_library(VkUtils
 	src/File.cpp
 	src/idl_gen_text.cpp
 	src/idl_parser.cpp
+	src/Pipeline.cpp
+	src/CommandBuffer.cpp
 	src/RendererVulkan.cpp
 	src/Scene.cpp
 	src/stb_image.c

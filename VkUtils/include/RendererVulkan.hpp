@@ -34,8 +34,8 @@ private:
     void InitCommon();
 
     bool CreateBuffer(vk::BufferUsageFlags usageFlags, vk::MemoryPropertyFlags memoryPropertyFlags, vk::DeviceSize size, void* data, vk::Buffer& buffer, vk::DeviceMemory& memory);
-    vk::CommandBuffer CreateCommandBuffer(vk::CommandBufferLevel level, bool begin);
-    void FlushCommandBuffer(vk::CommandBuffer commandBuffer, vk::Queue queue, bool free);
+    //vk::CommandBuffer CreateCommandBuffer(vk::CommandBufferLevel level, bool begin);
+    //void FlushCommandBuffer(vk::CommandBuffer commandBuffer, vk::Queue queue, bool free);
 
 public:
     bool Init(Scene* scene);
@@ -61,11 +61,11 @@ private:
     bool CreateVertices();
     bool CreateUniformBuffers();
 
-    void DestroyCommandBuffers();
-    void BuildCommandBuffers();
-    void CreateCommandBuffers();
+    //void DestroyCommandBuffers();
+    //void BuildCommandBuffers();
+    //void CreateCommandBuffers();
 
-    bool RecordCommandBuffers();
+    //bool RecordCommandBuffers();
 
     void PrepareFrame();
     void SubmitFrame();
