@@ -1,4 +1,6 @@
 #include "../include/CommandBuffer.hpp"
+#include "../include/VulkanSwapchain.hpp"
+#include "../include/Pipeline.hpp"
 
 namespace m3d {
 CommandBuffer::CommandBuffer(vk::Device& Device, vk::Queue& Queue, VulkanSwapChain& swapChain)
@@ -18,7 +20,7 @@ CommandBuffer::CommandBuffer(vk::Device& Device, vk::Queue& Queue, VulkanSwapCha
     drawCmdBuffers = device.allocateCommandBuffers(cmdBufAllocateInfo);
 }
 
-void CommandBuffer::Build()
+void CommandBuffer::Build(Pipeline &pipeline)
 {
     vk::CommandBufferBeginInfo cmdBufInfo = {};
 
@@ -28,7 +30,7 @@ void CommandBuffer::Build()
     clearValues[1].depthStencil = { 1.0f, 0 };
 
     vk::RenderPassBeginInfo renderPassBeginInfo = {};
-    renderPassBeginInfo.renderPass = renderPass;
+    renderPassBeginInfo.renderPass = pipeline.GetRenderPass();
     renderPassBeginInfo.renderArea.offset.x = 0;
     renderPassBeginInfo.renderArea.offset.y = 0;
     renderPassBeginInfo.renderArea.extent.width = width;
@@ -50,7 +52,7 @@ void CommandBuffer::Build()
 
         vk::DeviceSize offsets[1] = { 0 };
 
-        drawCmdBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, descriptorSet, nullptr);
+        drawCmdBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.GetPipelineLayout(), 0, pipeline.GetDescriptorSet(), nullptr);
         drawCmdBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
 
         drawCmdBuffers[i].bindVertexBuffers(0, 1, &meshBuffer.vertices.buf, offsets);

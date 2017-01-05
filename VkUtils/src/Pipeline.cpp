@@ -292,7 +292,7 @@ namespace m3d {
 		return shaderStage;
 	}
 
-	Pipeline::Pipeline(vk::Device &Device) : device(Device)
+	Pipeline::Pipeline(vk::Device &Device, vk::PhysicalDevice &PhysicalDevice) : device(Device), physicalDevice(PhysicalDevice)
 	{
 		// Create our rendering pipeline used in this example
 	    // Vulkan uses the concept of rendering pipelines to encapsulate
