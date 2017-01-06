@@ -5,11 +5,11 @@
 */
 
 #include "RendererVulkan.hpp"
+#include "CommandBuffer.hpp"
 #include "File.hpp"
 #include "Matrix.h"
-#include "Scene.hpp"
 #include "Pipeline.hpp"
-#include "CommandBuffer.hpp"
+#include "Scene.hpp"
 #include "VulkanHelper.hpp"
 #include "VulkanSwapchain.hpp"
 #include "vulkanTextureLoader.hpp"
@@ -17,13 +17,14 @@
 #include <iostream>
 
 #define VERTEX_BUFFER_BIND_ID 0
+namespace m3d {
 
 /*
- * Utils
- */
+	 * Utils
+	 */
 std::vector<const char*> RendererVulkan::getAvailableWSIExtensions()
 {
-	std::vector<const char*> extensions = { VK_KHR_SURFACE_EXTENSION_NAME };
+    std::vector<const char*> extensions = { VK_KHR_SURFACE_EXTENSION_NAME };
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
@@ -37,9 +38,9 @@ std::vector<const char*> RendererVulkan::getAvailableWSIExtensions()
     extensions.push_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
 #endif
 
-//#if defined(_DEBUG)
-//	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-//#endif
+    //#if defined(_DEBUG)
+    //	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+    //#endif
 
     return extensions;
 }
@@ -136,17 +137,17 @@ LRESULT RendererVulkan::handle_message(UINT msg, WPARAM wparam, LPARAM lparam)
 }
 
 /*
- * Setup Vulkan
- */
+	 * Setup Vulkan
+	 */
 bool RendererVulkan::CreateInstance()
 {
     // Use validation layers if this is a debug build, and use WSI extensions regardless
     std::vector<const char*> extensions = getAvailableWSIExtensions();
-    
-//#if defined(_DEBUG)
-//	std::vector<const char*> layers;
-//    layers.push_back("VK_LAYER_LUNARG_standard_validation");
-//#endif
+
+    //#if defined(_DEBUG)
+    //	std::vector<const char*> layers;
+    //    layers.push_back("VK_LAYER_LUNARG_standard_validation");
+    //#endif
 
     // vk::ApplicationInfo allows the programmer to specifiy some basic information about the
     // program, which can be useful for layers and tools to provide more debug information.
@@ -164,11 +165,11 @@ bool RendererVulkan::CreateInstance()
                                           .setPApplicationInfo(&appInfo)
                                           .setEnabledExtensionCount(static_cast<uint32_t>(extensions.size()))
                                           .setPpEnabledExtensionNames(extensions.data())
-//#if defined(_DEBUG)
-//                                          .setEnabledLayerCount(static_cast<uint32_t>(layers.size()))
-//                                          .setPpEnabledLayerNames(layers.data())
-//#endif
-		;
+        //#if defined(_DEBUG)
+        //                                          .setEnabledLayerCount(static_cast<uint32_t>(layers.size()))
+        //                                          .setPpEnabledLayerNames(layers.data())
+        //#endif
+        ;
 
     // Create the Vulkan instance.
     try {
@@ -262,16 +263,14 @@ void RendererVulkan::InitCommon()
 {
     CreateSwapChain();
     CreateCommandPool();
-    CreateCommandBuffers();
-    CreateDepthStencil();
-    CreateRenderPass();
-    CreatePipelineCache();
-    CreateFramebuffers();
+	commandBuffer = new CommandBuffer(device, physicalDevice, queue, swapChain);
+
+	pipeLine = new Pipeline(device, physicalDevice);
 }
 
 //void RendererVulkan::SetupVertexInputs()
 //{
-//   
+//
 //}
 
 bool RendererVulkan::Init(Scene* scene)
@@ -293,7 +292,7 @@ bool RendererVulkan::Init(Scene* scene)
         CreateVertices();
         SetupVertexInputs();
         CreateUniformBuffers();
-		CreatePipelineLayout();
+        CreatePipelineLayout();
         CreatePipeline();
         CreateDescriptorPool();
         CreateDescriptorSet();
@@ -306,233 +305,6 @@ bool RendererVulkan::Init(Scene* scene)
     return true;
 }
 
-/* Render Pass */
-//bool RendererVulkan::CreateRenderPass()
-//{
-//    
-//    return true;
-//}
-
-bool RendererVulkan::CreateDepthStencil()
-{
-    assert(vkhelper::getSupportedDepthFormat(physicalDevice, depthFormat));
-
-    vk::ImageCreateInfo image = {};
-    image.setSType(vk::StructureType::eImageCreateInfo);
-    image.setPNext(nullptr);
-    image.imageType = vk::ImageType::e2D;
-    image.format = depthFormat;
-    image.extent = { width, height, 1 };
-    image.mipLevels = 1;
-    image.arrayLayers = 1;
-    image.samples = vk::SampleCountFlagBits::e1;
-    image.tiling = vk::ImageTiling::eOptimal;
-    image.usage = vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eTransferSrc;
-
-    vk::MemoryAllocateInfo memAlloc = {};
-    memAlloc.setSType(vk::StructureType::eMemoryAllocateInfo);
-    memAlloc.pNext = nullptr;
-    memAlloc.setAllocationSize(0);
-    memAlloc.memoryTypeIndex = 0;
-
-    vk::ImageViewCreateInfo depthStencilView = {};
-    depthStencilView.setSType(vk::StructureType::eImageViewCreateInfo);
-    depthStencilView.setViewType(vk::ImageViewType::e2D);
-    depthStencilView.format = depthFormat;
-
-    depthStencilView.subresourceRange = vk::ImageSubresourceRange{
-        vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil,
-        0,
-        1,
-        0,
-        1
-    };
-
-    vk::MemoryRequirements memReqs;
-    depthStencil.image = device.createImage(image, nullptr);
-    memReqs = device.getImageMemoryRequirements(depthStencil.image);
-    memAlloc.allocationSize = memReqs.size;
-    memAlloc.memoryTypeIndex = vkhelper::getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
-    depthStencil.mem = device.allocateMemory(memAlloc, nullptr);
-    device.bindImageMemory(depthStencil.image, depthStencil.mem, 0);
-
-    depthStencilView.image = depthStencil.image;
-
-    depthStencil.view = device.createImageView(depthStencilView, nullptr);
-
-    return true;
-}
-
-bool RendererVulkan::CreateFramebuffers()
-{
-    // Create frame buffers for every swap chain image
-    framebuffers.resize(swapChain.images.size());
-
-	std::array<vk::ImageView, 2> attachments;
-	attachments[1] = depthStencil.view;
-
-	for (size_t i = 0; i < framebuffers.size(); i++)
-	{
-		attachments[0] = swapChain.buffers[i].view;	
-
-		vk::FramebufferCreateInfo frameBufferCreateInfo = {};
-		//frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		// All frame buffers use the same renderpass setup
-		frameBufferCreateInfo.renderPass = renderPass;
-		frameBufferCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-		frameBufferCreateInfo.pAttachments = attachments.data();
-		frameBufferCreateInfo.width = width;
-		frameBufferCreateInfo.height = height;
-		frameBufferCreateInfo.layers = 1;
-		// Create the framebuffer
-		framebuffers[i] = device.createFramebuffer(frameBufferCreateInfo);
-	}
-
-    return true;
-}
-
-//void RendererVulkan::CreatePipelineLayout()
-//{
-//	
-//}
-//
-//bool RendererVulkan::CreatePipeline()
-//{
-//    
-//    
-//    return true;
-//}
-
-bool RendererVulkan::CreateBuffer(vk::BufferUsageFlags usageFlags, vk::MemoryPropertyFlags memoryPropertyFlags, vk::DeviceSize size, void* data, vk::Buffer& buffer, vk::DeviceMemory& memory)
-{
-	vk::MemoryRequirements memReqs = {};
-	vk::MemoryAllocateInfo memAlloc = {};
-    vk::BufferCreateInfo bufferCreateInfo = {};
-    bufferCreateInfo.setUsage(usageFlags);
-    bufferCreateInfo.setSize(size);
-
-    //VK_CHECK_RESULT(vkCreateBuffer(device, &bufferCreateInfo, nullptr, buffer));
-    buffer = device.createBuffer(bufferCreateInfo);
-    //vkGetBufferMemoryRequirements(device, buffer, &memReqs);
-    memReqs = device.getBufferMemoryRequirements(buffer);
-    memAlloc.allocationSize = memReqs.size;
-    memAlloc.memoryTypeIndex = vkhelper::getMemoryType(physicalDevice, memReqs.memoryTypeBits, memoryPropertyFlags);
-
-    //VK_CHECK_RESULT(vkAllocateMemory(device, &memAlloc, nullptr, memory));
-    memory = device.allocateMemory(memAlloc);
-    if (data != nullptr) {
-        void* mapped;
-        //VK_CHECK_RESULT(vkMapMemory(device, *memory, 0, size, 0, &mapped));
-        mapped = device.mapMemory(memory, 0, size);
-        memcpy(mapped, data, size);
-        //vkUnmapMemory(device, *memory);
-        device.unmapMemory(memory);
-    }
-    //VK_CHECK_RESULT(vkBindBufferMemory(device, *buffer, *memory, 0));
-    device.bindBufferMemory(buffer, memory, 0);
-    return true;
-}
-
-
-bool RendererVulkan::CreateVertices()
-{
-    size_t vertexBufferSize = scene->meshes[0].vertices.size() * sizeof(float);
-    size_t indexBufferSize = scene->meshes[0].indices.size() * sizeof(uint32_t);
-    // TODO
-    meshBuffer.indexCount = scene->meshes[0].indices.size();
-
-    struct {
-        vk::Buffer buffer;
-        vk::DeviceMemory memory;
-    } vertexStaging, indexStaging;
-
-    // Create staging buffers
-    // Vertex data
-    CreateBuffer(
-        vk::BufferUsageFlagBits::eTransferSrc,
-        vk::MemoryPropertyFlagBits::eHostVisible,
-        vertexBufferSize,
-        scene->meshes[0].vertices.data(),
-        vertexStaging.buffer,
-        vertexStaging.memory);
-    // Index data
-    CreateBuffer(
-        vk::BufferUsageFlagBits::eTransferSrc,
-        vk::MemoryPropertyFlagBits::eHostVisible,
-        indexBufferSize,
-        scene->meshes[0].indices.data(),
-        indexStaging.buffer,
-        indexStaging.memory);
-
-    // Create device local buffers
-    // Vertex buffer
-    CreateBuffer(
-        vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-        vk::MemoryPropertyFlagBits::eDeviceLocal,
-        vertexBufferSize,
-        nullptr,
-        meshBuffer.vertices.buf,
-        meshBuffer.vertices.mem);
-    // Index buffer
-    CreateBuffer(
-        vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-        vk::MemoryPropertyFlagBits::eDeviceLocal,
-        indexBufferSize,
-        nullptr,
-        meshBuffer.indices.buf,
-        meshBuffer.indices.mem);
-
-    // Copy from staging buffers
-    vk::CommandBuffer copyCmd = CreateCommandBuffer(vk::CommandBufferLevel::ePrimary, true);
-
-    vk::BufferCopy copyRegion = {};
-
-    copyRegion.size = vertexBufferSize;
-    //vkCmdCopyBuffer(
-    //	copyCmd,
-    //	vertexStaging.buffer,
-    //	skinnedMesh->meshBuffer.vertices.buf,
-    //	1,
-    //	&copyRegion);
-
-    copyCmd.copyBuffer(vertexStaging.buffer, meshBuffer.vertices.buf, copyRegion);
-
-    copyRegion.size = indexBufferSize;
-    //vkCmdCopyBuffer(
-    //	copyCmd,
-    //	indexStaging.buffer,
-    //	skinnedMesh->meshBuffer.indices.buf,
-    //	1,
-    //	&copyRegion);
-
-    copyCmd.copyBuffer(indexStaging.buffer, meshBuffer.indices.buf, copyRegion);
-
-    FlushCommandBuffer(copyCmd, queue, true);
-
-    //vkDestroyBuffer(device, vertexStaging.buffer, nullptr);
-    //vkFreeMemory(device, vertexStaging.memory, nullptr);
-    //vkDestroyBuffer(device, indexStaging.buffer, nullptr);
-    //vkFreeMemory(device, indexStaging.memory, nullptr);
-    device.destroyBuffer(vertexStaging.buffer);
-    device.freeMemory(vertexStaging.memory);
-    device.destroyBuffer(indexStaging.buffer);
-    device.freeMemory(indexStaging.memory);
-
-    return true;
-}
-//
-//bool RendererVulkan::CreateUniformBuffers()
-//{
-//    
-//    return true;
-//}
-
-//bool RendererVulkan::CreateDescriptorSet()
-//{
-//    
-//    return true;
-//}
-
 bool RendererVulkan::CreateCommandPool()
 {
     vk::CommandPoolCreateInfo cmdPoolInfo;
@@ -541,8 +313,6 @@ bool RendererVulkan::CreateCommandPool()
     cmdPool = device.createCommandPool(cmdPoolInfo);
     return true;
 }
-
-
 
 bool RendererVulkan::OnWindowSizeChanged()
 {
@@ -595,7 +365,7 @@ void RendererVulkan::Draw()
 
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &cmdBuffers[currentImage];
-    queue.submit(submitInfo, vk::Fence()/*waitFences[currentImage]*/);
+    queue.submit(submitInfo, vk::Fence() /*waitFences[currentImage]*/);
 
     SubmitFrame();
 }
@@ -617,9 +387,9 @@ void RendererVulkan::DrawLoop()
 
 RendererVulkan::~RendererVulkan()
 {
-    device.destroyPipeline(pipeline);
-    device.destroyPipelineLayout(pipelineLayout);
-    device.destroyDescriptorSetLayout(descriptorSetLayout);
+	delete pipeLine;
+	delete commandBuffer;
 
     // TODO: destroy texture, Mesh resources
+}
 }

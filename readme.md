@@ -10,12 +10,19 @@
 
 # TODO
 
+## Shortterm
+
+* .clang_format
+* enable all compile warnings and take them as errors
 * Window Event
 * vulkan texture loader
 * [scene loader](https://nlguillemot.wordpress.com/2016/11/18/opengl-renderer-design/)
 	* [Buffer offset](https://developer.nvidia.com/vulkan-memory-management)
     * Camera
     * Animation
+
+## Longtern
+
 * GUI
 * Editor
 * configurable rendering pipeline

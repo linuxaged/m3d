@@ -14,196 +14,176 @@
 
 class Scene;
 
-class RendererVulkan {
-public:
-    ~RendererVulkan();
+namespace m3d {
+	class RenderPass;
+	class CommandBuffer;
 
-private:
-    bool CreateInstance();
+	class RendererVulkan {
+	public:
+		~RendererVulkan();
 
-    bool CreateSurface();
+	private:
+		bool CreateInstance();
 
-    bool CreateDevice();
+		bool CreateSurface();
 
-    bool GetDeviceQueue();
+		bool CreateDevice();
 
-    bool CreateSemaphores();
+		bool GetDeviceQueue();
 
-    void CreateSwapChain();
-    void CreatePipelineCache();
-    void InitCommon();
+		bool CreateSemaphores();
 
-    bool CreateBuffer(vk::BufferUsageFlags usageFlags, vk::MemoryPropertyFlags memoryPropertyFlags, vk::DeviceSize size, void* data, vk::Buffer& buffer, vk::DeviceMemory& memory);
-    //vk::CommandBuffer CreateCommandBuffer(vk::CommandBufferLevel level, bool begin);
-    //void FlushCommandBuffer(vk::CommandBuffer commandBuffer, vk::Queue queue, bool free);
+		void CreateSwapChain();
+		void CreatePipelineCache();
+		void InitCommon();
 
-public:
-    bool Init(Scene* scene);
+		bool CreateBuffer(vk::BufferUsageFlags usageFlags, vk::MemoryPropertyFlags memoryPropertyFlags, vk::DeviceSize size, void* data, vk::Buffer& buffer, vk::DeviceMemory& memory);
+		//vk::CommandBuffer CreateCommandBuffer(vk::CommandBufferLevel level, bool begin);
+		//void FlushCommandBuffer(vk::CommandBuffer commandBuffer, vk::Queue queue, bool free);
 
-private:
-    /* Render Pass */
-    bool CreateRenderPass();
+	public:
+		bool Init(Scene* scene);
 
-    bool CreateDepthStencil();
+	private:
+		/* Render Pass */
+		bool CreateRenderPass();
 
-    bool CreateFramebuffers();
+		bool CreateDepthStencil();
 
-    bool CreateCommandPool();
+		bool CreateFramebuffers();
 
-    void SetupVertexInputs();
+		bool CreateCommandPool();
 
-    // pipeline
-    bool CreateDescriptorPool();
-    bool CreateDescriptorSet();
-	void CreatePipelineLayout();
-    bool CreatePipeline();
+		void SetupVertexInputs();
 
-    bool CreateVertices();
-    bool CreateUniformBuffers();
+		// pipeline
+		bool CreateDescriptorPool();
+		bool CreateDescriptorSet();
+		void CreatePipelineLayout();
+		bool CreatePipeline();
 
-    //void DestroyCommandBuffers();
-    //void BuildCommandBuffers();
-    //void CreateCommandBuffers();
+		bool CreateVertices();
+		bool CreateUniformBuffers();
 
-    //bool RecordCommandBuffers();
+		//void DestroyCommandBuffers();
+		//void BuildCommandBuffers();
+		//void CreateCommandBuffers();
 
-    void PrepareFrame();
-    void SubmitFrame();
+		//bool RecordCommandBuffers();
 
-public:
-    /* Window Event */
-    bool OnWindowSizeChanged();
+		void PrepareFrame();
+		void SubmitFrame();
 
-public:
-    /* Draw Loop */
-    void Draw();
-    void DrawLoop();
-    uint32_t frameCounter;
-    float frameTimer;
+	public:
+		/* Window Event */
+		bool OnWindowSizeChanged();
 
-public:
-    vk::Device getDevice() const;
-    vk::PhysicalDevice getPhysicalDevice() const;
-    vk::CommandPool getCommandPool() const;
-    vk::Queue getQueue() const;
+	public:
+		/* Draw Loop */
+		void Draw();
+		void DrawLoop();
+		uint32_t frameCounter;
+		float frameTimer;
 
-private:
-    struct SwapChainImage {
-        vk::Image image;
-        vk::ImageView view;
-        vk::Fence fence;
-    };
-    /* Utils */
-    std::vector<const char*> RendererVulkan::getAvailableWSIExtensions();
+	public:
+		vk::Device getDevice() const;
+		vk::PhysicalDevice getPhysicalDevice() const;
+		vk::CommandPool getCommandPool() const;
+		vk::Queue getQueue() const;
 
-    vk::SurfaceKHR createVulkanSurface();
-    vk::PipelineShaderStageCreateInfo loadShader(const std::string& fileName, vk::ShaderStageFlagBits stage);
+	private:
+		struct SwapChainImage {
+			vk::Image image;
+			vk::ImageView view;
+			vk::Fence fence;
+		};
+		/* Utils */
+		std::vector<const char*> RendererVulkan::getAvailableWSIExtensions();
 
-    /* Windows window */
-public:
-    void createWin32Window(HINSTANCE hinstance, WNDPROC wndproc, uint32_t width, uint32_t height);
-    LRESULT handle_message(UINT msg, WPARAM wparam, LPARAM lparam);
+		vk::SurfaceKHR createVulkanSurface();
+		vk::PipelineShaderStageCreateInfo loadShader(const std::string& fileName, vk::ShaderStageFlagBits stage);
 
-private:
-    HINSTANCE hinstance_;
-    HWND hwnd_;
-    HMODULE hmodule_;
+		/* Windows window */
+	public:
+		void createWin32Window(HINSTANCE hinstance, WNDPROC wndproc, uint32_t width, uint32_t height);
+		LRESULT handle_message(UINT msg, WPARAM wparam, LPARAM lparam);
 
-private:
-    vk::Instance instance;
-    vk::SurfaceKHR surface;
-    vk::PhysicalDevice physicalDevice;
-    vk::Device device;
-    vk::Queue queue;
-    uint32_t graphicsQueueIndex;
+	private:
+		HINSTANCE hinstance_;
+		HWND hwnd_;
+		HMODULE hmodule_;
 
-    vk::Semaphore presentComplete;
-    vk::Semaphore renderComplete;
-	std::vector<vk::Fence> waitFences;
+	private:
+		vk::Instance instance;
+		vk::SurfaceKHR surface;
+		vk::PhysicalDevice physicalDevice;
+		vk::Device device;
+		vk::Queue queue;
+		uint32_t graphicsQueueIndex;
 
-    bool inited;
-    uint32_t width, height;
-    VulkanSwapChain swapChain;
+		vk::Semaphore presentComplete;
+		vk::Semaphore renderComplete;
+		std::vector<vk::Fence> waitFences;
 
-    //vk::SwapchainKHR					swapChain;
-    //vk::SwapchainKHR					oldSwapChain;
-    std::vector<SwapChainImage> images;
-    uint32_t imageCount;
-    /* Descriptor Set */
-    vk::DescriptorPool descriptorPool;
-    vk::DescriptorSet descriptorSet;
-    vk::DescriptorSetLayout descriptorSetLayout;
-    /* Command Buffer */
-    vk::CommandPool cmdPool;
-    std::vector<vk::CommandBuffer> cmdBuffers;
-    /* Vertex Data */
-    struct StagingBuffer {
-        vk::DeviceMemory mem;
-        vk::Buffer buf;
-    };
+		bool inited;
+		uint32_t width, height;
+		VulkanSwapChain swapChain;
 
-    struct {
-        StagingBuffer vertices;
-        StagingBuffer indices;
-        uint32_t indexCount;
-    } meshBuffer;
+		//vk::SwapchainKHR					swapChain;
+		//vk::SwapchainKHR					oldSwapChain;
+		std::vector<SwapChainImage> images;
+		uint32_t imageCount;
+		/* Descriptor Set */
+		vk::DescriptorPool descriptorPool;
+		vk::DescriptorSet descriptorSet;
+		vk::DescriptorSetLayout descriptorSetLayout;
+		/* Command Buffer */
+		vk::CommandPool cmdPool;
+		std::vector<vk::CommandBuffer> cmdBuffers;
+		/* Vertex Data */
+		struct StagingBuffer {
+			vk::DeviceMemory mem;
+			vk::Buffer buf;
+		};
 
-    struct {
-        vk::PipelineVertexInputStateCreateInfo inputState;
-        std::vector<vk::VertexInputBindingDescription> bindingDescriptions;
-        std::vector<vk::VertexInputAttributeDescription> attributeDescriptions;
-    } vertexInputs;
-    //struct {
-    //	vk::Buffer buffer;
-    //	vk::DeviceMemory memory;
-    //} vertices;
+		struct {
+			StagingBuffer vertices;
+			StagingBuffer indices;
+			uint32_t indexCount;
+		} meshBuffer;
 
-    //struct {
-    //	vk::Buffer buffer;
-    //	vk::DeviceMemory memory;
-    //} indices;
+		struct {
+			vk::PipelineVertexInputStateCreateInfo inputState;
+			std::vector<vk::VertexInputBindingDescription> bindingDescriptions;
+			std::vector<vk::VertexInputAttributeDescription> attributeDescriptions;
+		} vertexInputs;
 
-    struct {
-        vk::Buffer buffer;
-        vk::DeviceMemory memory;
-        vk::DescriptorBufferInfo descriptor;
-    } uniformDataVS;
+		struct {
+			vk::Buffer buffer;
+			vk::DeviceMemory memory;
+			vk::DescriptorBufferInfo descriptor;
+		} uniformDataVS;
 
-    struct {
+		struct {
 #ifdef USE_GLM
-        glm::mat4 projectionMatrix;
-        glm::mat4 modelMatrix;
-        glm::mat4 viewMatrix;
+			glm::mat4 projectionMatrix;
+			glm::mat4 modelMatrix;
+			glm::mat4 viewMatrix;
 #else
-        m3d::math::Matrix4x4 projectionMatrix;
-        m3d::math::Matrix4x4 modelMatrix;
-        m3d::math::Matrix4x4 viewMatrix;
+			m3d::math::Matrix4x4 projectionMatrix;
+			m3d::math::Matrix4x4 modelMatrix;
+			m3d::math::Matrix4x4 viewMatrix;
 #endif
-    } uboVS;
+		} uboVS;
 
-    uint32_t indexCount;
-    vk::PipelineVertexInputStateCreateInfo inputState;
-    std::vector<vk::VertexInputBindingDescription> bindingDescriptions;
-    std::vector<vk::VertexInputAttributeDescription> attributeDescriptions;
-    /* Render Pass */
-    struct
-    {
-        vk::Image image;
-        vk::DeviceMemory mem;
-        vk::ImageView view;
-    } depthStencil;
-    vk::Format depthFormat;
-
-    uint32_t currentImage;
-    vk::PipelineStageFlags submitPipelineStages = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-    vk::SubmitInfo submitInfo;
-    vk::PresentInfoKHR presentInfo;
-    std::vector<vk::ShaderModule> shaderModules;
-    vk::RenderPass renderPass;
-    std::vector<vk::Framebuffer> framebuffers;
-    vk::Pipeline pipeline;
-    vk::PipelineLayout pipelineLayout;
-
-private:
-    Scene* scene;
-};
+		uint32_t indexCount;
+		vk::PipelineVertexInputStateCreateInfo inputState;
+		std::vector<vk::VertexInputBindingDescription> bindingDescriptions;
+		std::vector<vk::VertexInputAttributeDescription> attributeDescriptions;
+		/* Render Pass */
+		Pipeline		*pipeLine;
+		CommandBuffer *commandBuffer;
+	private:
+		Scene* scene;
+	};
+}
