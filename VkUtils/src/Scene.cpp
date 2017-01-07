@@ -20,6 +20,7 @@ using namespace m3d::schema;
 #define NORMAL_STRIDE 3
 #define UV_STRIDE 2
 
+namespace m3d {
 bool Mesh::init(FbxMesh* pFbxMesh)
 {
     uint32_t normalCount = pFbxMesh->GetElementNormalCount();
@@ -328,3 +329,4 @@ void AddInstance(Scene& pFbxScene, uint32_t meshID, uint32_t* newInstanceID)
         *newInstanceID = tmpNewInstanceID;
     }
 }
+} // End of namespace m3d

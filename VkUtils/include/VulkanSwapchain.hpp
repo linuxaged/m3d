@@ -25,32 +25,12 @@
 #endif
 
 #include <vulkan/vulkan.hpp>
-//#include "vulkantools.h"
 
 #ifdef __ANDROID__
 #include "vulkanandroid.h"
 #endif
 
-// Macro to get a procedure address based on a vulkan instance
-#define GET_INSTANCE_PROC_ADDR(inst, entrypoint)                                                              \
-                                                                                                              \
-    {                                                                                                         \
-        fp##entrypoint = reinterpret_cast<PFN_vk##entrypoint>(vkGetInstanceProcAddr(inst, "vk" #entrypoint)); \
-        if (fp##entrypoint == NULL) {                                                                         \
-            exit(1);                                                                                          \
-        }                                                                                                     \
-    }
-
-// Macro to get a procedure address based on a vulkan device
-#define GET_DEVICE_PROC_ADDR(dev, entrypoint)                                                              \
-                                                                                                           \
-    {                                                                                                      \
-        fp##entrypoint = reinterpret_cast<PFN_vk##entrypoint>(vkGetDeviceProcAddr(dev, "vk" #entrypoint)); \
-        if (fp##entrypoint == NULL) {                                                                      \
-            exit(1);                                                                                       \
-        }                                                                                                  \
-    }
-
+namespace m3d {
 typedef struct _SwapChainBuffers {
     vk::Image image;
     vk::ImageView view;
@@ -62,16 +42,7 @@ private:
     vk::Device device;
     vk::PhysicalDevice physicalDevice;
     vk::SurfaceKHR surface;
-    // Function pointers
-    //PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
-    //PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR fpGetPhysicalDeviceSurfaceCapabilitiesKHR;
-    //PFN_vkGetPhysicalDeviceSurfaceFormatsKHR fpGetPhysicalDeviceSurfaceFormatsKHR;
-    //PFN_vkGetPhysicalDeviceSurfacePresentModesKHR fpGetPhysicalDeviceSurfacePresentModesKHR;
-    //PFN_vkCreateSwapchainKHR fpCreateSwapchainKHR;
-    //PFN_vkDestroySwapchainKHR fpDestroySwapchainKHR;
-    //PFN_vkGetSwapchainImagesKHR fpGetSwapchainImagesKHR;
-    //PFN_vkAcquireNextImageKHR fpAcquireNextImageKHR;
-    //PFN_vkQueuePresentKHR fpQueuePresentKHR;
+
 public:
     vk::Format colorFormat;
     vk::ColorSpaceKHR colorSpace;
@@ -86,20 +57,20 @@ public:
 
     // Creates an os specific surface
     /**
-	* Create the surface object, an abstraction for the native platform window
-	*
-	* @pre Windows
-	* @param platformHandle HINSTANCE of the window to create the surface for
-	* @param platformWindow HWND of the window to create the surface for
-	*
-	* @pre Android 
-	* @param window A native platform window
-	*
-	* @pre Linux (XCB)
-	* @param connection xcb connection to the X Server
-	* @param window The xcb window to create the surface for
-	* @note Targets other than XCB ar not yet supported
-	*/
+		* Create the surface object, an abstraction for the native platform window
+		*
+		* @pre Windows
+		* @param platformHandle HINSTANCE of the window to create the surface for
+		* @param platformWindow HWND of the window to create the surface for
+		*
+		* @pre Android
+		* @param window A native platform window
+		*
+		* @pre Linux (XCB)
+		* @param connection xcb connection to the X Server
+		* @param window The xcb window to create the surface for
+		* @note Targets other than XCB ar not yet supported
+		*/
     void initSurface(
 #ifdef _WIN32
         void* platformHandle, void* platformWindow
@@ -120,12 +91,6 @@ public:
 
 // Create the os-specific surface
 #ifdef _WIN32
-        //VkWin32SurfaceCreateInfoKHR surfaceCreateInfo = {};
-        //surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-        //surfaceCreateInfo.hinstance = (HINSTANCE)platformHandle;
-        //surfaceCreateInfo.hwnd = (HWND)platformWindow;
-        //err = vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, nullptr, &surface);
-
         vk::Win32SurfaceCreateInfoKHR surfaceInfo = vk::Win32SurfaceCreateInfoKHR()
                                                         .setHinstance((HINSTANCE)platformHandle)
                                                         .setHwnd((HWND)platformWindow);
@@ -192,12 +157,12 @@ public:
 
         // Exit if either a graphics or a presenting queue hasn't been found
         if (graphicsQueueNodeIndex == UINT32_MAX || presentQueueNodeIndex == UINT32_MAX) {
-            assert("Could not find a graphics and/or presenting queue!", "Fatal error");
+            assert("Could not find a graphics and/or presenting queue!");
         }
 
         // todo : Add support for separate graphics and presenting queue
         if (graphicsQueueNodeIndex != presentQueueNodeIndex) {
-            assert("Separate graphics and presenting queues are not supported yet!", "Fatal error");
+            assert("Separate graphics and presenting queues are not supported yet!");
         }
 
         queueNodeIndex = graphicsQueueNodeIndex;
@@ -222,36 +187,27 @@ public:
     }
 
     /**
-	* Set instance, physical and logical device to use for the swapchain and get all required function pointers
-	* 
-	* @param instance Vulkan instance to use
-	* @param physicalDevice Physical device used to query properties and formats relevant to the swapchain
-	* @param device Logical representation of the device to create the swapchain for
-	*
-	*/
+		* Set instance, physical and logical device to use for the swapchain and get all required function pointers
+		*
+		* @param instance Vulkan instance to use
+		* @param physicalDevice Physical device used to query properties and formats relevant to the swapchain
+		* @param device Logical representation of the device to create the swapchain for
+		*
+		*/
     void connect(vk::Instance& instance, vk::PhysicalDevice& physicalDevice, vk::Device& device)
     {
         this->instance = instance;
         this->physicalDevice = physicalDevice;
         this->device = device;
-        //GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfaceSupportKHR);
-        //GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfaceCapabilitiesKHR);
-        //GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfaceFormatsKHR);
-        //GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfacePresentModesKHR);
-        //GET_DEVICE_PROC_ADDR(device, CreateSwapchainKHR);
-        //GET_DEVICE_PROC_ADDR(device, DestroySwapchainKHR);
-        //GET_DEVICE_PROC_ADDR(device, GetSwapchainImagesKHR);
-        //GET_DEVICE_PROC_ADDR(device, AcquireNextImageKHR);
-        //GET_DEVICE_PROC_ADDR(device, QueuePresentKHR);
     }
 
-    /** 
-	* Create the swapchain and get it's images with given width and height
-	* 
-	* @param width Pointer to the width of the swapchain (may be adjusted to fit the requirements of the swapchain)
-	* @param height Pointer to the height of the swapchain (may be adjusted to fit the requirements of the swapchain)
-	* @param vsync (Optional) Can be used to force vsync'd rendering (by using VK_PRESENT_MODE_FIFO_KHR as presentation mode)
-	*/
+    /**
+		* Create the swapchain and get it's images with given width and height
+		*
+		* @param width Pointer to the width of the swapchain (may be adjusted to fit the requirements of the swapchain)
+		* @param height Pointer to the height of the swapchain (may be adjusted to fit the requirements of the swapchain)
+		* @param vsync (Optional) Can be used to force vsync'd rendering (by using VK_PRESENT_MODE_FIFO_KHR as presentation mode)
+		*/
     void create(uint32_t* width, uint32_t* height, bool vsync = false)
     {
         //VkResult err;
@@ -390,16 +346,16 @@ public:
         }
     }
 
-    /** 
-	* Acquires the next image in the swap chain
-	*
-	* @param presentCompleteSemaphore (Optional) Semaphore that is signaled when the image is ready for use
-	* @param imageIndex Pointer to the image index that will be increased if the next image could be acquired
-	*
-	* @note The function will always wait until the next image has been acquired by setting timeout to UINT64_MAX
-	*
-	* @return VkResult of the image acquisition
-	*/
+    /**
+		* Acquires the next image in the swap chain
+		*
+		* @param presentCompleteSemaphore (Optional) Semaphore that is signaled when the image is ready for use
+		* @param imageIndex Pointer to the image index that will be increased if the next image could be acquired
+		*
+		* @note The function will always wait until the next image has been acquired by setting timeout to UINT64_MAX
+		*
+		* @return VkResult of the image acquisition
+		*/
     vk::Result acquireNextImage(vk::Semaphore presentCompleteSemaphore, uint32_t* imageIndex)
     {
         // By setting timeout to UINT64_MAX we will always wait until the next image has been acquired or an actual error is thrown
@@ -408,14 +364,14 @@ public:
     }
 
     /**
-	* Queue an image for presentation
-	*
-	* @param queue Presentation queue for presenting the image
-	* @param imageIndex Index of the swapchain image to queue for presentation
-	* @param waitSemaphore (Optional) Semaphore that is waited on before the image is presented (only used if != VK_NULL_HANDLE)
-	*
-	* @return VkResult of the queue presentation
-	*/
+		* Queue an image for presentation
+		*
+		* @param queue Presentation queue for presenting the image
+		* @param imageIndex Index of the swapchain image to queue for presentation
+		* @param waitSemaphore (Optional) Semaphore that is waited on before the image is presented (only used if != VK_NULL_HANDLE)
+		*
+		* @return VkResult of the queue presentation
+		*/
     vk::Result queuePresent(vk::Queue queue, uint32_t imageIndex, vk::Semaphore waitSemaphore)
     {
         vk::PresentInfoKHR presentInfo = {};
@@ -433,8 +389,8 @@ public:
     }
 
     /**
-	* Destroy and free Vulkan resources used for the swapchain
-	*/
+		* Destroy and free Vulkan resources used for the swapchain
+		*/
     void cleanup()
     {
         if (swapChain) {
@@ -452,8 +408,8 @@ public:
 
 #if defined(_DIRECT2DISPLAY)
     /**
-	* Create direct to display surface
-	*/
+		* Create direct to display surface
+		*/
     void createDirect2DisplaySurface(uint32_t width, uint32_t height)
     {
         uint32_t displayPropertyCount;
@@ -570,3 +526,4 @@ public:
     }
 #endif
 };
+}// End of namespace m3d

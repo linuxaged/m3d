@@ -22,6 +22,7 @@ class FbxSurfaceMaterial;
 class FbxMesh;
 }
 
+namespace m3d {
 struct DiffuseMap {
     vkext::VulkanTexture texture;
 };
@@ -45,18 +46,21 @@ struct Material {
 };
 
 struct Mesh {
-	bool init(fbxsdk::FbxMesh* fbxMesh);
+    bool init(fbxsdk::FbxMesh* fbxMesh);
 
-	struct Slice
-	{
-		Slice(int offset, int count) : indexOffset(offset), triangleCount(count) {}
-		int indexOffset;
-		int triangleCount;
-	};
+    struct Slice {
+        Slice(int offset, int count)
+            : indexOffset(offset)
+            , triangleCount(count)
+        {
+        }
+        int indexOffset;
+        int triangleCount;
+    };
 
     std::string name;
 
-	std::vector<Slice> slices;
+    std::vector<Slice> slices;
 
     std::vector<float> vertices;
     std::vector<float> uvs;
@@ -109,3 +113,4 @@ public:
 void LoadMeshes(Scene* scene, std::vector<uint32_t>* loadedMeshIDs);
 
 void AddInstance(Scene& scene, uint32_t meshID, uint32_t* newInstanceID);
+} // End of namspace m3d

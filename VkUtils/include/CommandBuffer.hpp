@@ -3,49 +3,47 @@
 #include <vulkan/vulkan.hpp>
 
 // TODO: move into namespace ::m3d
-class VulkanSwapChain;
-class Scene;
 
 namespace m3d {
-
+class VulkanSwapChain;
+class Scene;
 class Pipeline;
 
 class CommandBuffer {
 public:
     CommandBuffer(vk::Device&, vk::PhysicalDevice&, vk::Queue&, VulkanSwapChain&);
-	~CommandBuffer();
+    ~CommandBuffer();
 
     /* frame buffer */
     void CreateDepthStencil();
     void CreateFramebuffers(Pipeline&);
 
-	/* Vertex */
-	void CreateBuffer(vk::BufferUsageFlags, vk::MemoryPropertyFlags, vk::DeviceSize, void* data, vk::Buffer& buffer, vk::DeviceMemory& memory);
-	void CreateVertices(Scene*);
+    /* Vertex */
+    void CreateBuffer(vk::BufferUsageFlags, vk::MemoryPropertyFlags, vk::DeviceSize, void* data, vk::Buffer& buffer, vk::DeviceMemory& memory);
+    void CreateVertices(Scene*);
 
     uint32_t Create(vk::CommandBufferLevel level, bool begin);
     void Flush(uint32_t index);
     void Build(Pipeline&);
 
 private:
- 
     void createCommandPool();
 
 private:
     vk::Device& device;
-	vk::PhysicalDevice &physicalDevice;
+    vk::PhysicalDevice& physicalDevice;
     vk::Queue& queue;
     VulkanSwapChain& swapChain;
-	/* Vertices */
-	struct StagingBuffer {
-		vk::DeviceMemory mem;
-		vk::Buffer buf;
-	};
-	struct {
-		StagingBuffer vertices;
-		StagingBuffer indices;
-		uint32_t indexCount;
-	} meshBuffer;
+    /* Vertices */
+    struct StagingBuffer {
+        vk::DeviceMemory mem;
+        vk::Buffer buf;
+    };
+    struct {
+        StagingBuffer vertices;
+        StagingBuffer indices;
+        uint32_t indexCount;
+    } meshBuffer;
 
     /* frame buffers */
     std::vector<vk::Framebuffer> frameBuffers;

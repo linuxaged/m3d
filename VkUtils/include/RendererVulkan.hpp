@@ -12,9 +12,8 @@
 
 #define DEFAULT_FENCE_TIMEOUT 100000000000
 
-class Scene;
-
 namespace m3d {
+	class Pipeline;
 	class RenderPass;
 	class CommandBuffer;
 
@@ -35,35 +34,19 @@ namespace m3d {
 
 		void CreateSwapChain();
 		void CreatePipelineCache();
-		void InitCommon();
 
 		bool CreateBuffer(vk::BufferUsageFlags usageFlags, vk::MemoryPropertyFlags memoryPropertyFlags, vk::DeviceSize size, void* data, vk::Buffer& buffer, vk::DeviceMemory& memory);
-		//vk::CommandBuffer CreateCommandBuffer(vk::CommandBufferLevel level, bool begin);
-		//void FlushCommandBuffer(vk::CommandBuffer commandBuffer, vk::Queue queue, bool free);
 
 	public:
-		bool Init(Scene* scene);
+		bool Init();
 
 	private:
-		/* Render Pass */
-		bool CreateRenderPass();
 
-		bool CreateDepthStencil();
-
-		bool CreateFramebuffers();
 
 		bool CreateCommandPool();
 
-		void SetupVertexInputs();
 
-		// pipeline
-		bool CreateDescriptorPool();
-		bool CreateDescriptorSet();
-		void CreatePipelineLayout();
-		bool CreatePipeline();
 
-		bool CreateVertices();
-		bool CreateUniformBuffers();
 
 		//void DestroyCommandBuffers();
 		//void BuildCommandBuffers();
@@ -165,25 +148,19 @@ namespace m3d {
 		} uniformDataVS;
 
 		struct {
-#ifdef USE_GLM
-			glm::mat4 projectionMatrix;
-			glm::mat4 modelMatrix;
-			glm::mat4 viewMatrix;
-#else
 			m3d::math::Matrix4x4 projectionMatrix;
 			m3d::math::Matrix4x4 modelMatrix;
 			m3d::math::Matrix4x4 viewMatrix;
-#endif
 		} uboVS;
 
-		uint32_t indexCount;
-		vk::PipelineVertexInputStateCreateInfo inputState;
-		std::vector<vk::VertexInputBindingDescription> bindingDescriptions;
-		std::vector<vk::VertexInputAttributeDescription> attributeDescriptions;
+		/* Submit */
+		uint32_t currentImage;
+		vk::PipelineStageFlags submitPipelineStages = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+		vk::SubmitInfo submitInfo;
+
 		/* Render Pass */
 		Pipeline		*pipeLine;
 		CommandBuffer *commandBuffer;
-	private:
-		Scene* scene;
+
 	};
 }

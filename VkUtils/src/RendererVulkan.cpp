@@ -259,21 +259,7 @@ void RendererVulkan::CreatePipelineCache()
     //pipelineCache = device.createPipelineCache(pipelineCacheCreateInfo);
 }
 
-void RendererVulkan::InitCommon()
-{
-    CreateSwapChain();
-    CreateCommandPool();
-	commandBuffer = new CommandBuffer(device, physicalDevice, queue, swapChain);
-
-	pipeLine = new Pipeline(device, physicalDevice);
-}
-
-//void RendererVulkan::SetupVertexInputs()
-//{
-//
-//}
-
-bool RendererVulkan::Init(Scene* scene)
+bool RendererVulkan::Init()
 {
     if (!CreateInstance()) {
         return false;
@@ -283,24 +269,12 @@ bool RendererVulkan::Init(Scene* scene)
         return false;
     }
 
-    this->scene = scene;
 
-    InitCommon();
+	CreateSwapChain();
+	CreateCommandPool();
 
-    // spec init
-    {
-        CreateVertices();
-        SetupVertexInputs();
-        CreateUniformBuffers();
-        CreatePipelineLayout();
-        CreatePipeline();
-        CreateDescriptorPool();
-        CreateDescriptorSet();
-        BuildCommandBuffers();
-    }
-
-    // TODO:
-    //OnWindowSizeChanged();
+	commandBuffer = new CommandBuffer(device, physicalDevice, queue, swapChain);
+	pipeLine = new Pipeline(device, physicalDevice);
 
     return true;
 }
@@ -323,20 +297,11 @@ bool RendererVulkan::OnWindowSizeChanged()
 
     // Recreate swapChain
     CreateSwapChain();
-    // Recreate framebuffers
-    device.destroyImageView(depthStencil.view);
-    device.destroyImage(depthStencil.image);
-    device.freeMemory(depthStencil.mem);
-    CreateDepthStencil();
 
-    for (uint32_t i = 0; i < framebuffers.size(); i++) {
-        device.destroyFramebuffer(framebuffers[i]);
-    }
-    CreateFramebuffers();
-
-    DestroyCommandBuffers();
-    CreateCommandBuffers();
-    BuildCommandBuffers();
+    // Recreate Command Buffer
+	delete commandBuffer;
+	commandBuffer = new CommandBuffer(device, physicalDevice, queue, swapChain);
+	commandBuffer->Build(*pipeLine);
 
     queue.waitIdle();
     device.waitIdle();
@@ -387,8 +352,8 @@ void RendererVulkan::DrawLoop()
 
 RendererVulkan::~RendererVulkan()
 {
-	delete pipeLine;
-	delete commandBuffer;
+    delete pipeLine;
+    delete commandBuffer;
 
     // TODO: destroy texture, Mesh resources
 }
