@@ -27,7 +27,7 @@
 #include "Scene.hpp"
 
 //VulkanExample *vulkanExample;
-RendererVulkan* renderer;
+m3d::RendererVulkan* renderer;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     if (renderer != NULL) {
@@ -47,7 +47,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLin
     //vulkanExample->renderLoop();
     //delete(vulkanExample);
 
-    Scene scene;
+    m3d::Scene scene;
     scene.Init();
 
     // fill the Scene
@@ -59,7 +59,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLin
         // do some translation
     }
 
-    renderer = new RendererVulkan();
+    renderer = new m3d::RendererVulkan();
     renderer->createWin32Window(hInstance, WndProc, 1280, 720);
     renderer->Init(&scene);
     renderer->DrawLoop();

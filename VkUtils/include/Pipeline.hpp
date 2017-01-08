@@ -17,6 +17,7 @@ namespace m3d {
 		//
 		void CreateDescriptorPool();
 		void CreateDescriptorSetLayout();
+		void CreatePipelineLayout();
 		void CreateDescriptorSet();
 		// shader
 		vk::PipelineShaderStageCreateInfo loadShader(const std::string& fileName, vk::ShaderStageFlagBits stage);

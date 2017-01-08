@@ -72,14 +72,6 @@ namespace m3d {
 		uniformDataVS.descriptor.range = sizeof(uboVS);
 
 		// Update matrices
-#ifdef USE_GLM
-		uboVS.projectionMatrix = glm::perspective(glm::radians(60.0f), (float)size.width / (float)size.height, 0.1f, 256.0f);
-		std::cout << "pMat: " << glm::to_string(uboVS.projectionMatrix) << std::endl;
-		uboVS.viewMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, zoom));
-		std::cout << "vMat: " << glm::to_string(uboVS.viewMatrix) << std::endl;
-		uboVS.modelMatrix = glm::mat4();
-		std::cout << "mMat: " << glm::to_string(uboVS.modelMatrix) << std::endl;
-#else
 		float pMat[16] = {
 			2.0f, 0.0f, 0.0f, 0.0f,
 			0.0f, 2.0f, 0.0f, 0.0f,
@@ -100,7 +92,6 @@ namespace m3d {
 		uboVS.viewMatrix.ToString(buf, 512);
 		printf("vmat = %s\n", buf);
 		uboVS.modelMatrix = m3d::math::Matrix4x4();
-#endif
 
 		// Map uniform buffer and update it
 		// If you want to keep a handle to the memory and not unmap it afer updating,
@@ -209,8 +200,6 @@ namespace m3d {
 
 	void Pipeline::CreateDescriptorSetLayout()
 	{
-		/* Pipeline Layout */
-
 		// Setup layout of descriptors used in this example
 		// Basically connects the different shader stages to descriptors
 		// for binding uniform buffers, image samplers, etc.
@@ -229,7 +218,10 @@ namespace m3d {
 		descriptorLayout.pBindings = &layoutBinding;
 
 		descriptorSetLayout = device.createDescriptorSetLayout(descriptorLayout);
+	}
 
+	void Pipeline::CreatePipelineLayout()
+	{
 		// Create the pipeline layout that is used to generate the rendering pipelines that
 		// are based on this descriptor set layout
 		// In a more complex scenario you would have different pipeline layouts for different
@@ -294,6 +286,12 @@ namespace m3d {
 
 	Pipeline::Pipeline(vk::Device &Device, vk::PhysicalDevice &PhysicalDevice) : device(Device), physicalDevice(PhysicalDevice)
 	{
+		CreateDescriptorPool();
+		CreateDescriptorSetLayout();
+		CreateUniformBuffers();
+		CreateDescriptorSet();
+
+		CreateRenderPass();
 		// Create our rendering pipeline used in this example
 	    // Vulkan uses the concept of rendering pipelines to encapsulate
 	    // fixed states
@@ -390,6 +388,7 @@ namespace m3d {
 
 	    // Assign states
 	    // Assign pipeline state create information
+		SetupVertexInputs();
 	    pipelineCreateInfo.stageCount = shaderStages.size();
 	    pipelineCreateInfo.pStages = shaderStages.data();
 	    pipelineCreateInfo.pVertexInputState = &vertexInputs.inputState;
@@ -410,6 +409,6 @@ namespace m3d {
 
 	Pipeline::~Pipeline()
 	{
-
+		// TODO
 	}
 }
