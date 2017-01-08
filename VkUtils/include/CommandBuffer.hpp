@@ -20,7 +20,7 @@ public:
 
     /* Vertex */
     void CreateBuffer(vk::BufferUsageFlags, vk::MemoryPropertyFlags, vk::DeviceSize, void* data, vk::Buffer& buffer, vk::DeviceMemory& memory);
-    void CreateVertices(Scene*);
+    void CreateVertices(std::vector<float>& vertices, std::vector<uint32_t> &indices);
 
     uint32_t Create(vk::CommandBufferLevel level, bool begin);
     void Flush(uint32_t index);

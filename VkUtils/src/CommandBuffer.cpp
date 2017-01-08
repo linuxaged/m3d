@@ -1,16 +1,16 @@
-#include "../include/VulkanHelper.hpp"
 #include "../include/CommandBuffer.hpp"
-#include "../include/VulkanSwapchain.hpp"
 #include "../include/Pipeline.hpp"
 #include "../include/Scene.hpp"
+#include "../include/VulkanHelper.hpp"
+#include "../include/VulkanSwapchain.hpp"
 
 static const uint32_t width = 1280;
 static const uint32_t height = 720;
 
 namespace m3d {
-CommandBuffer::CommandBuffer(vk::Device& Device, vk::PhysicalDevice &PhysicalDevice, vk::Queue& Queue, VulkanSwapChain& swapChain)
+CommandBuffer::CommandBuffer(vk::Device& Device, vk::PhysicalDevice& PhysicalDevice, vk::Queue& Queue, VulkanSwapChain& swapChain)
     : device(Device)
-	, physicalDevice(PhysicalDevice)
+    , physicalDevice(PhysicalDevice)
     , queue(Queue)
     , swapChain(swapChain)
 {
@@ -29,200 +29,182 @@ CommandBuffer::CommandBuffer(vk::Device& Device, vk::PhysicalDevice &PhysicalDev
 /* Create Frame Buffer */
 void CommandBuffer::CreateDepthStencil()
 {
-	vk::Format depthFormat;
-	assert(vkhelper::getSupportedDepthFormat(physicalDevice, depthFormat));
+    vk::Format depthFormat;
+    assert(vkhelper::getSupportedDepthFormat(physicalDevice, depthFormat));
 
-	vk::ImageCreateInfo image = {};
-	image.setSType(vk::StructureType::eImageCreateInfo);
-	image.setPNext(nullptr);
-	image.imageType = vk::ImageType::e2D;
-	image.format = depthFormat;
-	image.extent = { width, height, 1 };
-	image.mipLevels = 1;
-	image.arrayLayers = 1;
-	image.samples = vk::SampleCountFlagBits::e1;
-	image.tiling = vk::ImageTiling::eOptimal;
-	image.usage = vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eTransferSrc;
+    vk::ImageCreateInfo image = {};
+    image.setSType(vk::StructureType::eImageCreateInfo);
+    image.setPNext(nullptr);
+    image.imageType = vk::ImageType::e2D;
+    image.format = depthFormat;
+    image.extent = { width, height, 1 };
+    image.mipLevels = 1;
+    image.arrayLayers = 1;
+    image.samples = vk::SampleCountFlagBits::e1;
+    image.tiling = vk::ImageTiling::eOptimal;
+    image.usage = vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eTransferSrc;
 
-	vk::MemoryAllocateInfo memAlloc = {};
-	memAlloc.setSType(vk::StructureType::eMemoryAllocateInfo);
-	memAlloc.pNext = nullptr;
-	memAlloc.setAllocationSize(0);
-	memAlloc.memoryTypeIndex = 0;
+    vk::MemoryAllocateInfo memAlloc = {};
+    memAlloc.setSType(vk::StructureType::eMemoryAllocateInfo);
+    memAlloc.pNext = nullptr;
+    memAlloc.setAllocationSize(0);
+    memAlloc.memoryTypeIndex = 0;
 
-	vk::ImageViewCreateInfo depthStencilView = {};
-	depthStencilView.setSType(vk::StructureType::eImageViewCreateInfo);
-	depthStencilView.setViewType(vk::ImageViewType::e2D);
-	depthStencilView.format = depthFormat;
+    vk::ImageViewCreateInfo depthStencilView = {};
+    depthStencilView.setSType(vk::StructureType::eImageViewCreateInfo);
+    depthStencilView.setViewType(vk::ImageViewType::e2D);
+    depthStencilView.format = depthFormat;
 
-	depthStencilView.subresourceRange = vk::ImageSubresourceRange{
-		vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil,
-		0,
-		1,
-		0,
-		1
-	};
+    depthStencilView.subresourceRange = vk::ImageSubresourceRange{
+        vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil,
+        0,
+        1,
+        0,
+        1
+    };
 
-	vk::MemoryRequirements memReqs;
-	depthStencil.image = device.createImage(image, nullptr);
-	memReqs = device.getImageMemoryRequirements(depthStencil.image);
-	memAlloc.allocationSize = memReqs.size;
-	memAlloc.memoryTypeIndex = vkhelper::getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
-	depthStencil.mem = device.allocateMemory(memAlloc, nullptr);
-	device.bindImageMemory(depthStencil.image, depthStencil.mem, 0);
+    vk::MemoryRequirements memReqs;
+    depthStencil.image = device.createImage(image, nullptr);
+    memReqs = device.getImageMemoryRequirements(depthStencil.image);
+    memAlloc.allocationSize = memReqs.size;
+    memAlloc.memoryTypeIndex = vkhelper::getMemoryType(physicalDevice, memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
+    depthStencil.mem = device.allocateMemory(memAlloc, nullptr);
+    device.bindImageMemory(depthStencil.image, depthStencil.mem, 0);
 
-	depthStencilView.image = depthStencil.image;
+    depthStencilView.image = depthStencil.image;
 
-	depthStencil.view = device.createImageView(depthStencilView, nullptr);
+    depthStencil.view = device.createImageView(depthStencilView, nullptr);
 }
 
-void CommandBuffer::CreateFramebuffers(Pipeline &pipeline)
+void CommandBuffer::CreateFramebuffers(Pipeline& pipeline)
 {
-	// Create frame buffers for every swap chain image
-	frameBuffers.resize(swapChain.images.size());
+    // Create frame buffers for every swap chain image
+    frameBuffers.resize(swapChain.images.size());
 
-	std::array<vk::ImageView, 2> attachments;
-	attachments[1] = depthStencil.view;
+    std::array<vk::ImageView, 2> attachments;
+    attachments[1] = depthStencil.view;
 
-	for (size_t i = 0; i < frameBuffers.size(); i++)
-	{
-		attachments[0] = swapChain.buffers[i].view;
+    for (size_t i = 0; i < frameBuffers.size(); i++) {
+        attachments[0] = swapChain.buffers[i].view;
 
-		vk::FramebufferCreateInfo frameBufferCreateInfo = {};
-		//frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		// All frame buffers use the same renderpass setup
-		frameBufferCreateInfo.renderPass = pipeline.GetRenderPass();
-		frameBufferCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-		frameBufferCreateInfo.pAttachments = attachments.data();
-		frameBufferCreateInfo.width = width;
-		frameBufferCreateInfo.height = height;
-		frameBufferCreateInfo.layers = 1;
-		// Create the framebuffer
-		frameBuffers[i] = device.createFramebuffer(frameBufferCreateInfo);
-	}
+        vk::FramebufferCreateInfo frameBufferCreateInfo = {};
+        //frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        // All frame buffers use the same renderpass setup
+        frameBufferCreateInfo.renderPass = pipeline.GetRenderPass();
+        frameBufferCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        frameBufferCreateInfo.pAttachments = attachments.data();
+        frameBufferCreateInfo.width = width;
+        frameBufferCreateInfo.height = height;
+        frameBufferCreateInfo.layers = 1;
+        // Create the framebuffer
+        frameBuffers[i] = device.createFramebuffer(frameBufferCreateInfo);
+    }
 }
 
 void CommandBuffer::CreateBuffer(vk::BufferUsageFlags usageFlags, vk::MemoryPropertyFlags memoryPropertyFlags, vk::DeviceSize size, void* data, vk::Buffer& buffer, vk::DeviceMemory& memory)
 {
-	vk::MemoryRequirements memReqs = {};
-	vk::MemoryAllocateInfo memAlloc = {};
-	vk::BufferCreateInfo bufferCreateInfo = {};
-	bufferCreateInfo.setUsage(usageFlags);
-	bufferCreateInfo.setSize(size);
+    vk::MemoryRequirements memReqs = {};
+    vk::MemoryAllocateInfo memAlloc = {};
+    vk::BufferCreateInfo bufferCreateInfo = {};
+    bufferCreateInfo.setUsage(usageFlags);
+    bufferCreateInfo.setSize(size);
 
-	//VK_CHECK_RESULT(vkCreateBuffer(device, &bufferCreateInfo, nullptr, buffer));
-	buffer = device.createBuffer(bufferCreateInfo);
-	//vkGetBufferMemoryRequirements(device, buffer, &memReqs);
-	memReqs = device.getBufferMemoryRequirements(buffer);
-	memAlloc.allocationSize = memReqs.size;
-	memAlloc.memoryTypeIndex = vkhelper::getMemoryType(physicalDevice, memReqs.memoryTypeBits, memoryPropertyFlags);
+    //VK_CHECK_RESULT(vkCreateBuffer(device, &bufferCreateInfo, nullptr, buffer));
+    buffer = device.createBuffer(bufferCreateInfo);
+    //vkGetBufferMemoryRequirements(device, buffer, &memReqs);
+    memReqs = device.getBufferMemoryRequirements(buffer);
+    memAlloc.allocationSize = memReqs.size;
+    memAlloc.memoryTypeIndex = vkhelper::getMemoryType(physicalDevice, memReqs.memoryTypeBits, memoryPropertyFlags);
 
-	//VK_CHECK_RESULT(vkAllocateMemory(device, &memAlloc, nullptr, memory));
-	memory = device.allocateMemory(memAlloc);
-	if (data != nullptr) {
-		void* mapped;
-		//VK_CHECK_RESULT(vkMapMemory(device, *memory, 0, size, 0, &mapped));
-		mapped = device.mapMemory(memory, 0, size);
-		memcpy(mapped, data, size);
-		//vkUnmapMemory(device, *memory);
-		device.unmapMemory(memory);
-	}
-	//VK_CHECK_RESULT(vkBindBufferMemory(device, *buffer, *memory, 0));
-	device.bindBufferMemory(buffer, memory, 0);
+    //VK_CHECK_RESULT(vkAllocateMemory(device, &memAlloc, nullptr, memory));
+    memory = device.allocateMemory(memAlloc);
+    if (data != nullptr) {
+        void* mapped;
+        //VK_CHECK_RESULT(vkMapMemory(device, *memory, 0, size, 0, &mapped));
+        mapped = device.mapMemory(memory, 0, size);
+        memcpy(mapped, data, size);
+        //vkUnmapMemory(device, *memory);
+        device.unmapMemory(memory);
+    }
+    //VK_CHECK_RESULT(vkBindBufferMemory(device, *buffer, *memory, 0));
+    device.bindBufferMemory(buffer, memory, 0);
 }
 
-void CommandBuffer::CreateVertices(Scene* scene)
+void CommandBuffer::CreateVertices(std::vector<float>& vertices, std::vector<uint32_t> &indices)
 {
-	size_t vertexBufferSize = scene->meshes[0].vertices.size() * sizeof(float);
-	size_t indexBufferSize = scene->meshes[0].indices.size() * sizeof(uint32_t);
-	// TODO
-	meshBuffer.indexCount = scene->meshes[0].indices.size();
+    size_t vertexBufferSize = vertices.size() * sizeof(float);
+    size_t indexBufferSize = indices.size() * sizeof(uint32_t);
+    // TODO
+    meshBuffer.indexCount = indices.size();
 
-	struct {
-		vk::Buffer buffer;
-		vk::DeviceMemory memory;
-	} vertexStaging, indexStaging;
+    struct {
+        vk::Buffer buffer;
+        vk::DeviceMemory memory;
+    } vertexStaging, indexStaging;
 
-	// Create staging buffers
-	// Vertex data
-	CreateBuffer(
-		vk::BufferUsageFlagBits::eTransferSrc,
-		vk::MemoryPropertyFlagBits::eHostVisible,
-		vertexBufferSize,
-		scene->meshes[0].vertices.data(),
-		vertexStaging.buffer,
-		vertexStaging.memory);
-	// Index data
-	CreateBuffer(
-		vk::BufferUsageFlagBits::eTransferSrc,
-		vk::MemoryPropertyFlagBits::eHostVisible,
-		indexBufferSize,
-		scene->meshes[0].indices.data(),
-		indexStaging.buffer,
-		indexStaging.memory);
+    // Create staging buffers
+    // Vertex data
+    CreateBuffer(
+        vk::BufferUsageFlagBits::eTransferSrc,
+        vk::MemoryPropertyFlagBits::eHostVisible,
+        vertexBufferSize,
+        vertices.data(),
+        vertexStaging.buffer,
+        vertexStaging.memory);
+    // Index data
+    CreateBuffer(
+        vk::BufferUsageFlagBits::eTransferSrc,
+        vk::MemoryPropertyFlagBits::eHostVisible,
+        indexBufferSize,
+        indices.data(),
+        indexStaging.buffer,
+        indexStaging.memory);
 
-	// Create device local buffers
-	// Vertex buffer
-	CreateBuffer(
-		vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-		vk::MemoryPropertyFlagBits::eDeviceLocal,
-		vertexBufferSize,
-		nullptr,
-		meshBuffer.vertices.buf,
-		meshBuffer.vertices.mem);
-	// Index buffer
-	CreateBuffer(
-		vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-		vk::MemoryPropertyFlagBits::eDeviceLocal,
-		indexBufferSize,
-		nullptr,
-		meshBuffer.indices.buf,
-		meshBuffer.indices.mem);
+    // Create device local buffers
+    // Vertex buffer
+    CreateBuffer(
+        vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+        vk::MemoryPropertyFlagBits::eDeviceLocal,
+        vertexBufferSize,
+        nullptr,
+        meshBuffer.vertices.buf,
+        meshBuffer.vertices.mem);
+    // Index buffer
+    CreateBuffer(
+        vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+        vk::MemoryPropertyFlagBits::eDeviceLocal,
+        indexBufferSize,
+        nullptr,
+        meshBuffer.indices.buf,
+        meshBuffer.indices.mem);
 
-	// Copy from staging buffers
-	uint32_t copyCmdIndex = Create(vk::CommandBufferLevel::ePrimary, true);
+    // Copy from staging buffers
+    uint32_t copyCmdIndex = Create(vk::CommandBufferLevel::ePrimary, true);
 
-	vk::BufferCopy copyRegion = {};
+    vk::BufferCopy copyRegion = {};
 
-	copyRegion.size = vertexBufferSize;
-	//vkCmdCopyBuffer(
-	//	copyCmd,
-	//	vertexStaging.buffer,
-	//	skinnedMesh->meshBuffer.vertices.buf,
-	//	1,
-	//	&copyRegion);
+    copyRegion.size = vertexBufferSize;
 
-	tempCmdBuffers[copyCmdIndex].copyBuffer(vertexStaging.buffer, meshBuffer.vertices.buf, copyRegion);
+    tempCmdBuffers[copyCmdIndex].copyBuffer(vertexStaging.buffer, meshBuffer.vertices.buf, copyRegion);
 
-	copyRegion.size = indexBufferSize;
-	//vkCmdCopyBuffer(
-	//	copyCmd,
-	//	indexStaging.buffer,
-	//	skinnedMesh->meshBuffer.indices.buf,
-	//	1,
-	//	&copyRegion);
+    copyRegion.size = indexBufferSize;
 
-	tempCmdBuffers[copyCmdIndex].copyBuffer(indexStaging.buffer, meshBuffer.indices.buf, copyRegion);
+    tempCmdBuffers[copyCmdIndex].copyBuffer(indexStaging.buffer, meshBuffer.indices.buf, copyRegion);
 
-	//FlushCommandBuffer(copyCmd, queue, true);
-	Flush(copyCmdIndex);
+    Flush(copyCmdIndex);
 
-	//vkDestroyBuffer(device, vertexStaging.buffer, nullptr);
-	//vkFreeMemory(device, vertexStaging.memory, nullptr);
-	//vkDestroyBuffer(device, indexStaging.buffer, nullptr);
-	//vkFreeMemory(device, indexStaging.memory, nullptr);
-	device.destroyBuffer(vertexStaging.buffer);
-	device.freeMemory(vertexStaging.memory);
-	device.destroyBuffer(indexStaging.buffer);
-	device.freeMemory(indexStaging.memory);
+    device.destroyBuffer(vertexStaging.buffer);
+    device.freeMemory(vertexStaging.memory);
+    device.destroyBuffer(indexStaging.buffer);
+    device.freeMemory(indexStaging.memory);
 }
 
-void CommandBuffer::Build(Pipeline &pipeline)
+void CommandBuffer::Build(Pipeline& pipeline)
 {
-	{
-		CreateDepthStencil();
-		CreateFramebuffers(pipeline);
-	}
+    {
+        CreateDepthStencil();
+        CreateFramebuffers(pipeline);
+    }
 
     vk::CommandBufferBeginInfo cmdBufInfo = {};
 
@@ -333,4 +315,4 @@ CommandBuffer::~CommandBuffer()
     // destroy command pool
     device.destroyCommandPool(cmdPool);
 }
-}
+} // End of namespace m3d

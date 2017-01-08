@@ -253,13 +253,7 @@ void RendererVulkan::CreateSwapChain()
     swapChain.create(&width, &height, false);
 }
 
-void RendererVulkan::CreatePipelineCache()
-{
-    //vk::PipelineCacheCreateInfo pipelineCacheCreateInfo = {};
-    //pipelineCache = device.createPipelineCache(pipelineCacheCreateInfo);
-}
-
-bool RendererVulkan::Init()
+bool RendererVulkan::Init(Scene *scene)
 {
     if (!CreateInstance()) {
         return false;
@@ -269,22 +263,13 @@ bool RendererVulkan::Init()
         return false;
     }
 
-
 	CreateSwapChain();
-	CreateCommandPool();
 
 	commandBuffer = new CommandBuffer(device, physicalDevice, queue, swapChain);
+	commandBuffer->CreateVertices(scene->meshes[0].vertices, scene->meshes[0].indices);
+
 	pipeLine = new Pipeline(device, physicalDevice);
 
-    return true;
-}
-
-bool RendererVulkan::CreateCommandPool()
-{
-    vk::CommandPoolCreateInfo cmdPoolInfo;
-    cmdPoolInfo.queueFamilyIndex = swapChain.queueNodeIndex;
-    cmdPoolInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
-    cmdPool = device.createCommandPool(cmdPoolInfo);
     return true;
 }
 

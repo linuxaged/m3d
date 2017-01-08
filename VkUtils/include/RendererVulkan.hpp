@@ -13,6 +13,7 @@
 #define DEFAULT_FENCE_TIMEOUT 100000000000
 
 namespace m3d {
+	class Scene;
 	class Pipeline;
 	class RenderPass;
 	class CommandBuffer;
@@ -33,27 +34,11 @@ namespace m3d {
 		bool CreateSemaphores();
 
 		void CreateSwapChain();
-		void CreatePipelineCache();
-
-		bool CreateBuffer(vk::BufferUsageFlags usageFlags, vk::MemoryPropertyFlags memoryPropertyFlags, vk::DeviceSize size, void* data, vk::Buffer& buffer, vk::DeviceMemory& memory);
 
 	public:
-		bool Init();
+		bool Init(Scene *);
 
 	private:
-
-
-		bool CreateCommandPool();
-
-
-
-
-		//void DestroyCommandBuffers();
-		//void BuildCommandBuffers();
-		//void CreateCommandBuffers();
-
-		//bool RecordCommandBuffers();
-
 		void PrepareFrame();
 		void SubmitFrame();
 
