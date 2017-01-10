@@ -13,18 +13,19 @@
 #include "VulkanHelper.hpp"
 #include "VulkanSwapchain.hpp"
 #include "vulkanTextureLoader.hpp"
+#include "vulkanDebug.h"
+
 #include <chrono>
 #include <iostream>
 
 #define VERTEX_BUFFER_BIND_ID 0
 namespace m3d {
 
-/*
-	 * Utils
-	 */
 std::vector<const char*> RendererVulkan::getAvailableWSIExtensions()
 {
     std::vector<const char*> extensions = { VK_KHR_SURFACE_EXTENSION_NAME };
+	extensions.push_back("VK_KHR_surface");
+	extensions.push_back("VK_EXT_debug_report");
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
@@ -144,10 +145,10 @@ bool RendererVulkan::CreateInstance()
     // Use validation layers if this is a debug build, and use WSI extensions regardless
     std::vector<const char*> extensions = getAvailableWSIExtensions();
 
-    //#if defined(_DEBUG)
-    //	std::vector<const char*> layers;
-    //    layers.push_back("VK_LAYER_LUNARG_standard_validation");
-    //#endif
+#if defined(_DEBUG)
+    std::vector<const char*> layers;
+    layers.push_back("VK_LAYER_LUNARG_standard_validation");
+#endif
 
     // vk::ApplicationInfo allows the programmer to specifiy some basic information about the
     // program, which can be useful for layers and tools to provide more debug information.
@@ -165,10 +166,10 @@ bool RendererVulkan::CreateInstance()
                                           .setPApplicationInfo(&appInfo)
                                           .setEnabledExtensionCount(static_cast<uint32_t>(extensions.size()))
                                           .setPpEnabledExtensionNames(extensions.data())
-        //#if defined(_DEBUG)
-        //                                          .setEnabledLayerCount(static_cast<uint32_t>(layers.size()))
-        //                                          .setPpEnabledLayerNames(layers.data())
-        //#endif
+#if defined(_DEBUG)
+                                          .setEnabledLayerCount(static_cast<uint32_t>(layers.size()))
+                                          .setPpEnabledLayerNames(layers.data())
+#endif
         ;
 
     // Create the Vulkan instance.
@@ -178,6 +179,19 @@ bool RendererVulkan::CreateInstance()
         std::cout << "Could not create a Vulkan instance: " << e.what() << std::endl;
         return false;
     }
+
+	// If requested, we enable the default validation layers for debugging
+	if (1)
+	{
+		
+		// The report flags determine what type of messages for the layers will be displayed
+		// For validating (debugging) an appplication the error and warning bits should suffice
+		vk::DebugReportFlagsEXT debugReportFlags = vk::DebugReportFlagBitsEXT::eError; // | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
+																				// Additional flags include performance info, loader and layer debug messages, etc.
+		//vkDebug::setupDebugging(instance, debugReportFlags, VK_NULL_HANDLE);
+		vkx::debug::setupDebugging(instance, debugReportFlags);
+	}
+
     return true;
 }
 
@@ -210,12 +224,14 @@ bool RendererVulkan::CreateDevice()
     queueCreateInfo.queueCount = 1;
     queueCreateInfo.pQueuePriorities = queuePriorities.data();
 
-    std::vector<const char*> enabledExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+    
     vk::DeviceCreateInfo deviceCreateInfo;
     deviceCreateInfo.queueCreateInfoCount = 1;
     deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
     deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+
     // enable the debug marker extension if it is present (likely meaning a debugging tool is present)
+	std::vector<const char*> enabledExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
     if (vkhelper::checkDeviceExtensionPresent(physicalDevice, VK_EXT_DEBUG_MARKER_EXTENSION_NAME)) {
         enabledExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
     }
@@ -253,7 +269,7 @@ void RendererVulkan::CreateSwapChain()
     swapChain.create(&width, &height, false);
 }
 
-bool RendererVulkan::Init(Scene *scene)
+bool RendererVulkan::Init(Scene* scene)
 {
     if (!CreateInstance()) {
         return false;
@@ -263,12 +279,12 @@ bool RendererVulkan::Init(Scene *scene)
         return false;
     }
 
-	CreateSwapChain();
+    CreateSwapChain();
 
-	commandBuffer = new CommandBuffer(device, physicalDevice, queue, swapChain);
-	commandBuffer->CreateVertices(scene->meshes[0].vertices, scene->meshes[0].indices);
+    commandBuffer = new CommandBuffer(device, physicalDevice, queue, swapChain);
+    commandBuffer->CreateVertices(scene->meshes[0].vertices, scene->meshes[0].indices);
 
-	pipeLine = new Pipeline(device, physicalDevice);
+    pipeLine = new Pipeline(device, physicalDevice);
 
     return true;
 }
@@ -284,9 +300,9 @@ bool RendererVulkan::OnWindowSizeChanged()
     CreateSwapChain();
 
     // Recreate Command Buffer
-	delete commandBuffer;
-	commandBuffer = new CommandBuffer(device, physicalDevice, queue, swapChain);
-	commandBuffer->Build(*pipeLine);
+    delete commandBuffer;
+    commandBuffer = new CommandBuffer(device, physicalDevice, queue, swapChain);
+    commandBuffer->Build(*pipeLine);
 
     queue.waitIdle();
     device.waitIdle();

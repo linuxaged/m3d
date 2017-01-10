@@ -137,12 +137,12 @@ namespace m3d {
 		depthReference.attachment = 1;
 		depthReference.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
-		std::array<vk::SubpassDescription, 1> subpasses = { {} };
+		vk::SubpassDescription subpassDescription = {};
 
-		subpasses[0].pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
-		subpasses[0].colorAttachmentCount = 1;
-		subpasses[0].pColorAttachments = &colorReference;
-		subpasses[0].pDepthStencilAttachment = &depthReference;
+		subpassDescription.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+		subpassDescription.colorAttachmentCount = 1;
+		subpassDescription.pColorAttachments = &colorReference;
+		subpassDescription.pDepthStencilAttachment = &depthReference;
 
 		std::array<vk::SubpassDependency, 2> subpassDependencies;
 
@@ -165,8 +165,8 @@ namespace m3d {
 		vk::RenderPassCreateInfo renderPassInfo;
 		renderPassInfo.attachmentCount = (uint32_t)attachments.size();
 		renderPassInfo.pAttachments = attachments.data();
-		renderPassInfo.subpassCount = (uint32_t)subpasses.size();
-		renderPassInfo.pSubpasses = subpasses.data();
+		renderPassInfo.subpassCount = 1;
+		renderPassInfo.pSubpasses = &subpassDescription;
 		renderPassInfo.dependencyCount = (uint32_t)subpassDependencies.size();
 		renderPassInfo.pDependencies = subpassDependencies.data();
 
@@ -290,6 +290,7 @@ namespace m3d {
 		CreateDescriptorSetLayout();
 		CreateUniformBuffers();
 		CreateDescriptorSet();
+		CreatePipelineLayout();
 
 		CreateRenderPass();
 		// Create our rendering pipeline used in this example
@@ -306,11 +307,7 @@ namespace m3d {
 	    // pipeline only stores that they are used with this pipeline,
 	    // but not their states
 
-		vk::GraphicsPipelineCreateInfo pipelineCreateInfo = {};
-	    // The layout used for this pipeline
-	    pipelineCreateInfo.layout = pipelineLayout;
-	    // Renderpass this pipeline is attached to
-	    pipelineCreateInfo.renderPass = renderPass;
+		
 
 	    // Vertex input state
 	    // Describes the topoloy used with this pipeline
@@ -389,6 +386,10 @@ namespace m3d {
 	    // Assign states
 	    // Assign pipeline state create information
 		SetupVertexInputs();
+
+		vk::GraphicsPipelineCreateInfo pipelineCreateInfo = {};
+		pipelineCreateInfo.layout = pipelineLayout;
+		pipelineCreateInfo.renderPass = renderPass;
 	    pipelineCreateInfo.stageCount = shaderStages.size();
 	    pipelineCreateInfo.pStages = shaderStages.data();
 	    pipelineCreateInfo.pVertexInputState = &vertexInputs.inputState;
@@ -398,13 +399,12 @@ namespace m3d {
 	    pipelineCreateInfo.pMultisampleState = &multisampleState;
 	    pipelineCreateInfo.pViewportState = &viewportState;
 	    pipelineCreateInfo.pDepthStencilState = &depthStencilState;
-	    pipelineCreateInfo.renderPass = renderPass;
 	    pipelineCreateInfo.pDynamicState = &dynamicState;
 
 	    // Create rendering pipeline
 	    // TODO: release
 	    vk::PipelineCache pipelineCache = device.createPipelineCache(vk::PipelineCacheCreateInfo());
-	    pipeline = device.createGraphicsPipelines(pipelineCache, pipelineCreateInfo, nullptr)[0];
+		pipeline = device.createGraphicsPipeline(pipelineCache , pipelineCreateInfo);
 	}
 
 	Pipeline::~Pipeline()
