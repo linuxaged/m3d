@@ -93,7 +93,7 @@ namespace m3d {
 		vk::Semaphore renderComplete;
 		std::vector<vk::Fence> waitFences;
 
-		bool inited;
+		bool inited = false;
 		uint32_t width, height;
 		VulkanSwapChain swapChain;
 
@@ -101,13 +101,7 @@ namespace m3d {
 		//vk::SwapchainKHR					oldSwapChain;
 		std::vector<SwapChainImage> images;
 		uint32_t imageCount;
-		/* Descriptor Set */
-		vk::DescriptorPool descriptorPool;
-		vk::DescriptorSet descriptorSet;
-		vk::DescriptorSetLayout descriptorSetLayout;
-		/* Command Buffer */
-		vk::CommandPool cmdPool;
-		std::vector<vk::CommandBuffer> cmdBuffers;
+
 		/* Vertex Data */
 		struct StagingBuffer {
 			vk::DeviceMemory mem;

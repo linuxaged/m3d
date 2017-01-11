@@ -230,9 +230,10 @@ void CommandBuffer::Build(Pipeline& pipeline)
 
         //vkCmdBeginRenderPass(drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
         drawCmdBuffers[i].beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
-
-        drawCmdBuffers[i].setViewport(0, vk::Viewport{ (float)width, (float)height, 0.0f, 1.0f });
-        drawCmdBuffers[i].setScissor(0, { vk::Rect2D{ (0, 0), (width, height) } });
+		vk::Viewport viewport = {0, 0, (float)width, (float)height, 0.0f, 1.0f};
+        drawCmdBuffers[i].setViewport(0, 1, &viewport);
+		vk::Rect2D rect2d = { (0, 0), (width, height) };
+        drawCmdBuffers[i].setScissor(0, 1, &rect2d);
 
         vk::DeviceSize offsets[1] = { 0 };
 

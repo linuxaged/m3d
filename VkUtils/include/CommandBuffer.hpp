@@ -26,6 +26,8 @@ public:
     void Flush(uint32_t index);
     void Build(Pipeline&);
 
+	std::vector<vk::CommandBuffer>& GetDrawCommandBuffers() { return drawCmdBuffers; }
+
 private:
     void createCommandPool();
 

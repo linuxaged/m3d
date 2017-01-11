@@ -126,7 +126,7 @@ LRESULT RendererVulkan::handle_message(UINT msg, WPARAM wparam, LPARAM lparam)
 
         break;
     case WM_SIZE:
-        OnWindowSizeChanged();
+        //OnWindowSizeChanged();
         break;
     case WM_ENTERSIZEMOVE:
 
@@ -286,15 +286,17 @@ bool RendererVulkan::Init(Scene* scene)
 
     pipeLine = new Pipeline(device, physicalDevice);
 
+	commandBuffer->Build(*pipeLine);
+	//OnWindowSizeChanged();
+
     return true;
 }
 
 bool RendererVulkan::OnWindowSizeChanged()
 {
-    if (!inited) {
+    if (inited) {
         return false;
     }
-    inited = false;
 
     // Recreate swapChain
     CreateSwapChain();
@@ -330,7 +332,7 @@ void RendererVulkan::Draw()
     //device.resetFences(1, &vk::Fence() /*&waitFences[currentImage]*/);
 
     submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &cmdBuffers[currentImage];
+	submitInfo.pCommandBuffers = &(commandBuffer->GetDrawCommandBuffers()[currentImage]);
     queue.submit(submitInfo, vk::Fence() /*waitFences[currentImage]*/);
 
     SubmitFrame();
