@@ -31,7 +31,7 @@ namespace m3d {
 
 		bool GetDeviceQueue();
 
-		bool CreateSemaphores();
+		void CreateFences();
 
 		void CreateSwapChain();
 

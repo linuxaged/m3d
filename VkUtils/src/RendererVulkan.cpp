@@ -269,6 +269,20 @@ void RendererVulkan::CreateSwapChain()
     swapChain.create(&width, &height, false);
 }
 
+// Create the Vulkan synchronization primitives used in this example
+void RendererVulkan::CreateFences()
+{
+	// Fences (Used to check draw command buffer completion)
+	vk::FenceCreateInfo fenceCreateInfo = {};
+	// Create in signaled state so we don't wait on first render of each command buffer
+	fenceCreateInfo.flags = vk::FenceCreateFlagBits::eSignaled;
+	waitFences.resize(commandBuffer->GetDrawCommandBuffers().size());
+	for (auto& fence : waitFences)
+	{
+		fence = device.createFence(fenceCreateInfo);
+	}
+}
+
 bool RendererVulkan::Init(Scene* scene)
 {
     if (!CreateInstance()) {
@@ -287,6 +301,8 @@ bool RendererVulkan::Init(Scene* scene)
     pipeLine = new Pipeline(device, physicalDevice);
 
 	commandBuffer->Build(*pipeLine);
+
+	CreateFences();
 	//OnWindowSizeChanged();
 
     return true;
@@ -328,12 +344,12 @@ void RendererVulkan::Draw()
 {
     PrepareFrame();
 
-    //device.waitForFences(1, &vk::Fence()/*&waitFences[currentImage]*/, true, UINT64_MAX);
-    //device.resetFences(1, &vk::Fence() /*&waitFences[currentImage]*/);
+    device.waitForFences(1, &waitFences[currentImage], true, UINT64_MAX);
+    device.resetFences(1, &waitFences[currentImage]);
 
     submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &(commandBuffer->GetDrawCommandBuffers()[currentImage]);
-    queue.submit(submitInfo, vk::Fence() /*waitFences[currentImage]*/);
+    queue.submit(submitInfo, waitFences[currentImage]);
 
     SubmitFrame();
 }
