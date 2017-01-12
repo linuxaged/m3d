@@ -4,7 +4,7 @@
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
 
-#include "RendererVulkan.hpp"
+#include "Renderer.hpp"
 #include "CommandBuffer.hpp"
 #include "File.hpp"
 #include "Matrix.h"
@@ -22,7 +22,7 @@
 namespace m3d {
 
 // Win32 : Sets up a console window and redirects standard output to it
-void RendererVulkan::CreateConsole(const char* title)
+void Renderer::CreateConsole(const char* title)
 {
     AllocConsole();
     AttachConsole(GetCurrentProcessId());
@@ -31,12 +31,12 @@ void RendererVulkan::CreateConsole(const char* title)
     SetConsoleTitle(TEXT(title));
 }
 
-RendererVulkan::RendererVulkan()
+Renderer::Renderer()
 {
 	CreateConsole("m3d");
 }
 
-std::vector<const char*> RendererVulkan::getAvailableWSIExtensions()
+std::vector<const char*> Renderer::getAvailableWSIExtensions()
 {
     std::vector<const char*> extensions = { VK_KHR_SURFACE_EXTENSION_NAME };
     extensions.push_back("VK_KHR_surface");
@@ -61,7 +61,7 @@ std::vector<const char*> RendererVulkan::getAvailableWSIExtensions()
     return extensions;
 }
 
-void RendererVulkan::createWin32Window(HINSTANCE hinstance, WNDPROC wndproc, uint32_t w, uint32_t h)
+void Renderer::createWin32Window(HINSTANCE hinstance, WNDPROC wndproc, uint32_t w, uint32_t h)
 {
     const std::string class_name("RendererVulkanWindowClass");
 
@@ -87,7 +87,7 @@ void RendererVulkan::createWin32Window(HINSTANCE hinstance, WNDPROC wndproc, uin
 
     hwnd_ = CreateWindowEx(WS_EX_APPWINDOW,
         class_name.c_str(),
-        "RendererVulkan",
+        "Renderer",
         win_style,
         0,
         0,
@@ -112,7 +112,7 @@ void RendererVulkan::createWin32Window(HINSTANCE hinstance, WNDPROC wndproc, uin
     SetWindowLongPtr(hwnd_, GWLP_USERDATA, (LONG_PTR)this);
 }
 
-LRESULT RendererVulkan::handle_message(UINT msg, WPARAM wparam, LPARAM lparam)
+LRESULT Renderer::handle_message(UINT msg, WPARAM wparam, LPARAM lparam)
 {
     switch (msg) {
     case WM_CLOSE:
@@ -155,7 +155,7 @@ LRESULT RendererVulkan::handle_message(UINT msg, WPARAM wparam, LPARAM lparam)
 /*
 	 * Setup Vulkan
 	 */
-bool RendererVulkan::CreateInstance()
+bool Renderer::CreateInstance()
 {
     // Use validation layers if this is a debug build, and use WSI extensions regardless
     std::vector<const char*> extensions = getAvailableWSIExtensions();
@@ -209,7 +209,7 @@ bool RendererVulkan::CreateInstance()
     return true;
 }
 
-bool RendererVulkan::CreateDevice()
+bool Renderer::CreateDevice()
 {
     // Create physical device
     std::vector<vk::PhysicalDevice> physicalDevices;
@@ -276,14 +276,14 @@ bool RendererVulkan::CreateDevice()
 }
 
 /*************** Swapchain ****************/
-void RendererVulkan::CreateSwapChain()
+void Renderer::CreateSwapChain()
 {
     swapChain.initSurface(hinstance_, hwnd_);
     swapChain.create(&width, &height, false);
 }
 
 // Create the Vulkan synchronization primitives used in this example
-void RendererVulkan::CreateFences()
+void Renderer::CreateFences()
 {
     // Fences (Used to check draw command buffer completion)
     vk::FenceCreateInfo fenceCreateInfo = {};
@@ -295,7 +295,7 @@ void RendererVulkan::CreateFences()
     }
 }
 
-bool RendererVulkan::Init(Scene* scene)
+bool Renderer::Init(Scene* scene)
 {
     if (!CreateInstance()) {
         return false;
@@ -320,7 +320,7 @@ bool RendererVulkan::Init(Scene* scene)
     return true;
 }
 
-bool RendererVulkan::OnWindowSizeChanged()
+bool Renderer::OnWindowSizeChanged()
 {
     if (inited) {
         return false;
@@ -340,19 +340,19 @@ bool RendererVulkan::OnWindowSizeChanged()
     inited = true;
 }
 
-void RendererVulkan::PrepareFrame()
+void Renderer::PrepareFrame()
 {
     swapChain.acquireNextImage(presentComplete, &currentImage);
 }
 
-void RendererVulkan::SubmitFrame()
+void Renderer::SubmitFrame()
 {
     swapChain.queuePresent(queue, currentImage, renderComplete);
     //queue.waitIdle();
 }
 
 /* Draw Loop */
-void RendererVulkan::Draw()
+void Renderer::Draw()
 {
     PrepareFrame();
 
@@ -366,7 +366,7 @@ void RendererVulkan::Draw()
     SubmitFrame();
 }
 
-void RendererVulkan::DrawLoop()
+void Renderer::DrawLoop()
 {
     while (1) {
         auto tStart = std::chrono::high_resolution_clock::now();
@@ -381,7 +381,7 @@ void RendererVulkan::DrawLoop()
     device.waitIdle();
 }
 
-RendererVulkan::~RendererVulkan()
+Renderer::~Renderer()
 {
     delete pipeLine;
     delete commandBuffer;

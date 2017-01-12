@@ -57,9 +57,9 @@ add_subdirectory(Math)
 # include_directories(Math)
 
 # Vulkan Utils
-add_subdirectory(VkUtils)
-# link_libraries(VkUtils)
-# include_directories(VkUtils)
+add_subdirectory(Render)
+# link_libraries(Render)
+# include_directories(Render)
 
 # GUI
 add_subdirectory(Gui)
@@ -67,7 +67,7 @@ add_subdirectory(Gui)
 # include_directories(Gui)
 
 foreach(EXTERNAL ${EXTERNALS})
-    add_dependencies(VkUtils ${EXTERNAL})
+    add_dependencies(Render ${EXTERNAL})
 endforeach()
 
 if (NOT WIN32)

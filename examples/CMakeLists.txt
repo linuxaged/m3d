@@ -34,7 +34,7 @@ macro(BUILD_EXAMPLES)
             add_executable(${EXAMPLE_NAME} ${EXAMPLE} ${SHADERS} ${COMPILED_SHADERS})
             set_target_properties(${EXAMPLE_NAME} PROPERTIES FOLDER "examples/${_FOLDER_NAME}")
 
-            target_link_libraries(${EXAMPLE_NAME} VkUtils)
+            target_link_libraries(${EXAMPLE_NAME} Render)
             if (NOT WIN32)
                 target_link_libraries(${EXAMPLE_NAME} Threads::Threads)
             endif()

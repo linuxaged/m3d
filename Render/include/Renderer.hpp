@@ -18,10 +18,10 @@ namespace m3d {
 	class RenderPass;
 	class CommandBuffer;
 
-	class RendererVulkan {
+	class Renderer {
 	public:
-		RendererVulkan();
-		~RendererVulkan();
+		Renderer();
+		~Renderer();
 
 	private:
 		void CreateConsole(const char* title);
@@ -69,7 +69,7 @@ namespace m3d {
 			vk::Fence fence;
 		};
 		/* Utils */
-		std::vector<const char*> RendererVulkan::getAvailableWSIExtensions();
+		std::vector<const char*> Renderer::getAvailableWSIExtensions();
 
 		vk::SurfaceKHR createVulkanSurface();
 		vk::PipelineShaderStageCreateInfo loadShader(const std::string& fileName, vk::ShaderStageFlagBits stage);
