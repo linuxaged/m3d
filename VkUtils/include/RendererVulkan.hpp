@@ -20,9 +20,12 @@ namespace m3d {
 
 	class RendererVulkan {
 	public:
+		RendererVulkan();
 		~RendererVulkan();
 
 	private:
+		void CreateConsole(const char* title);
+
 		bool CreateInstance();
 
 		bool CreateSurface();

@@ -12,8 +12,8 @@
 #include "Scene.hpp"
 #include "VulkanHelper.hpp"
 #include "VulkanSwapchain.hpp"
-#include "vulkanTextureLoader.hpp"
 #include "vulkanDebug.h"
+#include "vulkanTextureLoader.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -21,11 +21,26 @@
 #define VERTEX_BUFFER_BIND_ID 0
 namespace m3d {
 
+// Win32 : Sets up a console window and redirects standard output to it
+void RendererVulkan::CreateConsole(const char* title)
+{
+    AllocConsole();
+    AttachConsole(GetCurrentProcessId());
+    FILE* stream;
+    freopen_s(&stream, "CONOUT$", "w+", stdout);
+    SetConsoleTitle(TEXT(title));
+}
+
+RendererVulkan::RendererVulkan()
+{
+	CreateConsole("m3d");
+}
+
 std::vector<const char*> RendererVulkan::getAvailableWSIExtensions()
 {
     std::vector<const char*> extensions = { VK_KHR_SURFACE_EXTENSION_NAME };
-	extensions.push_back("VK_KHR_surface");
-	extensions.push_back("VK_EXT_debug_report");
+    extensions.push_back("VK_KHR_surface");
+    extensions.push_back("VK_EXT_debug_report");
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
@@ -180,17 +195,16 @@ bool RendererVulkan::CreateInstance()
         return false;
     }
 
-	// If requested, we enable the default validation layers for debugging
-	if (1)
-	{
-		
-		// The report flags determine what type of messages for the layers will be displayed
-		// For validating (debugging) an appplication the error and warning bits should suffice
-		vk::DebugReportFlagsEXT debugReportFlags = vk::DebugReportFlagBitsEXT::eError; // | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
-																				// Additional flags include performance info, loader and layer debug messages, etc.
-		//vkDebug::setupDebugging(instance, debugReportFlags, VK_NULL_HANDLE);
-		vkx::debug::setupDebugging(instance, debugReportFlags);
-	}
+    // If requested, we enable the default validation layers for debugging
+    if (1) {
+
+        // The report flags determine what type of messages for the layers will be displayed
+        // For validating (debugging) an appplication the error and warning bits should suffice
+        vk::DebugReportFlagsEXT debugReportFlags = vk::DebugReportFlagBitsEXT::eError; // | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
+        // Additional flags include performance info, loader and layer debug messages, etc.
+        //vkDebug::setupDebugging(instance, debugReportFlags, VK_NULL_HANDLE);
+        vkx::debug::setupDebugging(instance, debugReportFlags);
+    }
 
     return true;
 }
@@ -224,14 +238,13 @@ bool RendererVulkan::CreateDevice()
     queueCreateInfo.queueCount = 1;
     queueCreateInfo.pQueuePriorities = queuePriorities.data();
 
-    
     vk::DeviceCreateInfo deviceCreateInfo;
     deviceCreateInfo.queueCreateInfoCount = 1;
     deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
     deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
 
     // enable the debug marker extension if it is present (likely meaning a debugging tool is present)
-	std::vector<const char*> enabledExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+    std::vector<const char*> enabledExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
     if (vkhelper::checkDeviceExtensionPresent(physicalDevice, VK_EXT_DEBUG_MARKER_EXTENSION_NAME)) {
         enabledExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
     }
@@ -272,15 +285,14 @@ void RendererVulkan::CreateSwapChain()
 // Create the Vulkan synchronization primitives used in this example
 void RendererVulkan::CreateFences()
 {
-	// Fences (Used to check draw command buffer completion)
-	vk::FenceCreateInfo fenceCreateInfo = {};
-	// Create in signaled state so we don't wait on first render of each command buffer
-	fenceCreateInfo.flags = vk::FenceCreateFlagBits::eSignaled;
-	waitFences.resize(commandBuffer->GetDrawCommandBuffers().size());
-	for (auto& fence : waitFences)
-	{
-		fence = device.createFence(fenceCreateInfo);
-	}
+    // Fences (Used to check draw command buffer completion)
+    vk::FenceCreateInfo fenceCreateInfo = {};
+    // Create in signaled state so we don't wait on first render of each command buffer
+    fenceCreateInfo.flags = vk::FenceCreateFlagBits::eSignaled;
+    waitFences.resize(commandBuffer->GetDrawCommandBuffers().size());
+    for (auto& fence : waitFences) {
+        fence = device.createFence(fenceCreateInfo);
+    }
 }
 
 bool RendererVulkan::Init(Scene* scene)
@@ -300,10 +312,10 @@ bool RendererVulkan::Init(Scene* scene)
 
     pipeLine = new Pipeline(device, physicalDevice);
 
-	commandBuffer->Build(*pipeLine);
+    commandBuffer->Build(*pipeLine);
 
-	CreateFences();
-	//OnWindowSizeChanged();
+    CreateFences();
+    //OnWindowSizeChanged();
 
     return true;
 }
@@ -348,7 +360,7 @@ void RendererVulkan::Draw()
     device.resetFences(1, &waitFences[currentImage]);
 
     submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &(commandBuffer->GetDrawCommandBuffers()[currentImage]);
+    submitInfo.pCommandBuffers = &(commandBuffer->GetDrawCommandBuffers()[currentImage]);
     queue.submit(submitInfo, waitFences[currentImage]);
 
     SubmitFrame();
