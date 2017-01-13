@@ -39,8 +39,6 @@ Renderer::Renderer()
 std::vector<const char*> Renderer::getAvailableWSIExtensions()
 {
     std::vector<const char*> extensions = { VK_KHR_SURFACE_EXTENSION_NAME };
-    extensions.push_back("VK_KHR_surface");
-    extensions.push_back("VK_EXT_debug_report");
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
     extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
@@ -54,9 +52,9 @@ std::vector<const char*> Renderer::getAvailableWSIExtensions()
     extensions.push_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
 #endif
 
-    //#if defined(_DEBUG)
-    //	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-    //#endif
+    #if defined(_DEBUG)
+    	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+    #endif
 
     return extensions;
 }

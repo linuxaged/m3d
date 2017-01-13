@@ -177,7 +177,7 @@ Scene::Scene() {}
 void Scene::Init()
 {
     std::vector<uint8_t> sceneData;
-    m3d::file::readBinary("G:\\workspace\\m3d\\data\\schema\\scene_data.bin", sceneData);
+    m3d::file::readBinary("D:\\workspace\\m3d\\data\\schema\\scene_data.bin", sceneData);
     auto mainScene = GetSScene(sceneData.data());
     loadPath = mainScene->models()->Get(0)->name()->str();
     printf("fbx path: %s", loadPath.c_str());

@@ -88,7 +88,7 @@ namespace m3d {
 			0.0f, 0.0f, 1.0f, -10.0f,
 			0.0f, 0.0f, 0.0f, 1.0f
 		};
-		uboVS.viewMatrix = m3d::math::Matrix4x4::Translation(m3d::math::Vector3(0.0f, 0.0f, -10.0f));
+		uboVS.viewMatrix = m3d::math::Matrix4x4::Translation(m3d::math::Vector3(0.0f, 0.0f, -100.0f));
 		uboVS.viewMatrix.ToString(buf, 512);
 		printf("vmat = %s\n", buf);
 		uboVS.modelMatrix = m3d::math::Matrix4x4();
@@ -148,7 +148,7 @@ namespace m3d {
 
 		subpassDependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
 		subpassDependencies[0].dstSubpass = 0;
-		subpassDependencies[0].srcAccessMask = vk::AccessFlagBits::eColorAttachmentRead;
+		subpassDependencies[0].srcAccessMask = vk::AccessFlagBits::eMemoryRead;
 		subpassDependencies[0].dstAccessMask = vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
 		subpassDependencies[0].srcStageMask = vk::PipelineStageFlagBits::eBottomOfPipe;
 		subpassDependencies[0].dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
@@ -156,7 +156,7 @@ namespace m3d {
 
 		subpassDependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
 		subpassDependencies[1].srcSubpass = 0;
-		subpassDependencies[1].dstAccessMask = vk::AccessFlagBits::eColorAttachmentRead;
+		subpassDependencies[1].dstAccessMask = vk::AccessFlagBits::eMemoryRead;
 		subpassDependencies[1].srcAccessMask = vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
 		subpassDependencies[1].dstStageMask = vk::PipelineStageFlagBits::eBottomOfPipe;
 		subpassDependencies[1].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
@@ -380,8 +380,8 @@ namespace m3d {
 	    // Load shaders
 	    // Shaders are loaded from the SPIR-V format, which can be generated from glsl
 	    std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
-	    shaderStages[0] = loadShader("G:\\workspace\\m3d\\data\\shaders\\camera\\triangle.vert.spv", vk::ShaderStageFlagBits::eVertex);
-	    shaderStages[1] = loadShader("G:\\workspace\\m3d\\data\\shaders\\camera\\triangle.frag.spv", vk::ShaderStageFlagBits::eFragment);
+	    shaderStages[0] = loadShader("D:\\workspace\\m3d\\data\\shaders\\camera\\triangle.vert.spv", vk::ShaderStageFlagBits::eVertex);
+	    shaderStages[1] = loadShader("D:\\workspace\\m3d\\data\\shaders\\camera\\triangle.frag.spv", vk::ShaderStageFlagBits::eFragment);
 
 	    // Assign states
 	    // Assign pipeline state create information
