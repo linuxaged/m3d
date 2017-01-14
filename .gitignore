@@ -332,3 +332,6 @@ paket-files/
 *.dSYM/
 *.su
 *.spv
+
+################## Xcode, Mac ######################
+.DS_Store

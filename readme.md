@@ -20,6 +20,7 @@
 	* [Buffer offset](https://developer.nvidia.com/vulkan-memory-management)
     * Camera
     * Animation
+* Metal Renderer
 
 ## Longtern
 
@@ -27,7 +28,8 @@
 * Editor
 * configurable rendering pipeline
     * choose a config file format
-    * 
+* Script System
+    * Hook function
 
 
 
