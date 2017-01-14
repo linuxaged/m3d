@@ -81,11 +81,12 @@ void CommandBuffer::CreateFramebuffers(Pipeline& pipeline)
     // Create frame buffers for every swap chain image
     frameBuffers.resize(swapChain.images.size());
 
-    std::array<vk::ImageView, 2> attachments;
-    attachments[1] = depthStencil.view;
+    
 
     for (size_t i = 0; i < frameBuffers.size(); i++) {
+		std::array<vk::ImageView, 2> attachments;
         attachments[0] = swapChain.buffers[i].view;
+		attachments[1] = depthStencil.view;
 
         vk::FramebufferCreateInfo frameBufferCreateInfo = {};
         //frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -209,7 +210,7 @@ void CommandBuffer::Build(Pipeline& pipeline)
     vk::CommandBufferBeginInfo cmdBufInfo = {};
 
     vk::ClearValue clearValues[2];
-    std::array<float, 4> tmpColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+    std::array<float, 4> tmpColor = { 1.0f, 1.0f, 1.0f, 1.0f };
     clearValues[0].color = vk::ClearColorValue(tmpColor);
     clearValues[1].depthStencil = { 1.0f, 0 };
 
@@ -237,12 +238,12 @@ void CommandBuffer::Build(Pipeline& pipeline)
 
         vk::DeviceSize offsets[1] = { 0 };
 
-        drawCmdBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.GetPipelineLayout(), 0, pipeline.GetDescriptorSet(), nullptr);
+        drawCmdBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.GetPipelineLayout(), 0, 1, &pipeline.GetDescriptorSet(), 0, nullptr);
         drawCmdBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.GetPipeline());
 
         drawCmdBuffers[i].bindVertexBuffers(0, 1, &meshBuffer.vertices.buf, offsets);
         drawCmdBuffers[i].bindIndexBuffer(meshBuffer.indices.buf, 0, vk::IndexType::eUint32);
-        drawCmdBuffers[i].drawIndexed(meshBuffer.indexCount, 1, 0, 0, 0);
+        drawCmdBuffers[i].drawIndexed(meshBuffer.indexCount, 1, 0, 0, 1);
         drawCmdBuffers[i].endRenderPass();
         drawCmdBuffers[i].end();
     }

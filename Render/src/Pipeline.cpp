@@ -32,6 +32,7 @@ namespace m3d {
 	    // Location 4 : Bone weights
 	    // Location 5 : Bone IDs
 
+		//vertexInputs.inputState.flags = vk::PipelineVertexInputStateCreateFlagBits::;
 	    vertexInputs.inputState.vertexBindingDescriptionCount = vertexInputs.bindingDescriptions.size();
 	    vertexInputs.inputState.pVertexBindingDescriptions = vertexInputs.bindingDescriptions.data();
 	    vertexInputs.inputState.vertexAttributeDescriptionCount = vertexInputs.attributeDescriptions.size();

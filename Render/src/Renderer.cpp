@@ -345,6 +345,10 @@ void Renderer::PrepareFrame()
 
 void Renderer::SubmitFrame()
 {
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &(commandBuffer->GetDrawCommandBuffers()[currentImage]);
+	queue.submit(submitInfo, waitFences[currentImage]);
+
     swapChain.queuePresent(queue, currentImage, renderComplete);
     //queue.waitIdle();
 }
@@ -356,10 +360,6 @@ void Renderer::Draw()
 
     device.waitForFences(1, &waitFences[currentImage], true, UINT64_MAX);
     device.resetFences(1, &waitFences[currentImage]);
-
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &(commandBuffer->GetDrawCommandBuffers()[currentImage]);
-    queue.submit(submitInfo, waitFences[currentImage]);
 
     SubmitFrame();
 }

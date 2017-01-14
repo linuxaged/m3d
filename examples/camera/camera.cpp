@@ -38,15 +38,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nCmdShow)
 {
-    //for (size_t i = 0; i < __argc; i++) { VulkanExample::args.push_back(__argv[i]); };
-    //vulkanExample = new VulkanExample();
-    //vulkanExample->initVulkan();
-    //vulkanExample->setupWindow(hInstance, WndProc);
-    //vulkanExample->initSwapchain();
-    //vulkanExample->prepare();
-    //vulkanExample->renderLoop();
-    //delete(vulkanExample);
-
     m3d::Scene scene;
     scene.Init();
 
@@ -68,24 +59,3 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLin
 
     return 0;
 }
-
-//int main()
-//{
-//    Scene scene;
-//    scene.Init();
-//
-//    // fill the Scene
-//    std::vector<uint32_t> loadedMeshIds;
-//    LoadMeshes(&scene, &loadedMeshIds);
-//    for (auto& meshId : loadedMeshIds) {
-//        uint32_t instanceId;
-//        AddInstance(scene, meshId, &instanceId);
-//        // do some translation
-//    }
-//
-//    Renderer renderer;
-//    renderer.Init(&scene);
-//    renderer.DrawLoop();
-//
-//    return 0;
-//}
