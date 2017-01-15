@@ -23,11 +23,11 @@
 #include <iostream>
 #include <vector>
 
-#include "Renderer.hpp"
+#include "RendererVulkan.hpp"
 #include "Scene.hpp"
 
 //VulkanExample *vulkanExample;
-m3d::Renderer* renderer;
+m3d::RendererVulkan* renderer;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     if (renderer != NULL) {
@@ -50,7 +50,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLin
         // do some translation
     }
 
-    renderer = new m3d::Renderer();
+    renderer = new m3d::RendererVulkan();
     renderer->createWin32Window(hInstance, WndProc, 1280, 720);
     renderer->Init(&scene);
     renderer->DrawLoop();

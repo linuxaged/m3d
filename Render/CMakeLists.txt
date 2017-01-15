@@ -4,7 +4,7 @@ add_library(Render
 	src/idl_parser.cpp
 	src/Pipeline.cpp
 	src/CommandBuffer.cpp
-	src/Renderer.cpp
+	src/RendererVulkan.cpp
 	src/Scene.cpp
 	src/stb_image.c
 	src/vulkanDebug.cpp
