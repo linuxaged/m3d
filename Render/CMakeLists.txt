@@ -1,5 +1,6 @@
 add_library(Render
 	src/File.cpp
+	src/Mesh.cpp
 	src/idl_gen_text.cpp
 	src/idl_parser.cpp
 	src/Pipeline.cpp

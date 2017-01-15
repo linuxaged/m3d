@@ -1,3 +1,9 @@
+/*
+* Copyright (C) 2016 Tracy Ma
+* This code is licensed under the MIT license (MIT)
+* (http://opensource.org/licenses/MIT)
+*/
+
 #pragma once
 #include <vector>
 #include <vulkan/vulkan.hpp>
